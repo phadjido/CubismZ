@@ -78,5 +78,34 @@ int main(int argc, char *argv[])
 	fclose(fw);	
 	fclose(fp);	
 
+	float *Uf, *Vf, *Wf, *Pf;
+	Uf = (float *)malloc(nsize*sizeof(float));
+	Vf = (float *)malloc(nsize*sizeof(float));
+	Wf = (float *)malloc(nsize*sizeof(float));
+	Pf = (float *)malloc(nsize*sizeof(float));
+
+	for (int i = 0; i < nsize; i++) {
+		Uf[i] = U[i];
+		Vf[i] = V[i];
+		Wf[i] = W[i];
+		Pf[i] = P[i];
+	}
+
+	FILE *fuf = fopen("Uf.bin","wb");
+	FILE *fvf = fopen("Vf.bin","wb");
+	FILE *fwf = fopen("Wf.bin","wb");
+	FILE *fpf = fopen("Pf.bin","wb");
+
+	fwrite(Uf, sizeof(float), nsize, fuf);
+	fwrite(Vf, sizeof(float), nsize, fvf);
+	fwrite(Wf, sizeof(float), nsize, fwf);
+	fwrite(Pf, sizeof(float), nsize, fpf);
+
+	fclose(fuf);	
+	fclose(fvf);	
+	fclose(fwf);	
+	fclose(fpf);	
+
+
 	return 0;
 }
