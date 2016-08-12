@@ -2,8 +2,8 @@
  *  Test_IO_Compressed.h
  *  CUBISMTests
  *
- *  Created by Babak Hejazialhosseini on 5/16/13.
- *  Copyright 2013 ETH Zurich. All rights reserved.
+ *  Created by Panos Hadjidoukas on 4/4/16.
+ *  Copyright 2016 ETH Zurich. All rights reserved.
  *
  */
 #pragma once

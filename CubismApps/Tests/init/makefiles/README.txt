@@ -1,5 +1,6 @@
 # compile for a specific configuration
-make clean;make wavz=0 drain=1 zlib=0 
+make clean;make wavz=1 zlib=1 
+#make clean;make wavz=0 drain=1 zlib=0 
 
 # run this test
 ./tests -sim io -bpdx 4 -bpdx 4 -bpdz 4

@@ -1,3 +1,11 @@
+/*
+ *  ngareader.cpp
+ *
+ *  Created by Panos Hadjidoukas on 4/4/16.
+ *  Copyright 2016 ETH Zurich. All rights reserved.
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 

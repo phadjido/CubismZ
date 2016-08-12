@@ -2,8 +2,8 @@
  *  main.cpp
  *  MPCFcluster
  *
- *  Created by Diego Rossinelli on 11/25/11.
- *  Copyright 2011 ETH Zurich. All rights reserved.
+ *  Created by Panos Hadjidoukas on 4/4/16.
+ *  Copyright 2016 ETH Zurich. All rights reserved.
  *
  */
 #include <map>
