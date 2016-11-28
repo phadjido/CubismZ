@@ -1,6 +1,6 @@
 /*
  *  CompressionEncoders.h
- *  
+ *
  *
  *  Created by Diego Rossinelli on 3/27/13.
  *  Copyright 2013 ETH Zurich. All rights reserved.
@@ -18,35 +18,35 @@
 #if defined(_USE_LZF_)
 extern "C"
 {
-#include "lzf.h" 
+#include "lzf.h"
 }
 #endif
 
 #if defined(_USE_LZMA_)
 extern "C"
 {
-#include "mylzma.h" 
+#include "mylzma.h"
 }
 #endif
 
 #if defined(_USE_ZOPFLI_)
 extern "C"
 {
-#include "myzopfli.h" 
+#include "myzopfli.h"
 }
 #endif
 
 #if defined(_USE_FPC_)||defined(_USE_FPC2_)
 extern "C"
 {
-#include "fpc.h" 
+#include "fpc.h"
 }
 #endif
 
 #if defined(_USE_FPZIP_)||defined(_USE_FPZIP2_)
 extern "C"
 {
-#include "myfpzip.h" 
+#include "myfpzip.h"
 }
 #endif
 
@@ -60,7 +60,9 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 
 inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned char * outputbuf, const size_t maxsize)
 {
+#if defined(VERBOSE)
 	printf("zdecompress has been called for %d input bytes\n", ninputbytes);
+#endif
 
 	int decompressedbytes = 0;
 #if defined(_USE_ZLIB_)
@@ -69,9 +71,9 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 	datastream.total_out = datastream.avail_out = maxsize;
 	datastream.next_in = inputbuf;
 	datastream.next_out = outputbuf;
-	
+
 	const int retval = inflateInit(&datastream);
-	
+
 	if (retval == Z_OK && inflate(&datastream, Z_FINISH))
 	{
 		decompressedbytes = datastream.total_out;
@@ -81,7 +83,7 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 		printf("ZLIB DECOMPRESSION FAILURE!!\n");
 		abort();
 	}
-	
+
 	inflateEnd(&datastream);
 #elif defined(_USE_LZ4_)
 	decompressedbytes = LZ4_uncompress_unknownOutputSize((char *)inputbuf, (char*) outputbuf, ninputbytes, maxsize);
@@ -106,7 +108,7 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 		printf("LZMA DECOMPRESSION FAILURE!!\n");
 		abort();
 	}
-	memcpy(outputbuf, lzma_decompressed, decompressedbytes); 
+	memcpy(outputbuf, lzma_decompressed, decompressedbytes);
 	free(lzma_decompressed);
 #else
 	decompressedbytes = lzma_decompress((unsigned char *) inputbuf, ninputbytes, (unsigned char *) outputbuf, maxsize);
@@ -130,7 +132,7 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 		printf("FPC DECOMPRESSION FAILURE!!\n");
 		abort();
 	}
-#elif defined(_USE_FPZIP2_)	/* does not work as the buffer contains a mix of integers + floats */ 
+#elif defined(_USE_FPZIP2_)	/* does not work as the buffer contains a mix of integers + floats */
 	fpz_decompress1D((char *)inputbuf, ninputbytes, (char *) outputbuf, (unsigned int *)&decompressedbytes, (sizeof(Real)==4)?1:0);
 	printf("fpz: %d to %d\n", ninputbytes, decompressedbytes);
 	if (decompressedbytes < 0)
@@ -147,7 +149,7 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 
 /* THIS CODE SERVES US TO COMPRESS IN-PLACE. TAKEN FROM THE WEB
  * http://stackoverflow.com/questions/12398377/is-it-possible-to-have-zlib-read-from-and-write-to-the-same-memory-buffer
- * 
+ *
  * Compress buf[0..len-1] in place into buf[0..*max-1].  *max must be greater
  than or equal to len.  Return Z_OK on success, Z_BUF_ERROR if *max is not
  enough output space, Z_MEM_ERROR if there is not enough memory, or
@@ -156,12 +158,12 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
  actual size of the output.  If Z_BUF_ERROR is returned, then *max is
  unchanged and buf[] is filled with *max bytes of uncompressed data (which is
  not all of it, but as much as would fit).
- 
+
  Incompressible data will require more output space than len, so max should
  be sufficiently greater than len to handle that case in order to avoid a
  Z_BUF_ERROR. To assure that there is enough output space, max should be
  greater than or equal to the result of deflateBound(strm, len).
- 
+
  strm is a deflate stream structure that has already been successfully
  initialized by deflateInit() or deflateInit2().  That structure can be
  reused across multiple calls to deflate_inplace().  This avoids unnecessary
@@ -182,16 +184,16 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 								 deflateReset(), then the 11 needs to be
 								 increased to accomodate the resulting gzip
 								 header size plus one */
-	
-	
+
+
     /* initialize deflate stream and point to the input data */
     ret = deflateReset(strm);
-    
+
     if (ret != Z_OK)
         return ret;
     strm->next_in = buf;
     strm->avail_in = len;
-	
+
     /* kick start the process with a temporary output buffer -- this allows
 	 deflate to consume a large chunk of input data in order to make room for
 	 output data there */
@@ -200,10 +202,10 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
     strm->next_out = temp;
     strm->avail_out = sizeof(temp) > *max ? *max : sizeof(temp);
     ret = deflate(strm, Z_FINISH);
-	
+
     if (ret == Z_STREAM_ERROR)
         return ret;
-	
+
     /* if we can, copy the temporary output data to the consumed portion of the
 	 input buffer, and then continue to write up to the start of the consumed
 	 input for as long as possible */
@@ -222,14 +224,14 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
             return ret == Z_STREAM_END ? Z_OK : ret;
         }
     }
-	
+
     /* the output caught up with the input due to insufficiently compressible
 	 data -- copy the remaining input data into an allocated buffer and
 	 complete the compression from there to the now empty input buffer (this
 	 will only occur for long incompressible streams, more than ~20 MB for
 	 the default deflate memLevel of 8, or when *max is too small and less
 	 than the length of the header plus one byte) */
-	
+
     hold = (unsigned char*)strm->zalloc(strm->opaque, strm->avail_in, 1);
     if (hold == Z_NULL)
         return Z_MEM_ERROR;
@@ -255,7 +257,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 		abort();
 	}
 
-	int ninputbytes = len;          
+	int ninputbytes = len;
 	int compressedbytes;
 
 #pragma omp critical
@@ -275,7 +277,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 //			printf("rz != ELZMA_E_OK\n"); abort();
 		}
 		memcpy(bufzlib, lzma_compressed, compressedbytes);
-		free(lzma_compressed);	
+		free(lzma_compressed);
 #else
 		compressedbytes = lzma_compress((unsigned char *) buf, ninputbytes, (unsigned char *)bufzlib, ZBUFSIZE);
 #endif
@@ -286,7 +288,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 #elif defined(_USE_FPZIP2_)
 		fpz_compress1D((void *) buf, ninputbytes, (void *) bufzlib, (unsigned int *)&compressedbytes, (sizeof(Real)==4)?1:0);
 #endif
-		memcpy(buf, bufzlib, compressedbytes);	
+		memcpy(buf, bufzlib, compressedbytes);
 	}
 
 	strm->total_out = compressedbytes;

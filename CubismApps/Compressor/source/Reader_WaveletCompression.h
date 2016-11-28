@@ -583,7 +583,7 @@ public:
 		vector<unsigned char> waveletbuf(4 << 21);
 		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
-#if 1 // defined(VERBOSE)
+#if defined(VERBOSE)
 		printf("zdecompressed %d bytes to %d bytes...(%.2lf)\n", zz_bytes, decompressedbytes, zratio1);
 #endif
 		int readbytes = 0;
@@ -602,7 +602,9 @@ public:
 			nbytes = swapint(nbytes);
 			readbytes += sizeof(int);
 			assert(readbytes <= decompressedbytes);
+#if defined(VERBOSE)
 			printf("wavelet decompressing %d bytes...\n", nbytes);
+#endif
 			WaveletCompressor compressor;
 
 			{ // swapping
