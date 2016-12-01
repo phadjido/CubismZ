@@ -584,7 +584,7 @@ public:
 		vector<unsigned char> waveletbuf(4 << 21);
 		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
-#if 1 // defined(VERBOSE)
+#if defined(VERBOSE)
 		printf("zdecompressed %d bytes to %d bytes...(%.2lf)\n", zz_bytes, decompressedbytes, zratio1);
 #endif
 		int readbytes = 0;
@@ -603,7 +603,9 @@ public:
 			nbytes = swapint(nbytes);
 			readbytes += sizeof(int);
 			assert(readbytes <= decompressedbytes);
+#if defined(VERBOSE)
 			printf("wavelet decompressing %d bytes...\n", nbytes);
+#endif
 			WaveletCompressor compressor;
 
 			{ // swapping
@@ -676,11 +678,11 @@ public:
 
 class Reader_WaveletCompressionMPI: public Reader_WaveletCompression
 {
-	const MPI::Comm& comm;
+	const MPI_Comm comm;
 
 public:
 
-	Reader_WaveletCompressionMPI(const MPI::Comm& comm, const string path, int swapbytes, int wtype):
+	Reader_WaveletCompressionMPI(const MPI_Comm comm, const string path, int swapbytes, int wtype):
 	Reader_WaveletCompression(path,swapbytes,wtype), comm(comm)
 	{
 
@@ -688,25 +690,26 @@ public:
 
 	virtual void load_file()
 	{
-		const int myrank = comm.Get_rank();
+		int myrank;
+        MPI_Comm_rank(comm, &myrank);
 
 		if (myrank == 0)
 			Reader_WaveletCompression::load_file();
 
 		//propagate primitive type data members
 		{
-			comm.Bcast(&global_header_displacement, sizeof(global_header_displacement), MPI_CHAR, 0);
-			comm.Bcast(&miniheader_bytes, sizeof(miniheader_bytes), MPI_CHAR, 0);
-			comm.Bcast(&NBLOCKS, sizeof(NBLOCKS), MPI_CHAR, 0);
-			comm.Bcast(totalbpd, sizeof(totalbpd), MPI_CHAR, 0);
-			comm.Bcast(bpd, sizeof(bpd), MPI_CHAR, 0);
-			comm.Bcast(&halffloat, sizeof(halffloat), MPI_CHAR, 0);
-			comm.Bcast(&doswapping, sizeof(doswapping), MPI_CHAR, 0);
+			MPI_Bcast(&global_header_displacement, sizeof(global_header_displacement), MPI_CHAR, 0, comm);
+			MPI_Bcast(&miniheader_bytes, sizeof(miniheader_bytes), MPI_CHAR, 0, comm);
+			MPI_Bcast(&NBLOCKS, sizeof(NBLOCKS), MPI_CHAR, 0, comm);
+			MPI_Bcast(totalbpd, sizeof(totalbpd), MPI_CHAR, 0, comm);
+			MPI_Bcast(bpd, sizeof(bpd), MPI_CHAR, 0, comm);
+			MPI_Bcast(&halffloat, sizeof(halffloat), MPI_CHAR, 0, comm);
+			MPI_Bcast(&doswapping, sizeof(doswapping), MPI_CHAR, 0, comm);
 		}
 
 		size_t nentries = idx2chunk.size();
 
-		comm.Bcast(&nentries, sizeof(nentries), MPI_CHAR, 0);
+		MPI_Bcast(&nentries, sizeof(nentries), MPI_CHAR, 0, comm);
 
 		if (myrank)
 			idx2chunk.resize(nentries);
@@ -714,7 +717,7 @@ public:
 		const size_t nbytes = nentries * sizeof(CompressedBlock);
 		char * const entries = (char *)&idx2chunk.front();
 
-		comm.Bcast(entries, nbytes, MPI_CHAR, 0);
+		MPI_Bcast(entries, nbytes, MPI_CHAR, 0, comm);
 	}
 };
 
