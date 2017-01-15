@@ -46,7 +46,7 @@ LIBS += -ldl
 #endif
 
 
-CPPFLAGS += -I../../Cubism/source -I../Cubism/source -I../../../Cubism/source/ -I../../MPCFcluster/source/ -I../../MPCFnode/source -I../../MPCcore/source -I.  -I../reader
+CPPFLAGS += -I../../Cubism/source -I../Cubism/source -I../../../Cubism/source/ -I../../MPCFcluster/source/ -I../../MPCFnode/source -I../../MPCcore/source -I.  -I../../tools/reader
 
 ##################
 VPATH := ../../../Cubism/source/ ../../MPCFcluster/source/ ../../MPCFnode/source/ .

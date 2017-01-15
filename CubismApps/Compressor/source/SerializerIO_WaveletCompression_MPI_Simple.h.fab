@@ -26,58 +26,15 @@ using namespace std;
 #define		_ASYNC_IO_	1	// peh: hardcoded option, not in active code though
 //#define	_WRITE_AT_ALL_	1	// peh:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-template<typename GridType, typename IterativeStreamer>
+template<typename GridType, typename TStreamer>
 class SerializerIO_WaveletCompression_MPI_SimpleBlocking
 {
 protected:
 
 	enum
 	{
-		NCHANNELS = IterativeStreamer::channels,
+//		NCHANNELS = TStreamer::NCHANNELS,
+		NCHANNELS = TStreamer::channels,	// peh
 		NPTS = _BLOCKSIZE_ * _BLOCKSIZE_ * _BLOCKSIZE_
 	};
 
@@ -94,6 +51,7 @@ protected:
 	struct CompressionBuffer
 	{
 	  BlockMetadata hotblocks[ENTRIES];
+//	  unsigned char compressedbuffer[BUFFERSIZE + ENTRYSIZE];
 	  unsigned char compressedbuffer[BUFFERSIZE];
 	};
 
@@ -109,7 +67,7 @@ protected:
 
 	Real threshold;
 	bool halffloat, verbosity;
-	int wtype_read, wtype_write;	// peh
+	int wtype_read, wtype_write;    // peh
 
 	vector< float > workload_total, workload_fwt, workload_encode; //per-thread cpu time for imbalance insight for fwt and encoding
 	vector<CompressionBuffer> workbuffer; //per-thread compression buffer
@@ -131,9 +89,7 @@ protected:
 		int idcompression = -1;
 
 		//1.
-
 		{
-
 			z_stream myzstream = {0};
 			deflateInit(&myzstream, Z_DEFAULT_COMPRESSION);
 
@@ -196,8 +152,7 @@ protected:
 		return timer.stop();
 	}
 
-	template<int channel>
-	void _compress(const vector<BlockInfo>& vInfo, const int NBLOCKS, IterativeStreamer streamer)
+	void _compress(const vector<BlockInfo>& vInfo, const int NBLOCKS)
 	{
 		int compress_threads = omp_get_max_threads()/2;	// peh: recheck this on BGQ
 		if (compress_threads < 1) compress_threads = 1;
@@ -226,28 +181,12 @@ protected:
 					WaveletCompressor compressor;
 
 					Real * const mysoabuffer = &compressor.uncompressed_data()[0][0][0];
-#if 0
-					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
-						for(int iy=0; iy<FluidBlock::sizeY; iy++)
-							for(int ix=0; ix<FluidBlock::sizeX; ix++)
-								mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = streamer.template operate<channel>(b(ix, iy, iz));
-#else
-					if(streamer.name() == "StreamerGridPointIterative")
-					{
-					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
-						for(int iy=0; iy<FluidBlock::sizeY; iy++)
-							for(int ix=0; ix<FluidBlock::sizeX; ix++)
-								mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = streamer.template operate<channel>(b(ix, iy, iz));
-					}
-					else
-					{
-					IterativeStreamer mystreamer(b);
-					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
-						for(int iy=0; iy<FluidBlock::sizeY; iy++)
-							for(int ix=0; ix<FluidBlock::sizeX; ix++)
-								mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = mystreamer.operate(ix, iy, iz);
-					}
-#endif
+
+                    TStreamer mystreamer(b);
+                    for(int iz=0; iz<FluidBlock::sizeZ; iz++)
+                        for(int iy=0; iy<FluidBlock::sizeY; iy++)
+                            for(int ix=0; ix<FluidBlock::sizeX; ix++)
+                                mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = mystreamer.operate(ix, iy, iz);
 
 					//wavelet digestion
 #if defined(_USE_WAVZ_) /* WAVELET COMPRESSION */
@@ -257,25 +196,6 @@ protected:
 					mybytes += sizeof(nbytes);
 
 					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #elif defined(_USE_FPZIP_)
 					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
 					int nbytes;
@@ -288,29 +208,6 @@ protected:
 					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
 					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #else /* NO COMPRESSION */
 #error	"Compression method for blocks has not been defined!"
 					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
@@ -321,27 +218,6 @@ protected:
 #endif
 					mybytes += nbytes;
 				}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 				tfwt += tw.stop();
 
@@ -369,22 +245,23 @@ protected:
 	{
 		int mygid;
 		int nranks;
-		MPI_Comm_rank(mycomm, &mygid);
-		MPI_Comm_size(mycomm, &nranks);
+        MPI_Comm_rank(mycomm, &mygid);
+        MPI_Comm_size(mycomm, &nranks);
 
 		MPI_Info myfileinfo;
-		MPI_Info_create(&myfileinfo);
+        MPI_Info_create(&myfileinfo);
 
-		string key("access_style");
-		string val("write_once");
-		MPI_Info_set(myfileinfo, (char*)key.c_str(), (char*)val.c_str());
+        string key("access_style");
+        string val("write_once");
+        MPI_Info_set(myfileinfo, (char*)key.c_str(), (char*)val.c_str());
 
 		MPI_File myfile;
 #if defined(_WRITE_AT_ALL_)
-		MPI_File_open(mycomm, (char*)fileName.c_str(),  MPI_MODE_WRONLY | MPI_MODE_CREATE, myfileinfo, &myfile);
+        MPI_File_open(mycomm, (char*)fileName.c_str(),  MPI_MODE_WRONLY | MPI_MODE_CREATE, myfileinfo, &myfile);
 #else
-		MPI_File_open(MPI_COMM_SELF, (char*)fileName.c_str(),  MPI_MODE_WRONLY | MPI_MODE_CREATE, myfileinfo, &myfile);
+        MPI_File_open(MPI_COMM_SELF, (char*)fileName.c_str(),  MPI_MODE_WRONLY | MPI_MODE_CREATE, myfileinfo, &myfile);
 #endif
+
 		size_t current_displacement = 0;
 
 		//write the mini-header
@@ -410,7 +287,7 @@ protected:
 			if (mygid == 0)
 				myfileoffset = 0;
 
-			MPI_Status status;
+            MPI_Status status;
 #if defined(_WRITE_AT_ALL_)
 			MPI_File_write_at_all(myfile, current_displacement + myfileoffset, &allmydata.front(), written_bytes, MPI_CHAR, &status);
 #else
@@ -427,7 +304,7 @@ protected:
 		//go back at the blank address and fill it with the displacement
 		if (mygid == 0)
 		{
-			MPI_Status status;
+            MPI_Status status;
 			MPI_File_write(myfile, &current_displacement, sizeof(current_displacement), MPI_CHAR, &status);
 			MPI_File_write(myfile, (void*)binaryocean_title.c_str(), binaryocean_title.size(), MPI_CHAR, &status);
 		}
@@ -436,7 +313,7 @@ protected:
 		{
 			const size_t header_bytes = header.size();
 
-			MPI_Status status;
+            MPI_Status status;
 			if (mygid == 0)
 				MPI_File_write_at(myfile, current_displacement, (void*)header.c_str(), header_bytes, MPI_CHAR, &status);
 
@@ -447,7 +324,7 @@ protected:
 		{
 			const int metadata_bytes = myblockindices.size() * sizeof(BlockMetadata);
 
-			MPI_Status status;
+            MPI_Status status;
 #if defined(_WRITE_AT_ALL_)
 			MPI_File_write_at_all(myfile, current_displacement + mygid * metadata_bytes, &myblockindices.front(), metadata_bytes, MPI_CHAR, &status);
 #else
@@ -460,7 +337,7 @@ protected:
 		{
 			const int title_bytes = binarylut_title.size();
 
-			MPI_Status status;
+            MPI_Status status;
 			if (mygid == 0)
 				MPI_File_write_at(myfile, current_displacement, (void*)binarylut_title.c_str(), title_bytes, MPI_CHAR, &status);
 
@@ -473,7 +350,7 @@ protected:
 
 			const int lutheader_bytes = sizeof(lutheader);
 
-			MPI_Status status;
+            MPI_Status status;
 #if defined(_WRITE_AT_ALL_)
 			MPI_File_write_at_all(myfile, current_displacement + mygid * lutheader_bytes, &lutheader, lutheader_bytes, MPI_CHAR, &status);
 #else
@@ -494,8 +371,8 @@ protected:
 		MPI_Reduce(isroot ? MPI_IN_PLACE : &tsum, &tsum, 1, MPI_FLOAT, MPI_SUM, 0, mycomm);
 		MPI_Reduce(isroot ? MPI_IN_PLACE : &tmax, &tmax, 1, MPI_FLOAT, MPI_MAX, 0, mycomm);
 
-		int comm_size;
-		MPI_Comm_size(mycomm, &comm_size);
+        int comm_size;
+        MPI_Comm_size(mycomm, &comm_size);
 		tsum /= comm_size * workload.size();
 
 		if (isroot)
@@ -505,8 +382,7 @@ protected:
 		return tsum;
 	}
 
-	template<int channel>
-	void _write(GridType & inputGrid, string fileName, IterativeStreamer streamer)
+	void _write(const GridType& inputGrid, const std::string fileName)
 	{
 		const vector<BlockInfo> infos = inputGrid.getBlocksInfo();
 		const int NBLOCKS = infos.size();
@@ -552,14 +428,8 @@ protected:
 				ss << "HalfFloat: " << (this->halffloat ? "yes" : "no") << "\n";
 #if defined(_USE_WAVZ_)
 				ss << "Wavelets: " << WaveletsOnInterval::ChosenWavelets_GetName(this->wtype_write) << "\n";
-
-
 #elif defined(_USE_FPZIP_)
 				ss << "Wavelets: " << "fpzip" << "\n";
-
-
-
-
 #else
 				ss << "Wavelets: " << "none" << "\n";
 #endif
@@ -568,14 +438,6 @@ protected:
 				ss << "Encoder: " << "zlib" << "\n";
 #else	/* _USE_LZ4_ */
 				ss << "Encoder: " << "lz4" << "\n";
-
-
-
-
-
-
-
-
 #endif
 				ss << "==============START-BINARY-METABLOCKS==============\n";
 
@@ -598,7 +460,7 @@ protected:
 
 			lut_compression.clear();
 
-			_compress<channel>(infos, infos.size(), streamer);
+			_compress(infos, infos.size());
 
 			//manipulate the file data (allmydata, lut_compression, myblockindices)
 			//so that they are file-friendly
@@ -619,9 +481,9 @@ protected:
 
 		const MPI_Comm mycomm = inputGrid.getCartComm();
 		int mygid;
-		int comm_size;
-		MPI_Comm_rank(mycomm, &mygid);
-		MPI_Comm_size(mycomm, &comm_size);
+        int comm_size;
+        MPI_Comm_rank(mycomm, &mygid);
+        MPI_Comm_size(mycomm, &comm_size);
 
 		//write into the file
 		Timer timer; timer.start();
@@ -636,9 +498,11 @@ protected:
 			MPI_Reduce(&written_bytes, &aggregate_written_bytes, 1, MPI_UINT64_T, MPI_SUM, 0, mycomm);
 			const bool isroot = mygid == 0;
 			if (mygid == 0)
-				printf("Channel %d: %.2f kB, wavelet-threshold: %.1e, compr. rate: %.2f\n",
-				   channel, aggregate_written_bytes/1024.,
-				   threshold, NPTS * sizeof(Real) * NBLOCKS * comm_size / (float) aggregate_written_bytes);
+            {
+                std::cout << TStreamer::NAME << ": " << std::setprecision(2) << aggregate_written_bytes/1024. << " kB, ";
+                std::cout << "wavelet-threshold: " << std::setprecision(2) << std::scientific << threshold << ", ";
+                std::cout << "compr. rate: " << std::setprecision(2) << std::fixed <<  NPTS * sizeof(Real) * NBLOCKS * comm_size / (float) aggregate_written_bytes << std::endl;
+            }
 
 			const float tavgcompr = _profile_report("Compr", workload_total, mycomm, isroot);
 			const float tavgfwt =_profile_report("FWT+decim", workload_fwt, mycomm, isroot);
@@ -657,7 +521,7 @@ protected:
 		}
 	}
 
-	void _read(string path)
+	void _read(const std::string path)
 	{
 		//THE FIRST PART IS SEQUENTIAL
 		//THE SECOND ONE IS RANDOM ACCESS
@@ -969,29 +833,25 @@ public:
 		wtype_read = 1;		// peh
 	}
 
-	template< int channel >
-	void Write(GridType & inputGrid, string fileName, IterativeStreamer streamer = IterativeStreamer())
+	void Write(const GridType& inputGrid, const std::string basename, const std::string path)
 	{
-		std::stringstream ss;
-		ss << "." << streamer.name() << ".channel"  << channel;
-
-		_write<channel>(inputGrid, fileName + ss.str(), streamer);
+        const std::string fullname = path + "/" + basename + TStreamer::EXT + ".wavelet";
+		_write(inputGrid, fullname);
 	}
 
-	void Read(string fileName, IterativeStreamer streamer = IterativeStreamer())
+	void Read(const std::string basename, const std::string path)
 	{
 		for(int channel = 0; channel < NCHANNELS; ++channel)
 		{
-			std::stringstream ss;
-			ss << "." << streamer.name() << ".channel"  << channel;
+            const std::string fullname = path + "/" + basename + TStreamer::EXT + ".wavelet";
 
-			_read(fileName + ss.str());
+			_read(fullname);
 		}
 	}
 };
 
-template<typename GridType, typename IterativeStreamer>
-class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCompression_MPI_SimpleBlocking<GridType, IterativeStreamer>
+template<typename GridType, typename TStreamer>
+class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCompression_MPI_SimpleBlocking<GridType, TStreamer>
 {
 	size_t nofcalls;
 	vector<MPI_Request> pending_requests;
@@ -1005,7 +865,7 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 		pending_requests.clear();
 
 		//close the split collective io
-		MPI_Status status;
+        MPI_Status status;
 		MPI_File_write_ordered_end(myopenfile, &this->allmydata.front(), &status);
 
 		//e buonanotte
@@ -1020,19 +880,20 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 
 		int mygid;
 		int nranks;
-		MPI_Comm_rank(mycomm, &mygid);
-		MPI_Comm_size(mycomm, &nranks);
+        MPI_Comm_rank(mycomm, &mygid);
+        MPI_Comm_size(mycomm, &nranks);
 
 		MPI_Info myfileinfo;
-		MPI_Info_create(&myfileinfo);
+        MPI_Info_create(&myfileinfo);
 
-		string key("access_style");
-		string val("write_once");
-		MPI_Info_set(myfileinfo, (char*)key.c_str(), (char*)val.c_str());
+        string key("access_style");
+        string val("write_once");
+        MPI_Info_set(myfileinfo, (char*)key.c_str(), (char*)val.c_str());
 
-		MPI_File_open(mycomm, (char*)fileName.c_str(),  MPI_MODE_WRONLY | MPI_MODE_CREATE, myfileinfo, &myopenfile);
+        MPI_File_open(mycomm, (char*)fileName.c_str(),  MPI_MODE_WRONLY | MPI_MODE_CREATE, myfileinfo, &myopenfile);
 
 		size_t current_displacement = 0;
+
 
 		//write the mini-header
 		{
@@ -1056,13 +917,13 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 		if (mygid == 0)
 		{
 #if defined(_ASYNC_IO_)
-			MPI_Request reqA, reqB;
-			MPI_File_iwrite(myopenfile, &current_displacement, sizeof(current_displacement), MPI_CHAR, &reqA);
-			MPI_File_iwrite(myopenfile, (void*)(this->binaryocean_title.c_str()), this->binaryocean_title.size(), MPI_CHAR, &reqB);
+            MPI_Request reqA, reqB;
+            MPI_File_iwrite(myopenfile, &current_displacement, sizeof(current_displacement), MPI_CHAR, &reqA);
+            MPI_File_iwrite(myopenfile, (void*)(this->binaryocean_title.c_str()), this->binaryocean_title.size(), MPI_CHAR, &reqB);
 			pending_requests.push_back(reqA);
 			pending_requests.push_back(reqB);
 #else
-			MPI_Status status;
+            MPI_Status status;
 			MPI_File_write(myopenfile, &current_displacement, sizeof(current_displacement), MPI_CHAR, &status) ;
 			MPI_File_write(myopenfile, (void*)(this->binaryocean_title.c_str()), this->binaryocean_title.size(), MPI_CHAR, &status) ;
 #endif
@@ -1073,16 +934,16 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 			const size_t header_bytes = this->header.size();
 
 			if (mygid == 0)
-            		{
+            {
 #if defined(_ASYNC_IO_)
-				MPI_Request req;
-                		MPI_File_iwrite_at(myopenfile, current_displacement, (void*)(this->header.c_str()), header_bytes, MPI_CHAR, &req);
+                MPI_Request req;
+                MPI_File_iwrite_at(myopenfile, current_displacement, (void*)(this->header.c_str()), header_bytes, MPI_CHAR, &req);
 				pending_requests.push_back(req);
 #else
-                		MPI_Status status;
-                		MPI_File_write_at(myopenfile, current_displacement, (void*)(this->header.c_str()), header_bytes, MPI_CHAR, &status);
+                MPI_Status status;
+                MPI_File_write_at(myopenfile, current_displacement, (void*)(this->header.c_str()), header_bytes, MPI_CHAR, &status);
 #endif
-			}
+            }
 
 			current_displacement += header_bytes;
 		}
@@ -1091,12 +952,12 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 		{
 			const int metadata_bytes = this->myblockindices.size() * sizeof(BlockMetadata);
 #if defined(_ASYNC_IO_)
-			MPI_Request req;
-			MPI_File_iwrite_at(myopenfile, current_displacement + mygid * metadata_bytes, &this->myblockindices.front(), metadata_bytes, MPI_CHAR, &req);
+            MPI_Request req;
+            MPI_File_iwrite_at(myopenfile, current_displacement + mygid * metadata_bytes, &this->myblockindices.front(), metadata_bytes, MPI_CHAR, &req);
 			pending_requests.push_back(req);
 #else
-			MPI_Status status;
-			MPI_File_write_at(myopenfile, current_displacement + mygid * metadata_bytes, &this->myblockindices.front(), metadata_bytes, MPI_CHAR, &status);
+            MPI_Status status;
+            MPI_File_write_at(myopenfile, current_displacement + mygid * metadata_bytes, &this->myblockindices.front(), metadata_bytes, MPI_CHAR, &status);
 #endif
 			current_displacement += metadata_bytes * nranks;
 		}
@@ -1106,16 +967,16 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 			const int title_bytes = this->binarylut_title.size();
 
 			if (mygid == 0)
-            		{
+            {
 #if defined(_ASYNC_IO_)
-				MPI_Request req;
-				MPI_File_iwrite_at(myopenfile, current_displacement, (void*)(this->binarylut_title.c_str()), title_bytes, MPI_CHAR, &req);
+                MPI_Request req;
+                MPI_File_iwrite_at(myopenfile, current_displacement, (void*)(this->binarylut_title.c_str()), title_bytes, MPI_CHAR, &req);
 				pending_requests.push_back(req);
 #else
-				MPI_Status status;
+                MPI_Status status;
 				MPI_File_write_at(myopenfile, current_displacement, (void*)(this->binarylut_title.c_str()), title_bytes, MPI_CHAR, &status);
 #endif
-            		}
+            }
 
 			current_displacement += title_bytes;
 		}
@@ -1127,11 +988,11 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 			const int lutheader_bytes = sizeof(this->lutheader);
 
 #if defined(_ASYNC_IO_)
-			MPI_Request req;
-			MPI_File_iwrite_at(myopenfile, current_displacement + mygid * lutheader_bytes, &this->lutheader, lutheader_bytes, MPI_CHAR, &req);
+            MPI_Request req;
+            MPI_File_iwrite_at(myopenfile, current_displacement + mygid * lutheader_bytes, &this->lutheader, lutheader_bytes, MPI_CHAR, &req);
 			pending_requests.push_back(req);
 #else
-			MPI_Status status;
+            MPI_Status status;
 			MPI_File_write_at(myopenfile, current_displacement + mygid * lutheader_bytes, &this->lutheader, lutheader_bytes, MPI_CHAR, &status) ;
 #endif
 		}
@@ -1143,7 +1004,7 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 
 public:
 	SerializerIO_WaveletCompression_MPI_Simple():
-	SerializerIO_WaveletCompression_MPI_SimpleBlocking<GridType, IterativeStreamer>(),
+	SerializerIO_WaveletCompression_MPI_SimpleBlocking<GridType, TStreamer>(),
 	nofcalls(0)
 	{
 	}
