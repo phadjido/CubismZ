@@ -1,5 +1,6 @@
 # 
-make clean;make wavz=0 drain=1 zlib=0 
+#make clean;make wavz=0 drain=1 zlib=0 
+make clean;make wavz=1 drain=0 zlib=1
 make data_generator
 ./data_generator
 ./tests -sim io

@@ -48,18 +48,6 @@ struct FluidElement
     }
 };
     
-struct StreamerGridPointIterative //dummy
-{
-    static const int channels = 2;
-    template<int channel>
-    static inline Real operate(const FluidElement& input) { abort(); return 0; }
-    
-    const char * name() { return "StreamerGridPointIterative" ; }
-};
-
-template<> inline Real StreamerGridPointIterative::operate<0>(const FluidElement& e) { return e.phi; }
-template<> inline Real StreamerGridPointIterative::operate<1>(const FluidElement& e) { return e.psi; }
-
 struct FluidBlock
 {
 	static const int sizeX = _BLOCKSIZE_;
@@ -119,4 +107,42 @@ struct FluidBlock
 	}
 };
 
-typedef Grid<FluidBlock, std::allocator> FluidGrid;
+//struct StreamerGridPointIterative //dummy
+//{
+//    static const int channels = 2;
+//    template<int channel>
+//    static inline Real operate(const FluidElement& input) { abort(); return 0; }
+//    
+//    const char * name() { return "StreamerGridPointIterative" ; }
+//};
+//template<> inline Real StreamerGridPointIterative::operate<0>(const FluidElement& e) { return e.phi; }
+//template<> inline Real StreamerGridPointIterative::operate<1>(const FluidElement& e) { return e.psi; }
+//typedef Grid<FluidBlock, std::allocator> FluidGrid;
+
+struct StreamerGridPointIterative
+{
+    static const int channels = 2;
+
+    FluidBlock * ref;
+    StreamerGridPointIterative(FluidBlock& b): ref(&b) {}
+    StreamerGridPointIterative(): ref(NULL) {}
+
+        template<int channel>
+        static inline Real operate(const FluidElement& input) { abort(); return 0; }
+
+        inline Real operate(const int ix, const int iy, const int iz) const
+        {
+        cout << "You must not call this operate method of StreamerGridPointIterative" << endl;
+        abort();
+        return 0;
+        }
+
+        const char * name() { return "StreamerGridPointIterative" ; }
+};
+
+template<> inline Real StreamerGridPointIterative::operate<0>(const FluidElement& e) { return e.phi; }
+template<> inline Real StreamerGridPointIterative::operate<1>(const FluidElement& e) { return e.psi; }
+
+typedef Grid <FluidBlock, std::allocator> FluidGridBase;
+typedef FluidGridBase FluidGrid;
+

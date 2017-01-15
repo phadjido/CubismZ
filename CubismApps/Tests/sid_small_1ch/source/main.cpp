@@ -7,6 +7,8 @@
  *
  */
 
+#include <map>
+#include <iomanip>
 #include <iostream>
 #include <mpi.h>
 
