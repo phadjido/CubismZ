@@ -312,7 +312,7 @@ protected:
 
 
 #else /* NO COMPRESSION */
-#error	"Compression method for blocks has not been defined!"
+//#error	"Compression method for blocks has not been defined!"
 					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
 					int nbytes = inbytes;
 					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));

@@ -13,6 +13,7 @@
 #include <mpi.h>
 #include <hdf5.h>
 #include <omp.h>
+#include "ParIO.h"
 //#define _TRANSPOSE_DATA_
 #define _COLLECTIVE_IO_
 
@@ -56,12 +57,15 @@ int main(int argc, const char **argv)
 		exit(1);
 	}
 
-	size_t dims[4]; 	/* dataset dimensions */
-	size_t	count[4];	/* hyperslab selection parameters */
-	size_t	offset[4];
+//	size_t dims[4]; 	/* dataset dimensions */
+//	size_t	count[4];	/* hyperslab selection parameters */
+//	size_t	offset[4];
+
+        const bool swapbytes = argparser.check("-swap");
+        const int wtype = argparser("-wtype").asInt(1);
 
 #if 1
-	Reader_WaveletCompressionMPI myreader(mycomm, inputfile_name);
+	Reader_WaveletCompressionMPI myreader(mycomm, inputfile_name, swapbytes, wtype);
 #else
 	Reader_WaveletCompression myreader(inputfile_name);
 #endif
@@ -71,18 +75,21 @@ int main(int argc, const char **argv)
 
 	const double t0 = omp_get_wtime(); 
 
-	string datfile_fullname = datfile_name + ".dat";;
+	string datfile_fullname = datfile_name + ".dat";
+        MPI_ParIO pio;
+        pio.Init((char *)datfile_fullname.c_str(), _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_*sizeof(Real));
 
-	int dim[3], period[3], reorder;
-	int coord[3], id;
+
+//	int dim[3], period[3], reorder;
+//	int coord[3], id;
 
 	/* Create a new file collectively and release property list identifier. */
-	FILE *file_id = fopen(datfile_fullname.c_str(), "wb");
-	if (file_id == NULL)
-	{
-		printf("file_id == NULL\n");
-		exit(1);
-	}
+//	FILE *file_id = fopen(datfile_fullname.c_str(), "wb");
+//	if (file_id == NULL)
+//	{
+//		printf("file_id == NULL\n");
+//		exit(1);
+//	}
 
 	int NBX = myreader.xblocks();
 	int NBY = myreader.yblocks();
@@ -95,21 +102,21 @@ int main(int argc, const char **argv)
 
 	/* Create the dataspace for the dataset.*/
 #if defined(_TRANSPOSE_DATA_)
-	dims[0] = NX;
-	dims[1] = NY;
-	dims[2] = NZ;
-	dims[3] = 1;
+//	dims[0] = NX;
+//	dims[1] = NY;
+//	dims[2] = NZ;
+//	dims[3] = 1;
 #else
-	dims[0] = NZ;
-	dims[1] = NY;
-	dims[2] = NX;
-	dims[3] = 1;
+//	dims[0] = NZ;
+//	dims[1] = NY;
+//	dims[2] = NX;
+//	dims[3] = 1;
 #endif
 
-	count[0] = _BLOCKSIZE_;
-	count[1] = _BLOCKSIZE_;
-	count[2] = _BLOCKSIZE_;
-	count[3] = 1;
+//	count[0] = _BLOCKSIZE_;
+//	count[1] = _BLOCKSIZE_;
+//	count[2] = _BLOCKSIZE_;
+//	count[3] = 1;
 
 	const int nblocks = NBX*NBY*NBZ;
 	const int b_end = ((nblocks + (mpi_size - 1))/ mpi_size) * mpi_size; 
@@ -131,36 +138,38 @@ int main(int argc, const char **argv)
 		if (b < nblocks)
 		{
 			printf("loading block(%d,%d,%d)\n", x, y, z); 
-			myreader.load_block(x, y, z, targetdata);
+			myreader.load_block2(x, y, z, targetdata);
 	
 #if defined(_TRANSPOSE_DATA_)
 			for (int xb = 0; xb < _BLOCKSIZE_; xb++)
 				for (int yb = 0; yb < _BLOCKSIZE_; yb++)
 					for (int zb = 0; zb < _BLOCKSIZE_; zb++)
 						storedata[xb*_BLOCKSIZE_*_BLOCKSIZE_ + yb*_BLOCKSIZE_ + zb] = targetdata[zb][yb][xb];
-			offset[0] = x * count[0];
-			offset[1] = y * count[1];
-			offset[2] = z * count[2];
-			offset[3] = 0;
+//			offset[0] = x * count[0];
+//			offset[1] = y * count[1];
+//			offset[2] = z * count[2];
+//			offset[3] = 0;
 #else
-			offset[0] = z * count[0];
-			offset[1] = y * count[1];
-			offset[2] = x * count[2];
-			offset[3] = 0;
+//			offset[0] = z * count[0];
+//			offset[1] = y * count[1];
+//			offset[2] = x * count[2];
+//			offset[3] = 0;
 #endif
 		
 
 			/* Select hyperslab in the file */
 #if defined(_TRANSPOSE_DATA_)
-			fwrite(storedata, sizeof(Real), _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_, file_id);
+//			fwrite(storedata, sizeof(Real), _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_, file_id);
+			pio.Write((char *)storedata, b);
 #else
-			printf("scalefactor = %lf\n" , scalefactor);
+//			printf("scalefactor = %lf\n" , scalefactor);
 			for (int zb = 0; zb < _BLOCKSIZE_; zb++)
 				for (int yb = 0; yb < _BLOCKSIZE_; yb++)
 					for (int xb = 0; xb < _BLOCKSIZE_; xb++)
 						targetdata[zb][yb][xb] /= scalefactor;
 
-			fwrite(targetdata, sizeof(Real), _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_, file_id);
+//			fwrite(targetdata, sizeof(Real), _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_, file_id);
+			pio.Write((char *)targetdata, b);
 #endif
 		}
 		else {
@@ -177,7 +186,8 @@ int main(int argc, const char **argv)
 	}
 	
 	/* Close/release resources */
-	fclose(file_id);
+	pio.Finalize();
+	//fclose(file_id);
 
 	MPI::Finalize();
 
