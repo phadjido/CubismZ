@@ -55,10 +55,9 @@ int main(int argc, char **argv)
 
 //	float threshold = 0.1;	// 0.1%
 	const double threshold = (double) argparser("-threshold").asDouble(1);
-	printf("threshold = %lf\n", threshold);
+	if (isroot) printf("threshold = %.2lf%%\n", threshold);
 //	printf("give threshold =");
 //	scanf("%f", &threshold);
-
 
 	if ((inputfile_name1 == "none")||(inputfile_name2 == "none"))
 	{

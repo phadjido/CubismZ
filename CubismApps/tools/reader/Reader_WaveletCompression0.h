@@ -626,47 +626,8 @@ public:
 			memcpy(compressor.compressed_data(), &waveletbuf[readbytes], nbytes);
 			readbytes += nbytes;
 
-#if defined(_USE_WAVZ_)
-
-			compressor.decompress(halffloat, nbytes, wtype, MYBLOCK);
-
-#elif defined(_USE_FPC_)
-
-			int fpc_decompressedbytes;
-			fpc_decompress((char *)compressor.compressed_data(), nbytes, (char*) MYBLOCK, &fpc_decompressedbytes);
-			if ((fpc_decompressedbytes < 0)||(fpc_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
-			{
-				printf("FPC DECOMPRESSION FAILURE!!\n");
-				abort();
-			}
-
-#elif defined(_USE_FPZIP_)
-			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
-			int fpz_decompressedbytes;
-			fpz_decompress3D((char *)compressor.compressed_data(), nbytes, layout, (char *) MYBLOCK, (unsigned int *)&fpz_decompressedbytes, (sizeof(Real)==4)?1:0);
-			if ((fpz_decompressedbytes < 0)||(fpz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
-			{
-				printf("FPZ DECOMPRESSION FAILURE:  %d!!\n", fpz_decompressedbytes);
-				abort();
-			}
-
-#elif defined(_USE_DRAIN_)
-			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
-			int drain_decompressedbytes;
-			drain_decompressedbytes = pour_3df_buffer((unsigned char *) compressor.compressed_data(), layout[0], layout[1], layout[2], (float *) MYBLOCK);
-			if ((drain_decompressedbytes < 0)||(drain_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
-			{
-				printf("DRAIN DECOMPRESSION FAILURE:  %d!!\n", drain_decompressedbytes);
-				abort();
-			}
-
-#elif defined(_USE_SHUFFLE_)
-                        reshuffle((char *)compressor.compressed_data(), nbytes, sizeof(Real));
                         memcpy((void *) MYBLOCK, (void *)compressor.compressed_data(), nbytes);
 
-#else
-                        memcpy((void *) MYBLOCK, (void *)compressor.compressed_data(), nbytes);
-#endif
 			const int BS3 = (_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_)*sizeof(Real);
 			zratio2 = (1.0*BS3)/nbytes;
 #if defined(VERBOSE)

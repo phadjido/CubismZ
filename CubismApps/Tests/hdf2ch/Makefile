@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-CC ?= mpic++
+CC = mpic++
 bs ?= 32
 ap ?= float
 hdf ?= 1
@@ -54,16 +54,19 @@ VPATH := ../../../Cubism/source/ ../../MPCFcluster/source/ ../../MPCFnode/source
 
 OBJECTS = main.o WaveletCompressor.o
 
-all: hdf2ch
+all: hdf2ch ch2diff
 
 hdf2ch: $(OBJECTS) 
+	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
+
+ch2diff: ch2diff.o WaveletCompressor.o
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
 
 %.o: %.cpp 
 	$(CC)  $(OPTFLAGS) $(CPPFLAGS) -c $^ -o $@
 
 clean:
-	rm -f *.o hdf2ch
+	rm -f *.o hdf2ch ch2diff
 
 cleanall:
 	rm -f *.o hdf2ch out*

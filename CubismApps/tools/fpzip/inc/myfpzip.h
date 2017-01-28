@@ -4,9 +4,13 @@
 #include "fpzip.h"
 #include <climits>
 
-//#ifndef FPZIP_ACC
-#define FPZIP_ACC	32
-//#endif
+#if defined(_FPZIP_24_)
+#define FPZIP_ACC 24
+#elif defined(_FPZIP_16_)
+#define FPZIP_ACC 16
+#else
+#define FPZIP_ACC 32
+#endif
 
 //extern "C"
 //{
@@ -15,7 +19,7 @@ static void fpz_compress4D(void *in, unsigned int inbytes, int layout[4], void *
 	unsigned int dim[4] = {1, 32, 32, 32};
 	int prec[4];
 	int dp, i;
-	int precbits = 32;
+	int precbits = FPZIP_ACC;
 
 	//dim[0] = nelem;
 	//if (bs > 0) for (i = 1; i < 4; i++) dim[i] = bs;

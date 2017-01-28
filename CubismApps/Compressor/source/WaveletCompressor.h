@@ -114,7 +114,8 @@ public:
 		datastream.next_in = (unsigned char*) WaveletCompressorGeneric<DATASIZE1D, DataType>::compressed_data();
 		datastream.next_out = bufzlib;
 
-		if (Z_OK == deflateInit(&datastream, Z_DEFAULT_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
+//		if (Z_OK == deflateInit(&datastream, Z_DEFAULT_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
+		if (Z_OK == deflateInit(&datastream, Z_BEST_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
 			compressedbytes = datastream.total_out;
 		else
 		{
@@ -149,7 +150,8 @@ public:
 		datastream.next_in = (unsigned char*) WaveletCompressorGeneric<DATASIZE1D, DataType>::compressed_data();
 		datastream.next_out = bufzlib;
 
-		if (Z_OK == deflateInit(&datastream, Z_DEFAULT_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
+//		if (Z_OK == deflateInit(&datastream, Z_DEFAULT_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
+		if (Z_OK == deflateInit(&datastream, Z_BEST_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
 			compressedbytes = datastream.total_out;
 		else
 		{

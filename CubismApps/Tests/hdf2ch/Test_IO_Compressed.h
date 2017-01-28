@@ -284,7 +284,7 @@ public:
 		double threshold = parser("-threshold").asDouble(1e-5);
 
 		mywaveletdumper.verbose();
-		printf("setting threshold to %f\n", threshold);
+		if (isroot) printf("setting threshold to %f\n", threshold);
 		mywaveletdumper.set_threshold(threshold);
 		mywaveletdumper.set_wtype_write(wtype_write);
 		mywaveletdumper.Write<0>(grid, streamer.str());
