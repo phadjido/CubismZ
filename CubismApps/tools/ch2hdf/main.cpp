@@ -17,6 +17,12 @@
 //#define _TRANSPOSE_DATA_
 #define _COLLECTIVE_IO_
 
+#ifdef _FLOAT_PRECISION_
+#define H5T_NATIVE_FP   H5T_NATIVE_FLOAT
+#else
+#define H5T_NATIVE_FP   H5T_NATIVE_DOUBLE
+#endif
+
 #include "ArgumentParser.h"
 #include "Reader_WaveletCompression.h"
 
@@ -178,9 +184,9 @@ int main(int argc, const char **argv)
 
 	/* Create the dataset with default properties and close filespace.*/
 #ifndef _ON_FERMI_
-	dset_id = H5Dcreate(file_id, "data", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	dset_id = H5Dcreate(file_id, "data", H5T_NATIVE_FP, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 #else
-        dset_id = H5Dcreate2(file_id, "data", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        dset_id = H5Dcreate2(file_id, "data", H5T_NATIVE_FP, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 #endif
 	H5Sclose(filespace);
 
@@ -240,8 +246,14 @@ int main(int argc, const char **argv)
 			for (int xb = 0; xb < _BLOCKSIZE_; xb++)
 				for (int yb = 0; yb < _BLOCKSIZE_; yb++)
 					for (int zb = 0; zb < _BLOCKSIZE_; zb++)
+					{
 						//targetdata_all[xb][yb][zb][i] = targetdata[xb][yb][zb];
 						targetdata_all[i + zb*NCHANNELS + yb*NCHANNELS*_BLOCKSIZE_ + xb*NCHANNELS*_BLOCKSIZE_*_BLOCKSIZE_] = targetdata[xb][yb][zb];
+						//if (targetdata[xb][yb][zb]!=0.0)
+						//{
+						//	printf("val = %e\n", targetdata[xb][yb][zb]); 
+						//}
+					}
 			}
 			
 #if defined(_TRANSPOSE_DATA_)
@@ -273,9 +285,9 @@ int main(int argc, const char **argv)
 			H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL);
 
 #if defined(_TRANSPOSE_DATA_)
-			status = H5Dwrite(dset_id, H5T_NATIVE_FLOAT, memspace, filespace, plist_id, storedata);
+			status = H5Dwrite(dset_id, H5T_NATIVE_FP, memspace, filespace, plist_id, storedata);
 #else
-			status = H5Dwrite(dset_id, H5T_NATIVE_FLOAT, memspace, filespace, plist_id, targetdata_all);
+			status = H5Dwrite(dset_id, H5T_NATIVE_FP, memspace, filespace, plist_id, targetdata_all);
 #endif
 			H5Sclose(filespace);
 		}
@@ -293,7 +305,7 @@ int main(int argc, const char **argv)
 			H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL);
 			H5Sselect_none(filespace);
 			
-			status = H5Dwrite(dset_id, H5T_NATIVE_FLOAT, nullmemspace, filespace, plist_id, NULL);
+			status = H5Dwrite(dset_id, H5T_NATIVE_FP, nullmemspace, filespace, plist_id, NULL);
 
 		}
 	}
@@ -335,10 +347,19 @@ int main(int argc, const char **argv)
 		fprintf(xmf, "     <Time Value=\"%05d\"/>\n", 0);
 		fprintf(xmf, "     <Topology TopologyType=\"3DCORECTMesh\" Dimensions=\"%d %d %d\"/>\n", (int)dims[0], (int)dims[1], (int)dims[2]);
 		fprintf(xmf, "     <Geometry GeometryType=\"ORIGIN_DXDYDZ\">\n");
+#ifdef _FLOAT_PRECISION_
 		fprintf(xmf, "       <DataItem Name=\"Origin\" Dimensions=\"3\" NumberType=\"Float\" Precision=\"4\" Format=\"XML\">\n");
+#else
+		fprintf(xmf, "       <DataItem Name=\"Origin\" Dimensions=\"3\" NumberType=\"Double\" Precision=\"8\" Format=\"XML\">\n");
+#endif
 		fprintf(xmf, "        %e %e %e\n", 0.,0.,0.);
 		fprintf(xmf, "       </DataItem>\n");
+#ifdef _FLOAT_PRECISION_
 		fprintf(xmf, "       <DataItem Name=\"Spacing\" Dimensions=\"3\" NumberType=\"Float\" Precision=\"4\" Format=\"XML\">\n");
+#else
+		fprintf(xmf, "       <DataItem Name=\"Spacing\" Dimensions=\"3\" NumberType=\"Double\" Precision=\"8\" Format=\"XML\">\n");
+#endif
+
 #if 1
 		fprintf(xmf, "        %e %e %e\n", 1./(Real)max(dims[0],max(dims[1],dims[2])),1./(Real)max(dims[0],max(dims[1],dims[2])),1./(Real)max(dims[0],max(dims[1],dims[2])));
 #else
@@ -351,7 +372,13 @@ int main(int argc, const char **argv)
 			fprintf(xmf, "     <Attribute Name=\"data\" AttributeType=\"%s\" Center=\"Node\">\n", "Scalar");
 		else
 			fprintf(xmf, "     <Attribute Name=\"data\" AttributeType=\"%s\" Center=\"Node\">\n", "Vector");
+
+#ifdef _FLOAT_PRECISION_
 		fprintf(xmf, "       <DataItem Dimensions=\"%d %d %d %d\" NumberType=\"Float\" Precision=\"4\" Format=\"HDF\">\n", (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3]);
+#else
+		fprintf(xmf, "       <DataItem Dimensions=\"%d %d %d %d\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">\n", (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3]);
+#endif
+
 #if 0
 		fprintf(xmf, "        %s:/data\n", h5file_fullname.c_str());
 #else

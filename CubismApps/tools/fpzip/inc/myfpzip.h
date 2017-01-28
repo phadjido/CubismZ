@@ -5,7 +5,7 @@
 #include <climits>
 
 //#ifndef FPZIP_ACC
-#define FPZIP_ACC	16
+#define FPZIP_ACC	32
 //#endif
 
 //extern "C"

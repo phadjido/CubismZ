@@ -26,49 +26,48 @@ using namespace std;
 #define		_ASYNC_IO_	1	// peh: hardcoded option, not in active code though
 //#define	_WRITE_AT_ALL_	1	// peh:
 
+//#define _USE_MORTON_
+#if defined(_USE_MORTON_)
+unsigned int Morton_3D_Encode_5bit(uint index1,uint index2,uint index3 )
+{ // pack 3 5-bitindicesinto a 15-bit Morton code
+        index1 &= 0x0000001f;
+        index2 &= 0x0000001f;
+        index3 &= 0x0000001f;
+        index1 *= 0x01041041;
+        index2 *= 0x01041041;
+        index3 *= 0x01041041;
+        index1 &= 0x10204081;
+        index2 &= 0x10204081;
+        index3 &= 0x10204081;
+        index1 *= 0x00011111;
+        index2 *= 0x00011111;
+        index3 *= 0x00011111;
+        index1 &= 0x12490000;
+        index2 &= 0x12490000;
+        index3 &= 0x12490000;
+        return( (index1 >> 16 ) | (index2 >> 15 ) | (index3 >> 14 ) );
+}
+#endif
 
+#if defined(_USE_ZEROBITS_)
+void float_zero_bits(unsigned int *ul, int n)
+{
+        unsigned int _ul = *ul;
 
+        if (n == 0)
+                _ul = _ul;
+        else if (n == 4)
+                _ul = _ul & 0xfffffff0;
+        else if (n == 8)
+                _ul = _ul & 0xffffff00;
+        else if (n == 12)
+                _ul = _ul & 0xfffff000;
+        else if (n == 16)
+                _ul = _ul & 0xffff0000;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        *ul = _ul;
+}
+#endif
 
 template<typename GridType, typename IterativeStreamer>
 class SerializerIO_WaveletCompression_MPI_SimpleBlocking
@@ -131,11 +130,11 @@ protected:
 		int idcompression = -1;
 
 		//1.
-
+		/* ZLIB/LZ4/LZF/FPC/FPZIP/DUMMY ENCODING (LOSSLESS COMPRESSION) */
 		{
-
+			/* TODO: replace the following code with: zbytes = zcompress(inputbuffer, bufsize, maxsize); */
 			z_stream myzstream = {0};
-			deflateInit(&myzstream, Z_DEFAULT_COMPRESSION);
+			deflateInit(&myzstream, Z_DEFAULT_COMPRESSION); // Z_BEST_COMPRESSION
 
 			unsigned mah = maxsize;
 			int err = deflate_inplace(&myzstream, inputbuffer, bufsize, &mah);
@@ -199,7 +198,7 @@ protected:
 	template<int channel>
 	void _compress(const vector<BlockInfo>& vInfo, const int NBLOCKS, IterativeStreamer streamer)
 	{
-		int compress_threads = omp_get_max_threads()/2;	// peh: recheck this on BGQ
+		int compress_threads = omp_get_max_threads();	// peh: recheck this on BGQ
 		if (compress_threads < 1) compress_threads = 1;
 
 #pragma omp parallel num_threads(compress_threads)
@@ -252,33 +251,24 @@ protected:
 					//wavelet digestion
 #if defined(_USE_WAVZ_) /* WAVELET COMPRESSION */
 					const int nbytes = (int)compressor.compress(this->threshold, this->halffloat, this->wtype_write);
-
 					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
 
 					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #elif defined(_USE_FPZIP_)
 					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
 					int nbytes;
+
+#if defined(_USE_MORTON_)
+					assert(_BLOCKSIZE_==32);
+					Real tmp[_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_];
+					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
+					for(int iy=0; iy<FluidBlock::sizeY; iy++)
+					for(int ix=0; ix<FluidBlock::sizeX; ix++)
+						tmp[Morton_3D_Encode_5bit(iz,iy,ix)] =  mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)];
+					memcpy(mysoabuffer, tmp, _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_*sizeof(Real));
+#endif
 
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 					fpz_compress3D((void *)mysoabuffer, inbytes, layout, (void *) compressor.compressed_data(), (unsigned int *)&nbytes, (sizeof(Real)==4)?1:0);
@@ -289,59 +279,39 @@ protected:
 					mybytes += sizeof(nbytes);
 					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #else /* NO COMPRESSION */
 //#error	"Compression method for blocks has not been defined!"
 					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
 					int nbytes = inbytes;
 					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
+
+#if defined(_USE_ZEROBITS_)
+					// set some bits to zero
+					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
+					for(int iy=0; iy<FluidBlock::sizeY; iy++)
+					for(int ix=0; ix<FluidBlock::sizeX; ix++)
+						float_zero_bits((unsigned int *)&mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)], _ZEROBITS_);
+#endif
+
+#if defined(_USE_SHUFFLE_)
+#if !defined(_USE_MORTON_)
+					shuffle((char *)mysoabuffer, nbytes, sizeof(Real));
+#else
+					assert(_BLOCKSIZE_==32);
+					Real tmp[_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_];
+					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
+					for(int iy=0; iy<FluidBlock::sizeY; iy++)
+					for(int ix=0; ix<FluidBlock::sizeX; ix++)
+						tmp[Morton_3D_Encode_5bit(ix,iy,iz)] =  mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)];
+					memcpy(mysoabuffer, tmp, _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_*sizeof(Real));
+                                        shuffle((char *)mysoabuffer, nbytes, sizeof(Real));
+#endif
+#endif
 					memcpy(mybuf.compressedbuffer + mybytes, mysoabuffer, sizeof(unsigned char) * nbytes);
 #endif
 					mybytes += nbytes;
 				}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 				tfwt += tw.stop();
 
@@ -552,30 +522,22 @@ protected:
 				ss << "HalfFloat: " << (this->halffloat ? "yes" : "no") << "\n";
 #if defined(_USE_WAVZ_)
 				ss << "Wavelets: " << WaveletsOnInterval::ChosenWavelets_GetName(this->wtype_write) << "\n";
-
-
 #elif defined(_USE_FPZIP_)
 				ss << "Wavelets: " << "fpzip" << "\n";
-
-
-
-
+#elif defined(_USE_SHUFFLE_)
+				ss << "Wavelets: " << "shuffle" << "\n";
 #else
 				ss << "Wavelets: " << "none" << "\n";
 #endif
 				ss << "WaveletThreshold: " << threshold << "\n";
 #if defined(_USE_ZLIB_)
 				ss << "Encoder: " << "zlib" << "\n";
-#else	/* _USE_LZ4_ */
-				ss << "Encoder: " << "lz4" << "\n";
-
-
-
-
-
-
-
-
+#elif defined(_USE_LZ4_)
+                                ss << "Encoder: " << "lz4" << "\n";
+#elif defined(_USE_LZMA_)
+                                ss << "Encoder: " << "lzma" << "\n";
+#else
+                                ss << "Encoder: " << "none" << "\n";
 #endif
 				ss << "==============START-BINARY-METABLOCKS==============\n";
 

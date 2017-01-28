@@ -7,8 +7,8 @@
  *  Copyright 2013 ETH Zurich. All rights reserved.
  *
  */
-#ifndef READER_WAVELETCOMPRESSION_H_T7YQFSP3
-#define READER_WAVELETCOMPRESSION_H_T7YQFSP3
+#ifndef READER_WAVELETCOMPRESSION_H_00000000
+#define READER_WAVELETCOMPRESSION_H_00000000
 
 #include <cstdlib>
 #include <cstring>
@@ -31,7 +31,7 @@ typedef double Real;
 #include "../../Compressor/source/WaveletCompressor.h"
 
 #include "../../Compressor/source/WaveletSerializationTypes.h"
-#include "../../Compressor/source/CompressionEncoders.h"
+#include "../../Compressor/source/CompressionEncoders0.h"
 #include "../../Compressor/source/FullWaveletTransform.h"
 
 //MACRO TAKEN FROM http://stackoverflow.com/questions/3767869/adding-message-to-assert
@@ -52,7 +52,7 @@ struct HeaderLUT { size_t aggregate_bytes; int nchunks; }  __attribute__((packed
 struct CompressedBlock{ size_t start, extent; int subid; }  __attribute__((packed));
 */
 
-class Reader_WaveletCompression
+class Reader_WaveletCompression0
 {
 protected:
 	string path;
@@ -181,7 +181,7 @@ protected:
 
 public:
 
-	Reader_WaveletCompression(const string path, bool doswapping, int wtype): NBLOCKS(-1), global_header_displacement(-1), path(path), doswapping(doswapping), wtype(wtype) { }
+	Reader_WaveletCompression0(const string path, bool doswapping, int wtype): NBLOCKS(-1), global_header_displacement(-1), path(path), doswapping(doswapping), wtype(wtype) { }
 
 	virtual void load_file()
 	{
@@ -288,27 +288,31 @@ public:
 
 				fscanf(file, "Wavelets: %s\n", buf);
 				printf("Wavelets: <%s>\n", buf);
-#if defined(_USE_WAVZ_)
-				MYASSERT(buf == string(WaveletsOnInterval::ChosenWavelets_GetName(wtype)),
-						"\nATTENZIONE:\nWavelets in the file is " << buf <<
-						" and i have " << WaveletsOnInterval::ChosenWavelets_GetName(wtype) << "\n");
-#elif defined(_USE_FPZIP_)
-				MYASSERT(buf == string("fpzip"),
-						"\nATTENZIONE:\nWavelets in the file is " << buf <<
-						" and i have " << "fpzip"  << "\n");
-#elif defined(_USE_DRAIN_)
-				MYASSERT(buf == string("drain"),
-						"\nATTENZIONE:\nWavelets in the file is " << buf <<
-						" and i have " << "drain"  << "\n");
-#elif defined(_USE_SHUFFLE_)
-				MYASSERT(buf == string("shuffle"),
-						"\nATTENZIONE:\nWavelets in the file is " << buf <<
-						" and i have " << "shuffle"  << "\n");
-#else
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				MYASSERT(buf == string("none"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
 						" and i have " << "none"  << "\n");
-#endif
+
 
 				float mythreshold = -1;
 				fscanf(file, "WaveletThreshold: %f\n", &mythreshold);
@@ -316,23 +320,19 @@ public:
 
 				fscanf(file, "Encoder: %s\n", buf);
 				printf("Encoder: <%s>\n", buf);
-#if defined(_USE_ZLIB_)
-				MYASSERT(buf == string("zlib"),
-						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
-						 " and i have zlib.\n");
-#elif defined(_USE_LZ4_)
-				MYASSERT(buf == string("lz4"),
-						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
-						 " and i have lz4.\n");
-#elif defined(_USE_LZMA_)
-				MYASSERT(buf == string("lzma"),
-						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
-						 " and i have lzma.\n");
-#else
+
+
+
+
+
+
+
+
+
 				MYASSERT(buf == string("none"),
 						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
 						 " and i have none.\n");
-#endif
+
 
 				fgets(buf, sizeof(buf), file);
 
@@ -519,7 +519,7 @@ public:
 		assert(!feof(f));
 
 		vector<unsigned char> waveletbuf(4 << 20);
-		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
+		const size_t decompressedbytes = zdecompress0(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 
 		int readbytes = 0;
 		for(int i = 0; i<compressedchunk.subid; ++i)
@@ -586,7 +586,7 @@ public:
 
 		size_t zz_bytes = compressedbuf.size();
 		vector<unsigned char> waveletbuf(4 << 21);
-		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
+		const size_t decompressedbytes = zdecompress0(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)
 		printf("zdecompressed %d bytes to %d bytes...(%.2lf)\n", zz_bytes, decompressedbytes, zratio1);
@@ -680,14 +680,14 @@ public:
 	}
 };
 
-class Reader_WaveletCompressionMPI: public Reader_WaveletCompression
+class Reader_WaveletCompressionMPI0: public Reader_WaveletCompression0
 {
 	const MPI_Comm comm;
 
 public:
 
-	Reader_WaveletCompressionMPI(const MPI_Comm comm, const string path, int swapbytes, int wtype):
-	Reader_WaveletCompression(path,swapbytes,wtype), comm(comm)
+	Reader_WaveletCompressionMPI0(const MPI_Comm comm, const string path, int swapbytes, int wtype):
+	Reader_WaveletCompression0(path,swapbytes,wtype), comm(comm)
 	{
 
 	}
@@ -698,7 +698,7 @@ public:
         MPI_Comm_rank(comm, &myrank);
 
 		if (myrank == 0)
-			Reader_WaveletCompression::load_file();
+			Reader_WaveletCompression0::load_file();
 
 		//propagate primitive type data members
 		{
@@ -725,4 +725,4 @@ public:
 	}
 };
 
-#endif /* READER_WAVELETCOMPRESSION_H_T7YQFSP3 */
+#endif /* READER_WAVELETCOMPRESSION_H_00000000 */

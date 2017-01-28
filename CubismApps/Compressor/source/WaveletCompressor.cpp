@@ -21,6 +21,13 @@ using namespace std;
 
 #include "WaveletCompressor.h"
 
+//#define _USE_FLOAT16_	// peh: put it as an option in Makefile.config
+
+
+
+
+
+
 void swapbytes(unsigned char *mem, int nbytes)
 {
         unsigned char buf[8];
@@ -29,7 +36,6 @@ void swapbytes(unsigned char *mem, int nbytes)
 }
 
 
-//#define _USE_FLOAT16_	// peh: put it as an option in Makefile.config
 
 #if defined(_USE_ZEROBITS_)
 void float_zero_bits3(unsigned int *ul, int n)
