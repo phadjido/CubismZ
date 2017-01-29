@@ -64,6 +64,7 @@ protected:
 	int NBLOCKS;
 	int totalbpd[3], bpd[3];
 	bool halffloat;
+	float threshold;	// peh: new
 
 	vector<CompressedBlock> idx2chunk;
 
@@ -300,6 +301,18 @@ public:
 				MYASSERT(buf == string("drain"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
 						" and i have " << "drain"  << "\n");
+#elif defined(_USE_ZFP_)
+				MYASSERT(buf == string("zfp"),
+						"\nATTENZIONE:\nWavelets in the file is " << buf <<
+						" and i have " << "zfp"  << "\n");
+#elif defined(_USE_SZ_)
+				MYASSERT(buf == string("sz"),
+						"\nATTENZIONE:\nWavelets in the file is " << buf <<
+						" and i have " << "sz"  << "\n");
+#elif defined(_USE_ISABELLA_)
+				MYASSERT(buf == string("isabella"),
+						"\nATTENZIONE:\nWavelets in the file is " << buf <<
+						" and i have " << "isabella"  << "\n");
 #elif defined(_USE_SHUFFLE_)
 				MYASSERT(buf == string("shuffle"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
@@ -313,6 +326,7 @@ public:
 				float mythreshold = -1;
 				fscanf(file, "WaveletThreshold: %f\n", &mythreshold);
 				printf("WaveletThreshold: <%f>\n", mythreshold);
+				this->threshold = mythreshold;
 
 				fscanf(file, "Encoder: %s\n", buf);
 				printf("Encoder: <%s>\n", buf);
@@ -651,6 +665,43 @@ public:
 			}
 
 #elif defined(_USE_DRAIN_)
+			int drain_level = (int) this->threshold;
+			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int drain_decompressedbytes;
+			drain_decompressedbytes = pour_3df_buffer((unsigned char *) compressor.compressed_data(), layout[0], layout[1], layout[2], (float *) MYBLOCK);
+			if ((drain_decompressedbytes < 0)||(drain_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("DRAIN DECOMPRESSION FAILURE:  %d!!\n", drain_decompressedbytes);
+				abort();
+			}
+
+#elif defined(_USE_ZFP_)
+//			double zfp_acc = 0.0;
+//			if(getenv("ZFP_ACC")) zfp_acc = atof(getenv("ZFP_ACC"));
+			double zfp_acc = (double)this->threshold;
+			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			size_t zfp_decompressedbytes;
+			int is_float = 1;
+			int status = zfp_decompress_buffer(MYBLOCK, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)compressor.compressed_data(), nbytes, &zfp_decompressedbytes);
+			if ((zfp_decompressedbytes < 0)||(zfp_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("ZFP DECOMPRESSION FAILURE:  %d!!\n", zfp_decompressedbytes);
+				abort();
+			}
+
+#elif defined(_USE_SZ_)
+			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int sz_decompressedbytes;
+
+			sz_decompressedbytes = SZ_decompress_args(SZ_FLOAT, (char *)compressor.compressed_data(), nbytes, MYBLOCK, 0, 0, layout[2], layout[1], layout[0]);
+			sz_decompressedbytes *= sizeof(Real);
+			if ((sz_decompressedbytes < 0)||(sz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("SZ DECOMPRESSION FAILURE:  %d!!\n", sz_decompressedbytes);
+				abort();
+			}
+
+#elif defined(_USE_ISABELLA_)
 			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 			int drain_decompressedbytes;
 			drain_decompressedbytes = pour_3df_buffer((unsigned char *) compressor.compressed_data(), layout[0], layout[1], layout[2], (float *) MYBLOCK);
@@ -709,6 +760,7 @@ public:
 			MPI_Bcast(bpd, sizeof(bpd), MPI_CHAR, 0, comm);
 			MPI_Bcast(&halffloat, sizeof(halffloat), MPI_CHAR, 0, comm);
 			MPI_Bcast(&doswapping, sizeof(doswapping), MPI_CHAR, 0, comm);
+			MPI_Bcast(&threshold, sizeof(threshold), MPI_CHAR, 0, comm);
 		}
 
 		size_t nentries = idx2chunk.size();

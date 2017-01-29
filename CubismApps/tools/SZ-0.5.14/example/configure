@@ -1,0 +1,13 @@
+#!/bin/bash
+
+SZPATH=/home/fti/workspace-java/SZ_Project/SZ-0.5.14
+CURDIR=`pwd`
+JAVAHOME=/home/fti/jdk/jdk1.8.0_05
+
+#ARCHITECTURE is set to linux_x64,linux_x86,linux_arm,solaris, or ppc
+#ppc means IBM PowerPC (such as IBM BlueGene series)
+ARCHITECTURE=linux_x64
+
+java -cp ${SZPATH}/lib/sz.jar tools.FlushConfiguration $SZPATH "$CURDIR" $JAVAHOME "$ARCHITECTURE"
+. ~/.bashrc
+echo Done sucessfully.

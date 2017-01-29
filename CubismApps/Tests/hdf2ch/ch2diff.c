@@ -33,6 +33,11 @@ int main(int argc, char **argv)
 	/* Initialize MPI */
 	MPI_Init(&argc, &argv);
 
+#ifdef _USE_SZ_
+	SZ_Init((char *)"sz.config");
+	omp_set_num_threads(1);
+#endif
+
 	/* MPI variables */
 	MPI_Comm comm  = MPI_COMM_WORLD;
 	MPI_Info info  = MPI_INFO_NULL;

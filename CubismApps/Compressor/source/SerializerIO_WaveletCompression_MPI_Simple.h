@@ -196,6 +196,19 @@ protected:
 		return timer.stop();
 	}
 
+
+#define APPLY_MORTON()													\
+	do														\
+	{														\
+	assert(_BLOCKSIZE_==32);											\
+	Real tmp[_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_];									\
+	for(int iz=0; iz<FluidBlock::sizeZ; iz++)									\
+	for(int iy=0; iy<FluidBlock::sizeY; iy++)									\
+	for(int ix=0; ix<FluidBlock::sizeX; ix++)									\
+		tmp[Morton_3D_Encode_5bit(iz,iy,ix)] =  mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)];	\
+	memcpy(mysoabuffer, tmp, _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_*sizeof(Real));					\
+	} while (0);
+
 	template<int channel>
 	void _compress(const vector<BlockInfo>& vInfo, const int NBLOCKS, IterativeStreamer streamer)
 	{
@@ -262,19 +275,101 @@ protected:
 					int nbytes;
 
 #if defined(_USE_MORTON_)
-					assert(_BLOCKSIZE_==32);
-					Real tmp[_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_];
-					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
-					for(int iy=0; iy<FluidBlock::sizeY; iy++)
-					for(int ix=0; ix<FluidBlock::sizeX; ix++)
-						tmp[Morton_3D_Encode_5bit(iz,iy,ix)] =  mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)];
-					memcpy(mysoabuffer, tmp, _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_*sizeof(Real));
+					APPLY_MORTON();
 #endif
 
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 					fpz_compress3D((void *)mysoabuffer, inbytes, layout, (void *) compressor.compressed_data(), (unsigned int *)&nbytes, (sizeof(Real)==4)?1:0);
 
 					//printf("fpz_compress3D: from %d to %d bytes\n", inbytes, nbytes);
+
+					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					mybytes += sizeof(nbytes);
+					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+
+#elif defined(_USE_DRAIN_)
+					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					int nbytes;
+#if defined(_USE_MORTON_)
+					APPLY_MORTON();
+#endif
+					int drain_level = (int)this->threshold;
+					char drain_level_value[16];
+					sprintf(drain_level_value, "%d", drain_level);
+					if(getenv("DRAIN_LEVEL") == NULL) setenv("DRAIN_LEVEL",drain_level_value, 1));
+					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+					nbytes = drain_3df_buffer((float * const)mysoabuffer, layout[0], layout[1], layout[2], (unsigned char *)compressor.compressed_data());
+#if VERBOSE
+					printf("draind_3db_buffer: from %d to %d bytes\n", inbytes, nbytes);
+#endif
+
+					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					mybytes += sizeof(nbytes);
+					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+
+#elif defined(_USE_ZFP_)
+					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					int nbytes;
+#if defined(_USE_MORTON_)
+					APPLY_MORTON();
+#endif
+//					double zfp_acc = 0.0;
+//					if(getenv("ZFP_ACC")) zfp_acc = atof(getenv("ZFP_ACC"));
+					double zfp_acc = this->threshold;
+					int is_float = 1;
+					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+					size_t nbytes_zfp;
+					int status = zfp_compress_buffer(mysoabuffer, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)compressor.compressed_data(), &nbytes_zfp);
+					nbytes = nbytes_zfp;
+#if VERBOSE
+					printf("zfp_compress status = %d, from %d to %d bytes = %d\n", status, inbytes, nbytes);
+#endif
+
+					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					mybytes += sizeof(nbytes);
+					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+
+#elif defined(_USE_SZ_)
+					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					int nbytes;
+#if defined(_USE_MORTON_)
+					APPLY_MORTON();
+#endif
+					double sz_abs_acc = 0.0;
+					double sz_rel_acc = 0.0;
+					if(getenv("SZ_ABS_ACC")) sz_abs_acc = atof(getenv("SZ_ABS_ACC"));
+					//SZ_ABS_ACC=$PARAM
+					sz_abs_acc = (double) this->threshold;
+
+					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+
+					int *bytes_sz = (int *)malloc(sizeof(int));
+					char *compressed_sz = SZ_compress_args(SZ_FLOAT, mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, 0, 0, layout[2], layout[1], layout[0]);
+					nbytes = *bytes_sz;
+					memcpy(compressor.compressed_data(), compressed_sz, nbytes);
+					free(bytes_sz);
+					free(compressed_sz);
+
+#if 1 //VERBOSE
+					printf("SZ_compress_args: from %d to %d bytes\n", inbytes, nbytes);
+#endif
+
+					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					mybytes += sizeof(nbytes);
+					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+
+#elif defined(_USE_ISABELLA_)
+					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					int nbytes;
+#if defined(_USE_MORTON_)
+					APPLY_MORTON();
+#endif
+
+					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+					nbytes = drain_3df_buffer((float * const)mysoabuffer, layout[0], layout[1], layout[2], (unsigned char *)compressor.compressed_data());
+#if VERBOSE
+					printf("draind_3db_buffer: from %d to %d bytes\n", inbytes, nbytes);
+#endif
 
 					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
@@ -525,6 +620,14 @@ protected:
 				ss << "Wavelets: " << WaveletsOnInterval::ChosenWavelets_GetName(this->wtype_write) << "\n";
 #elif defined(_USE_FPZIP_)
 				ss << "Wavelets: " << "fpzip" << "\n";
+#elif defined(_USE_DRAIN_)
+				ss << "Wavelets: " << "drain" << "\n";
+#elif defined(_USE_ZFP_)
+				ss << "Wavelets: " << "zfp" << "\n";
+#elif defined(_USE_SZ_)
+				ss << "Wavelets: " << "sz" << "\n";
+#elif defined(_USE_ISABELLA_)
+				ss << "Wavelets: " << "isabella" << "\n";
 #elif defined(_USE_SHUFFLE_)
 				ss << "Wavelets: " << "shuffle" << "\n";
 #else

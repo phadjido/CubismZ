@@ -281,8 +281,12 @@ public:
 		streamer.fill('0');
 		streamer<<step_id;
 
-		double threshold = parser("-threshold").asDouble(1e-5);
+#ifdef _USE_SZ_
+		SZ_Init((char *)"sz.config");
+		omp_set_num_threads(1);
+#endif
 
+		double threshold = parser("-threshold").asDouble(1e-5);
 		mywaveletdumper.verbose();
 		if (isroot) printf("setting threshold to %f\n", threshold);
 		mywaveletdumper.set_threshold(threshold);
