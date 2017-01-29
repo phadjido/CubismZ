@@ -1,6 +1,6 @@
 VERSION = 3.6
 
-prefix = /home/chatzidp/usr/lsf
+prefix = /usr/local
 exec_prefix = ${prefix}
 libdir = ${exec_prefix}/lib
 bindir = ${exec_prefix}/bin
