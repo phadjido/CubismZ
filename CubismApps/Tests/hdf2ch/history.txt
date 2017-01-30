@@ -241,3 +241,4 @@
  1389  cat g_fp16.txt 
  1390  ls -ltr
 
+ulimit -s 25600000

@@ -13,7 +13,7 @@
 #include "Reader_WaveletCompression.h"
 #include <ArgumentParser.h>
 #include <GridMPI.h>
-#define VERBOSE 0
+#define VERBOSE 1
 
 #ifdef _USE_HDF_
 #include <hdf5.h>
@@ -27,7 +27,6 @@
 
 
 typedef GridMPI < FluidGrid > G;
-
 
 class Test_IO_Compressed : public Simulation
 {
@@ -247,7 +246,7 @@ public:
 		_setup_mpi_constants(XPESIZE, YPESIZE, ZPESIZE);
 
 		if (!isroot)
-			VERBOSITY = 0;
+			VERBOSITY = 1;
 
 		if (VERBOSITY)
 		{

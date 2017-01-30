@@ -21,9 +21,9 @@ Simulation * sim = NULL;
 
 int main (int argc, char ** argv)
 {
-//	MPI_Init(&argc, &argv);
-	int provided; 
-	MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+	MPI_Init(&argc, &argv);
+//	int provided; 
+//	MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
 	
 	int myrank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
@@ -49,7 +49,7 @@ int main (int argc, char ** argv)
 	} 
  
 	sim->setup();
-	
+
 	sim->dispose();
 	
 	delete sim;
