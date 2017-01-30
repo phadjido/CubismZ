@@ -1,6 +1,6 @@
 /*
  *  main.cpp
- *  
+ *
  *
  *  Created by Panagiotis Chatzidoukas on 3/28/13.
  *  Copyright 2013 ETH Zurich. All rights reserved.
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	myreader2.load_file();
 	const double init_t1 = omp_get_wtime();
 
-	const double t0 = omp_get_wtime(); 
+	const double t0 = omp_get_wtime();
 
 	int dim[3], period[3], reorder;
 	int coord[3], id;
@@ -94,23 +94,23 @@ int main(int argc, char **argv)
 	int NBY2 = myreader2.yblocks();
 	int NBZ2 = myreader2.zblocks();
 	fprintf(stdout, "[2] I found in total %dx%dx%d blocks.\n", NBX2, NBY2, NBZ2);
-	
+
 	if ((NBX1 != NBX2) || (NBZ1 != NBZ2) ||(NBZ1 != NBZ2)) {
 		printf("Dimensions differ, exiting..\n");
 		exit(1);
 	}
-	
+
 	static Real targetdata1[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
 	static Real targetdata2[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
 
 	const int nblocks = NBX1*NBY1*NBZ1;
-	const int b_end = ((nblocks + (mpi_size - 1))/ mpi_size) * mpi_size; 
+	const int b_end = ((nblocks + (mpi_size - 1))/ mpi_size) * mpi_size;
 
 	long n = 0;
 	double e_inf = 0;
 	double e_1 = 0;
 	double e_2 = 0;
-	
+
 	double n_inf = 0;
 	double n_1 = 0;
 	double n_2 = 0;
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 	double maxdata = -DBL_MAX;
 	double mindata =  DBL_MAX;
 
-	for (int b = mpi_rank; b < b_end; b += mpi_size)	
+	for (int b = mpi_rank; b < b_end; b += mpi_size)
 	{
 		int z = b / (NBY1 * NBX1);
 		int y = (b / NBX1) % NBY1;
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 		if (b < nblocks)
 		{
 #if defined(VERBOSE)
-			fprintf(stdout, "loading block( %d, %d, %d )...\n", x, y, z); 
+			fprintf(stdout, "loading block( %d, %d, %d )...\n", x, y, z);
 #endif
 			double zratio1 = myreader1.load_block2(x, y, z, targetdata1);
 			double zratio2 = myreader2.load_block2(x, y, z, targetdata2);
@@ -182,24 +182,24 @@ int main(int argc, char **argv)
 //						if ((rel_err >= threshold)&&(err >= 0.001)) //&&(v > 0.001))
 						{
 							over_counter++;
-							//printf("%5d: %15.8f %15.8f (%15.8f)\n", over_counter, f1, f2, err); 
-							//printf("%5d: %15.8f %15.8f (%15.8f)\n", over_counter, f1, f2, rel_err); 
+							//printf("%5d: %15.8f %15.8f (%15.8f)\n", over_counter, f1, f2, err);
+							//printf("%5d: %15.8f %15.8f (%15.8f)\n", over_counter, f1, f2, rel_err);
 
 #if 0
 							printf("%5d: %15.8f %15.8f (%15.8f - %10.2f%%) [%4d,%4d,%4d]:(%2d,%2d,%2d)\n",
-									over_counter, f1, f2, err, rel_err, x, y, z, xb, yb, zb); 
+									over_counter, f1, f2, err, rel_err, x, y, z, xb, yb, zb);
 #endif
 						}
 #endif
 					}
-	
+
 		}
 		else {
 		}
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	const double t1 = omp_get_wtime(); 
+	const double t1 = omp_get_wtime();
 
 	if (!mpi_rank)
 	{
@@ -232,24 +232,24 @@ int main(int argc, char **argv)
 		MPI_Reduce(&n, &n,     			1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 		MPI_Reduce(&over_counter, &over_counter,1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 	}
-	
+
 
 	if (!mpi_rank)
 	{
 		printf("=========================\n");
-		printf("e_inf      = %.3e\n", e_inf);
-		printf("n_inf      = %.3e\n", n_inf);
-		printf("rel(e_inf) = %.3e\n", e_inf/n_inf);
+		printf("e_inf      = %e\n", e_inf);
+		printf("n_inf      = %e\n", n_inf);
+		printf("rel(e_inf) = %e\n", e_inf/n_inf);
 		printf("\n");
 
-		printf("e_1        = %.3e\n", e_1);
-		printf("rel(e_1)   = %.3e\n", e_1/n_1);
-		printf("mean(e_1)  = %.3e\n", e_1/n);
+		printf("e_1        = %e\n", e_1);
+		printf("rel(e_1)   = %e\n", e_1/n_1);
+		printf("mean(e_1)  = %e\n", e_1/n);
 		printf("\n");
 
-		printf("e_2        = %.3e\n", sqrt(e_2));
-		printf("rel(e_2)   = %.3e\n", sqrt(e_2)/sqrt(n_2));
-		printf("mean(e_2)  = %.3e\n", sqrt(e_2)/n);
+		printf("e_2        = %e\n", sqrt(e_2));
+		printf("rel(e_2)   = %e\n", sqrt(e_2)/sqrt(n_2));
+		printf("mean(e_2)  = %e\n", sqrt(e_2)/n);
 		printf("\n");
 
 		printf("n          = %ld\n", n);
@@ -298,7 +298,7 @@ int main(int argc, char **argv)
 		printf("PSNR-vs-BITRATE: %.04f bps %.04f dB\n", compressed_footprint * 8. / nall, psnr);
 
 	}
-	
+
 	/* Close/release resources */
 	MPI_Finalize();
 
