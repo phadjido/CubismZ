@@ -66,8 +66,8 @@ extern "C"
 }
 #endif
 
-#if defined(_USE_ISABELLA_)
-#include "myisabella.h"
+#if defined(_USE_ISA_)
+#include "myisa.h"
 #endif
 
 inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len, unsigned *max);

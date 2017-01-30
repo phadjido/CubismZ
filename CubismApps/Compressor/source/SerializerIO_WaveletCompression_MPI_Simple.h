@@ -358,17 +358,18 @@ protected:
 					mybytes += sizeof(nbytes);
 					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
 
-#elif defined(_USE_ISABELLA_)
+#elif defined(_USE_ISA_)
 					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
 					int nbytes;
 #if defined(_USE_MORTON_)
 					APPLY_MORTON();
 #endif
-
+					double isa_rate = (double) this->threshold;
+					int is_float = 1;
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
-					nbytes = drain_3df_buffer((float * const)mysoabuffer, layout[0], layout[1], layout[2], (unsigned char *)compressor.compressed_data());
+					int status = isa_compress_buffer((char *)mysoabuffer, layout[0], layout[1], layout[2], isa_rate, is_float, (char *)compressor.compressed_data(), &nbytes);
 #if VERBOSE
-					printf("draind_3db_buffer: from %d to %d bytes\n", inbytes, nbytes);
+					printf("isa_compressed_buffer: from %d to %d bytes\n", inbytes, nbytes);
 #endif
 
 					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
@@ -626,8 +627,8 @@ protected:
 				ss << "Wavelets: " << "zfp" << "\n";
 #elif defined(_USE_SZ_)
 				ss << "Wavelets: " << "sz" << "\n";
-#elif defined(_USE_ISABELLA_)
-				ss << "Wavelets: " << "isabella" << "\n";
+#elif defined(_USE_ISA_)
+				ss << "Wavelets: " << "isa" << "\n";
 #elif defined(_USE_SHUFFLE_)
 				ss << "Wavelets: " << "shuffle" << "\n";
 #else

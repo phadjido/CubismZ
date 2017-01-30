@@ -309,10 +309,10 @@ public:
 				MYASSERT(buf == string("sz"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
 						" and i have " << "sz"  << "\n");
-#elif defined(_USE_ISABELLA_)
-				MYASSERT(buf == string("isabella"),
+#elif defined(_USE_ISA_)
+				MYASSERT(buf == string("isa"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
-						" and i have " << "isabella"  << "\n");
+						" and i have " << "isa"  << "\n");
 #elif defined(_USE_SHUFFLE_)
 				MYASSERT(buf == string("shuffle"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
@@ -701,13 +701,16 @@ public:
 				abort();
 			}
 
-#elif defined(_USE_ISABELLA_)
+#elif defined(_USE_ISA_)
+			double isa_rate = (double) this->threshold;
+			int is_float = 1;
 			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
-			int drain_decompressedbytes;
-			drain_decompressedbytes = pour_3df_buffer((unsigned char *) compressor.compressed_data(), layout[0], layout[1], layout[2], (float *) MYBLOCK);
-			if ((drain_decompressedbytes < 0)||(drain_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			int isa_decompressedbytes;
+			int status2 = isa_decompress_buffer((char *)MYBLOCK, layout[0], layout[1], layout[2], isa_rate, is_float, (char *)compressor.compressed_data(), nbytes, &isa_decompressedbytes);
+
+			if ((isa_decompressedbytes < 0)||(isa_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
-				printf("DRAIN DECOMPRESSION FAILURE:  %d!!\n", drain_decompressedbytes);
+				printf("ISA DECOMPRESSION FAILURE:  %d!!\n", isa_decompressedbytes);
 				abort();
 			}
 
