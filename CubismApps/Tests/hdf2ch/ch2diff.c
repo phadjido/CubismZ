@@ -297,6 +297,20 @@ int main(int argc, char **argv)
 
 		printf("PSNR-vs-BITRATE: %.04f bps %.04f dB\n", compressed_footprint * 8. / nall, psnr);
 
+		printf("     CR - rel(e_inf) - rel(e_1) - mean(e_1) - rel(e_2) - mean(e_2) BPS PSNR\n"); 
+
+		printf("RE : %12s %12s %12s %12s %12s %12s %12s %12s\n", "CR", "rel(e_inf)", "rel(e_1)", "mean(e_1)", "rel(e_2)", "mean(e_2)", "BPS", "PSNR"); 
+
+
+		printf("RES: %12.2f %.6e %.6e %.6e %.6e %.6e %12.04f %12.04f\n", 
+			uncompressed_footprint / compressed_footprint,	// compression-rate
+			e_inf/n_inf,					// rel(e_inf)
+			e_1/n_1,					// rel(e_1)
+			e_1/n,						// mean(e_1)
+			sqrt(e_2)/sqrt(n_2),				// rel(e_2)
+			sqrt(e_2)/n,					// mean(e_2)
+			compressed_footprint * 8. / nall,		// BITRATE (bits per element)
+			psnr);						// PSNR
 	}
 
 	/* Close/release resources */

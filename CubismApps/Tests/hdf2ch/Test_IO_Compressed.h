@@ -13,7 +13,7 @@
 #include "Reader_WaveletCompression.h"
 #include <ArgumentParser.h>
 #include <GridMPI.h>
-#define VERBOSE 1
+#define VERBOSE 0
 
 #ifdef _USE_HDF_
 #include <hdf5.h>
@@ -290,9 +290,14 @@ public:
 		if (isroot) printf("setting threshold to %f\n", threshold);
 		mywaveletdumper.set_threshold(threshold);
 		mywaveletdumper.set_wtype_write(wtype_write);
+
+		MPI_Barrier(MPI_COMM_WORLD);
+		double t0 = omp_get_wtime();
 		mywaveletdumper.Write<0>(grid, streamer.str());
+		double t1 = omp_get_wtime();
 
 		if (isroot) cout << "done" << endl;
+		if (isroot) cout << "elapsed time: " << t1-t0 << " s" << endl;
 	}
 
 	void dispose()

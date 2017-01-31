@@ -1,12 +1,22 @@
-# Compile
-make clean;make CC=mpic++ wavz=0 drain=1 zlib=0 
+bs=32
+ds=512
+nb=$(echo "$ds/$bs" | bc)
 
-# Get HDF5 file from another Test 
-cp ../init/makefiles/out1.h5 .
+make clean
 
-# Compress HDF5
-./hdf2ch -sim io -simdata out1.h5 -outdata out1toh5
+#make all wavz=1 zlib=1
+#make all wavz=1 lzma=1
+make all wavz=1 lzma=1 shuffle=1
+#make all wavz=1 lzma=1 shuffle=1 zerobits=8
+#make all fpzip=1
+#make all zfp=1
+#make all sz=1
+#make all isa=1
 
-# Convert back to HDF5 (decompress)
-../../tools/ch2hdf/ch2hdf -simdata out1toh500000.StreamerGridPointIterative.channel0 -h5file out1back
+
+rm tmp00000.StreamerGridPointIterative.channel0
+
+./hdf2ch -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata data-301-g.h5  -outdata tmp  -threshold 0.008 -wtype_write 3
+
+mpirun -n 8 ./ch2diff -simdata1 tmp00000.StreamerGridPointIterative.channel0  -simdata2 ref.channel0 -wtype 3
 
