@@ -158,7 +158,7 @@ protected:
 #endif
 
 #if VERBOSE
-		cout << "vInfo size: " << vInfo.size() << endl;
+		std::cout << "vInfo size: " << vInfo.size() << endl;
 #endif
 
 		//#pragma omp parallel for
@@ -266,7 +266,7 @@ public:
 
 	void vp(G& grid, const int step_id)
 	{
-		if (isroot) cout << "dumping MPI VP ...\n" ;
+		if (isroot) std::cout << "dumping MPI VP ...\n" ;
 
 		const string path = parser("-fpath").asString(".");
 		const int wtype_write = parser("-wtype_write").asInt(1);
@@ -296,8 +296,8 @@ public:
 		mywaveletdumper.Write<0>(grid, streamer.str());
 		double t1 = omp_get_wtime();
 
-		if (isroot) cout << "done" << endl;
-		if (isroot) cout << "elapsed time: " << t1-t0 << " s" << endl;
+		if (isroot) std::cout << "done" << endl;
+		if (isroot) std::cout << "elapsed time: " << t1-t0 << " s" << endl;
 	}
 
 	void dispose()

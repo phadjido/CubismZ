@@ -88,12 +88,12 @@ int main(int argc, char **argv)
 	int NBX1 = myreader1.xblocks();
 	int NBY1 = myreader1.yblocks();
 	int NBZ1 = myreader1.zblocks();
-	fprintf(stdout, "[1] I found in total %dx%dx%d blocks.\n", NBX1, NBY1, NBZ1);
+	if (isroot) fprintf(stdout, "[A] I found in total %dx%dx%d blocks.\n", NBX1, NBY1, NBZ1);
 
 	int NBX2 = myreader2.xblocks();
 	int NBY2 = myreader2.yblocks();
 	int NBZ2 = myreader2.zblocks();
-	fprintf(stdout, "[2] I found in total %dx%dx%d blocks.\n", NBX2, NBY2, NBZ2);
+	if (isroot) fprintf(stdout, "[B] I found in total %dx%dx%d blocks.\n", NBX2, NBY2, NBZ2);
 
 	if ((NBX1 != NBX2) || (NBZ1 != NBZ2) ||(NBZ1 != NBZ2)) {
 		printf("Dimensions differ, exiting..\n");

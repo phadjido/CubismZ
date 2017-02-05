@@ -655,9 +655,10 @@ public:
 			}
 
 #elif defined(_USE_FPZIP_)
+			int fpzip_prec = (int) this->threshold;
 			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 			int fpz_decompressedbytes;
-			fpz_decompress3D((char *)compressor.compressed_data(), nbytes, layout, (char *) MYBLOCK, (unsigned int *)&fpz_decompressedbytes, (sizeof(Real)==4)?1:0);
+			fpz_decompress3D((char *)compressor.compressed_data(), nbytes, layout, (char *) MYBLOCK, (unsigned int *)&fpz_decompressedbytes, (sizeof(Real)==4)?1:0, fpzip_prec);
 			if ((fpz_decompressedbytes < 0)||(fpz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
 				printf("FPZ DECOMPRESSION FAILURE:  %d!!\n", fpz_decompressedbytes);
@@ -693,7 +694,8 @@ public:
 			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 			int sz_decompressedbytes;
 
-			sz_decompressedbytes = SZ_decompress_args(SZ_FLOAT, (char *)compressor.compressed_data(), nbytes, MYBLOCK, 0, 0, layout[2], layout[1], layout[0]);
+			//int SZ_decompress_args(int dataType, unsigned char *bytes, int byteLength, void* decompressed_array, int r5, int r4, int r3, int r2, int r1);
+			sz_decompressedbytes = SZ_decompress_args(SZ_FLOAT, (unsigned char *)compressor.compressed_data(), nbytes, MYBLOCK, 0, 0, layout[2], layout[1], layout[0]);
 			sz_decompressedbytes *= sizeof(Real);
 			if ((sz_decompressedbytes < 0)||(sz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{

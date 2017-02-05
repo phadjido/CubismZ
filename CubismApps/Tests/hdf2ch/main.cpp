@@ -10,12 +10,11 @@
 #include <iomanip>
 #include <iostream>
 #include <mpi.h>
-
+using namespace std;
 #include "Test_IO_Compressed.h"
 //#include "Test_Statistics.h"
 #include "ArgumentParser.h"
 
-using namespace std;
 
 Simulation * sim = NULL;
 

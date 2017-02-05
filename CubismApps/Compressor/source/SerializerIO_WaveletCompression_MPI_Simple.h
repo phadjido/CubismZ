@@ -279,7 +279,8 @@ protected:
 #endif
 
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
-					fpz_compress3D((void *)mysoabuffer, inbytes, layout, (void *) compressor.compressed_data(), (unsigned int *)&nbytes, (sizeof(Real)==4)?1:0);
+					int fpzip_prec = (int)this->threshold;
+					fpz_compress3D((void *)mysoabuffer, inbytes, layout, (void *) compressor.compressed_data(), (unsigned int *)&nbytes, (sizeof(Real)==4)?1:0, fpzip_prec);
 
 					//printf("fpz_compress3D: from %d to %d bytes\n", inbytes, nbytes);
 
@@ -344,13 +345,13 @@ protected:
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 
 					int *bytes_sz = (int *)malloc(sizeof(int));
-					char *compressed_sz = SZ_compress_args(SZ_FLOAT, mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, 0, 0, layout[2], layout[1], layout[0]);
+					unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, 0, 0, layout[2], layout[1], layout[0]);
 					nbytes = *bytes_sz;
 					memcpy(compressor.compressed_data(), compressed_sz, nbytes);
 					free(bytes_sz);
 					free(compressed_sz);
 
-#if 1 //VERBOSE
+#if VERBOSE
 					printf("SZ_compress_args: from %d to %d bytes\n", inbytes, nbytes);
 #endif
 
