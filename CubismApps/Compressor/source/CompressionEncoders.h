@@ -293,17 +293,29 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 #elif defined(_USE_LZ4_)||defined(_USE_LZF_)||defined(_USE_LZMA_)||defined(_USE_ZOPFLI_)||defined(_USE_FPC2_)||defined(_USE_FPZIP2_)||defined(_USE_ZSTD0_)
 
 	#define ZBUFSIZE (4*1024*1024)	/* fix this */
-	static char bufzlib[ZBUFSIZE];	/* and this per thread (threadprivate or better a small cyclic array of buffers ) */
+
+//	static char bufzlib[ZBUFSIZE];	/* and this per thread (threadprivate or better a small cyclic array of buffers ) */
+	#define MAXBUFFERS	12	/* todo */
+	static char bufzlibA[MAXBUFFERS][ZBUFSIZE];	/* and this per thread (threadprivate or better a small cyclic array of buffers ) */
+
+	if (omp_get_num_threads() > MAXBUFFERS) {
+		printf("small number of buffers (%d)\n", MAXBUFFERS);
+		abort();
+	}
 
 	if (ZBUFSIZE < *max) {
 		printf("small ZBUFSIZE\n");
 		abort();
 	}
 
+	char *bufzlib = (char *)&bufzlibA[omp_get_thread_num()][0];
+
 	int ninputbytes = len;
 	int compressedbytes;
 
+#if (MAXBUFFERS == 1)
 #pragma omp critical
+#endif
 	{
 #if defined(_USE_LZ4_)
 		compressedbytes = LZ4_compress((char*) buf, (char *) bufzlib, ninputbytes);
