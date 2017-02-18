@@ -17,7 +17,12 @@
 
 #include "FullWaveletTransform.h"
 
-#include <zlib.h>
+#if defined(_USE_ZSTD_)
+#include "zstd_zlibwrapper.h"
+#else
+#include <zlib.h>	// always needed
+#endif
+
 #if defined(_USE_LZ4_)
 #include <lz4.h>
 #endif
@@ -106,7 +111,7 @@ public:
 
 		const size_t ninputbytes = WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(threshold, float16, wtype);
 
-#if defined(_USE_ZLIB_)
+#if defined(_USE_ZLIB_) || defined(_USE_ZSTD_)
 		z_stream datastream = { 0 };
 		datastream.total_in = datastream.total_out = 0;
 		datastream.avail_in = ninputbytes;
@@ -142,7 +147,7 @@ public:
 
 		const size_t ninputbytes = WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(threshold, float16, swap, wtype);
 
-#if defined(_USE_ZLIB_)
+#if defined(_USE_ZLIB_) || defined(_USE_ZSTD_)
 		z_stream datastream = { 0 };
 		datastream.total_in = datastream.total_out = 0;
 		datastream.avail_in = ninputbytes;
@@ -176,7 +181,7 @@ public:
 	{
 		int decompressedbytes = 0;
 
-#if defined(_USE_ZLIB_)
+#if defined(_USE_ZLIB_) || defined(_USE_ZSTD_)
 		z_stream datastream = { 0 };
 		datastream.total_in = datastream.total_out = 0;
 		datastream.avail_in = ninputbytes;

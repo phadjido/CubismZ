@@ -19,7 +19,10 @@ nb=$(echo "$ds/$bs" | bc)
 
 make clean
 
-if [ $method -eq 1 ]
+if [ $method -eq 0 ]
+then
+	make all wavz=1 zlib=1 shuffle3=1
+elif [ $method -eq 1 ]
 then
 	make all wavz=1 zlib=1
 elif [ $method -eq 2 ]
@@ -56,6 +59,15 @@ then
 elif [ $method -eq 12 ]
 then
 	make all isa=1
+elif [ $method -eq 13 ]
+then
+	make all wavz=1 lzma=1
+elif [ $method -eq 14 ]
+then
+	make all wavz=1 zstd=1 shuffle3=1
+elif [ $method -eq 15 ]
+then
+	make all wavz=1 zstd0=1 shuffle3=1
 else
 	echo "no valid option"
 fi

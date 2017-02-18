@@ -518,8 +518,8 @@ public:
 
 		assert(!feof(f));
 
-		vector<unsigned char> waveletbuf(2 << 21);	// 21: 4MB, 22: 8MB, 28: 512MB
-		//vector<unsigned char> waveletbuf(536870912);
+		//static vector<unsigned char> waveletbuf(2 << 21);	// 21: 4MB, 22: 8MB, 28: 512MB
+		static vector<unsigned char> waveletbuf(2 << 28);	// 21: 4MB, 22: 8MB, 28: 512MB
 		const size_t decompressedbytes = zdecompress0(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 
 		int readbytes = 0;
@@ -586,8 +586,8 @@ public:
 		assert(!feof(f));
 
 		size_t zz_bytes = compressedbuf.size();
-		vector<unsigned char> waveletbuf(2 << 21);	// 21: 4MB, 22: 8MB, 28: 512MB
-		//vector<unsigned char> waveletbuf(536870912);
+		//static vector<unsigned char> waveletbuf(2 << 21);	// 21: 4MB, 22: 8MB, 28: 512MB
+		static vector<unsigned char> waveletbuf(2 << 28);
 		const size_t decompressedbytes = zdecompress0(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)

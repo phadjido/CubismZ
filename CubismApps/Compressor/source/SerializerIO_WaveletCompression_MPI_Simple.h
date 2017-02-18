@@ -642,6 +642,10 @@ protected:
                                 ss << "Encoder: " << "lz4" << "\n";
 #elif defined(_USE_LZMA_)
                                 ss << "Encoder: " << "lzma" << "\n";
+#elif defined(_USE_ZSTD_)
+                                ss << "Encoder: " << "zstd" << "\n";
+#elif defined(_USE_ZSTD0_)
+                                ss << "Encoder: " << "zstd0" << "\n";
 #else
                                 ss << "Encoder: " << "none" << "\n";
 #endif

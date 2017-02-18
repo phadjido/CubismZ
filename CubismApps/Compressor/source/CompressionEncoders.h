@@ -9,7 +9,11 @@
 
 #pragma once
 
+#if defined(_USE_ZSTD_)
+#include "zstd_zlibwrapper.h"
+#else
 #include <zlib.h>	// always needed
+#endif
 
 #if defined(_USE_LZ4_)
 #include <lz4.h>
@@ -26,6 +30,13 @@ extern "C"
 extern "C"
 {
 #include "mylzma.h"
+}
+#endif
+
+#if defined(_USE_ZSTD0_)
+extern "C"
+{
+#include "zstd.h"
 }
 #endif
 
@@ -81,7 +92,7 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 #endif
 
 	int decompressedbytes = 0;
-#if defined(_USE_ZLIB_)
+#if defined(_USE_ZLIB_) || defined(_USE_ZSTD_)
 	z_stream datastream = {0};
 	datastream.total_in = datastream.avail_in = ninputbytes;
 	datastream.total_out = datastream.avail_out = maxsize;
@@ -134,6 +145,22 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 		abort();
 	}
 #endif
+#elif defined(_USE_ZSTD0_)
+	{
+	ZSTD_DStream* const dstream = ZSTD_createDStream();
+	if (dstream==NULL) { fprintf(stderr, "ZSTD_createDStream() error \n"); exit(10); }
+	size_t const initResult = ZSTD_initDStream(dstream);
+	if (ZSTD_isError(initResult)) { fprintf(stderr, "ZSTD_initDStream() error : %s \n", ZSTD_getErrorName(initResult)); exit(11); }
+
+	ZSTD_inBuffer input = { inputbuf, ninputbytes, 0};
+	ZSTD_outBuffer output = { outputbuf, maxsize, 0};
+	size_t toRead = ZSTD_decompressStream(dstream, &output, &input);  /* toRead : size of next compressed block */
+	if (ZSTD_isError(toRead)) { fprintf(stderr, "ZSTD_decompressStream() error : %s \n", ZSTD_getErrorName(toRead)); exit(12); }
+	decompressedbytes = output.pos;
+
+	ZSTD_freeDStream(dstream);
+	//printf("zstd0: %ld -> %ld  (%.2lfx)\n", ninputbytes, decompressedbytes, (1.0*decompressedbytes)/ninputbytes);
+	}
 #elif defined(_USE_ZOPFLI_)
 	decompressedbytes = zopfli_decompress((const void *) inputbuf, ninputbytes, (void *) outputbuf, maxsize);
 	if (decompressedbytes < 0)
@@ -188,7 +215,7 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 						   unsigned *max)
 {
-#if defined(_USE_ZLIB_)
+#if defined(_USE_ZLIB_)||defined(_USE_ZSTD_)
     int ret;                    /* return code from deflate functions */
     unsigned have;              /* number of bytes in temp[] */
     unsigned char *hold;        /* allocated buffer to hold input data */
@@ -263,7 +290,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
     *max = strm->next_out - buf;
     return ret == Z_OK ? Z_BUF_ERROR : (ret == Z_STREAM_END ? Z_OK : ret);
 
-#elif defined(_USE_LZ4_)||defined(_USE_LZF_)||defined(_USE_LZMA_)||defined(_USE_ZOPFLI_)||defined(_USE_FPC2_)||defined(_USE_FPZIP2_)
+#elif defined(_USE_LZ4_)||defined(_USE_LZF_)||defined(_USE_LZMA_)||defined(_USE_ZOPFLI_)||defined(_USE_FPC2_)||defined(_USE_FPZIP2_)||defined(_USE_ZSTD0_)
 
 	#define ZBUFSIZE (4*1024*1024)	/* fix this */
 	static char bufzlib[ZBUFSIZE];	/* and this per thread (threadprivate or better a small cyclic array of buffers ) */
@@ -297,6 +324,27 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 #else
 		compressedbytes = lzma_compress((unsigned char *) buf, ninputbytes, (unsigned char *)bufzlib, ZBUFSIZE);
 #endif
+#elif defined(_USE_ZSTD0_)
+		{
+		int cLevel = 1;
+		ZSTD_CStream* const cstream = ZSTD_createCStream();
+		size_t const initResult = ZSTD_initCStream(cstream, cLevel);
+
+		ZSTD_inBuffer input = { buf, ninputbytes, 0 };
+		ZSTD_outBuffer output = { bufzlib, ZBUFSIZE, 0 };
+		size_t toRead = ZSTD_compressStream(cstream, &output, &input);
+		if (ZSTD_isError(toRead)) { fprintf(stderr, "ZSTD_compressStream() error : %s \n", ZSTD_getErrorName(toRead)); exit(12); }
+
+		//ZSTD_outBuffer output = { buffOut, buffOutSize, 0 };
+		size_t const remainingToFlush = ZSTD_endStream(cstream, &output);   /* close frame */
+		if (remainingToFlush) { fprintf(stderr, "not fully flushed"); exit(13); }
+
+		compressedbytes = output.pos;
+		ZSTD_freeCStream(cstream);
+
+		//printf("zstd0: %ld -> %ld  (%.2lfx)\n", ninputbytes, compressedbytes, (1.0*ninputbytes)/compressedbytes);
+
+		}
 #elif defined(_USE_ZOPFLI_)
 		compressedbytes = zopfli_compress((const unsigned char *) buf, ninputbytes, (unsigned char *) bufzlib);
 #elif defined(_USE_FPC2_)

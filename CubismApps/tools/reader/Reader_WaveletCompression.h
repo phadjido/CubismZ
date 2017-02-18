@@ -342,6 +342,14 @@ public:
 				MYASSERT(buf == string("lzma"),
 						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
 						 " and i have lzma.\n");
+#elif defined(_USE_ZSTD_)
+				MYASSERT(buf == string("zstd"),
+						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
+						 " and i have zstd.\n");
+#elif defined(_USE_ZSTD0_)
+				MYASSERT(buf == string("zstd0"),
+						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
+						 " and i have zstd0.\n");
 #else
 				MYASSERT(buf == string("none"),
 						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
@@ -532,7 +540,8 @@ public:
 
 		assert(!feof(f));
 
-		vector<unsigned char> waveletbuf(4 << 20);
+		//static vector<unsigned char> waveletbuf(2 << 21); // 21: 4MB, 22: 8MB, 28: 512MB
+		static vector<unsigned char> waveletbuf(2 << 28);
 		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 
 		int readbytes = 0;
@@ -599,7 +608,8 @@ public:
 		assert(!feof(f));
 
 		size_t zz_bytes = compressedbuf.size();
-		vector<unsigned char> waveletbuf(4 << 21);
+		//static vector<unsigned char> waveletbuf(2 << 21); // 21: 4MB, 22: 8MB, 28: 512MB
+		static vector<unsigned char> waveletbuf(2 << 28);
 		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)
