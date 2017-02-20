@@ -646,6 +646,8 @@ protected:
                                 ss << "Encoder: " << "zstd" << "\n";
 #elif defined(_USE_ZSTD0_)
                                 ss << "Encoder: " << "zstd0" << "\n";
+#elif defined(_USE_BLOSC_)
+                                ss << "Encoder: " << "blosc" << "\n";
 #else
                                 ss << "Encoder: " << "none" << "\n";
 #endif

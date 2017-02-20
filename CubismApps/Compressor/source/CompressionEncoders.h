@@ -40,6 +40,10 @@ extern "C"
 }
 #endif
 
+#if defined(_USE_BLOSC_)
+#include "blosc.h"
+#endif
+
 #if defined(_USE_ZOPFLI_)
 extern "C"
 {
@@ -161,6 +165,13 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 	ZSTD_freeDStream(dstream);
 	//printf("zstd0: %ld -> %ld  (%.2lfx)\n", ninputbytes, decompressedbytes, (1.0*decompressedbytes)/ninputbytes);
 	}
+#elif defined(_USE_BLOSC_)
+	/* Decompress  */
+	size_t dsize = blosc_decompress(inputbuf, outputbuf, maxsize);
+	if (dsize < 0) {
+		printf("Decompression error.  Error code: %d\n", dsize);
+	}
+	decompressedbytes = dsize;
 #elif defined(_USE_ZOPFLI_)
 	decompressedbytes = zopfli_decompress((const void *) inputbuf, ninputbytes, (void *) outputbuf, maxsize);
 	if (decompressedbytes < 0)
@@ -290,7 +301,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
     *max = strm->next_out - buf;
     return ret == Z_OK ? Z_BUF_ERROR : (ret == Z_STREAM_END ? Z_OK : ret);
 
-#elif defined(_USE_LZ4_)||defined(_USE_LZF_)||defined(_USE_LZMA_)||defined(_USE_ZOPFLI_)||defined(_USE_FPC2_)||defined(_USE_FPZIP2_)||defined(_USE_ZSTD0_)
+#elif defined(_USE_LZ4_)||defined(_USE_LZF_)||defined(_USE_LZMA_)||defined(_USE_ZOPFLI_)||defined(_USE_FPC2_)||defined(_USE_FPZIP2_)||defined(_USE_ZSTD0_)||defined(_USE_BLOSC_)
 
 	#define ZBUFSIZE (4*1024*1024)	/* fix this */
 
@@ -356,6 +367,20 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 
 		//printf("zstd0: %ld -> %ld  (%.2lfx)\n", ninputbytes, compressedbytes, (1.0*ninputbytes)/compressedbytes);
 
+		}
+#elif defined(_USE_BLOSC_)
+		{
+		int clevel = 5;
+		int doshuffle = 1;
+		int typesize = sizeof(Real);
+
+		/* Compress with clevel=5 and shuffle active  */
+		size_t csize = blosc_compress(clevel, doshuffle, typesize, ninputbytes, buf, bufzlib, ZBUFSIZE);
+		if (csize < 0) {
+			printf("Compression error.  Error code: %d\n", csize);
+		}
+		compressedbytes = csize;
+		//printf("blosc: %ld -> %ld\n", ninputbytes, compressbytes);
 		}
 #elif defined(_USE_ZOPFLI_)
 		compressedbytes = zopfli_compress((const unsigned char *) buf, ninputbytes, (unsigned char *) bufzlib);

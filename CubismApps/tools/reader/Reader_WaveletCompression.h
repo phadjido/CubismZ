@@ -350,6 +350,10 @@ public:
 				MYASSERT(buf == string("zstd0"),
 						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
 						 " and i have zstd0.\n");
+#elif defined(_USE_BLOSC_)
+				MYASSERT(buf == string("blosc"),
+						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
+						 " and i have blosc.\n");
 #else
 				MYASSERT(buf == string("none"),
 						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
