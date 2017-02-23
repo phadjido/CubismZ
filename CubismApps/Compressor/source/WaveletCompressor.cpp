@@ -24,9 +24,15 @@ using namespace std;
 //#define _USE_FLOAT16_	// peh: put it as an option in Makefile.config
 
 
+#if defined(_USE_SPDP3_)
+#include "myspdp.h"
+//static size_t spdp_compress_data( const char* buffIn, size_t buffInSize, char* buffOut, size_t buffOutSize )
+//static size_t spdp_uncompress_data( const char* buffIn, size_t buffInSize, char* buffOut, size_t buffOutSize)
+#endif
 
-
-
+#if defined(_USE_FPZIP3_)
+#include "myfpzip.h"
+#endif
 
 void swapbytes(unsigned char *mem, int nbytes)
 {
@@ -41,7 +47,10 @@ void swapbytes(unsigned char *mem, int nbytes)
 void float_zero_bits3(unsigned int *ul, int n)
 {
         unsigned int _ul = *ul;
+        unsigned long mask = ~((1 << n) - 1);
+        _ul = _ul & mask;
 
+#if 0
         if (n == 0)
                 _ul = _ul;
         else if (n == 4)
@@ -52,8 +61,20 @@ void float_zero_bits3(unsigned int *ul, int n)
                 _ul = _ul & 0xfffff000;
         else if (n == 16)
                 _ul = _ul & 0xffff0000;
+#endif
 
         *ul = _ul;
+
+
+}
+
+float float_zero_bits3b(float x, int bits)
+{
+        union { int ix; float fx; } v;
+        v.fx = x;
+        v.ix &= ~((1 << bits) - 1);
+
+        return v.fx;
 }
 #endif
 
@@ -213,8 +234,30 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 #endif
 
 	serialize_bitset<BS3>(mask, bufcompression, BITSETSIZE);
-	
-#if defined(_USE_SHUFFLE3_)||defined(_USE_ZEROBITS_)
+
+#if defined(_USE_SPDP3_)||defined(_USE_FPZIP3_)
+	{
+	int survbytes = sizeof(DataType)*survivors;
+	int outbytes;
+	int bufsize = 4*1024*1024*sizeof(char);
+	//int bufsize = survbytes + 1024;
+        char *tmp = (char *)malloc(bufsize);
+
+#if defined(_USE_SPDP3_)
+	outbytes = spdp_compress_data((char *)(bufcompression + BITSETSIZE), survbytes, tmp, bufsize);
+	printf("spdp : %d -> %d\n", survbytes, outbytes);
+#elif defined(_USE_FPZIP3_)
+	int layout[4] = {1, 1, survivors, 1};
+	fpz_compress3D((char *) (bufcompression + BITSETSIZE), survbytes, layout, tmp, (unsigned int *)&outbytes, 1, 8*sizeof(Real));
+	printf("fpz : %d -> %d\n", survbytes, outbytes);
+#endif
+	memcpy((char *) (bufcompression + BITSETSIZE), tmp, outbytes);
+	free(tmp);
+
+	return BITSETSIZE + outbytes;
+	}
+
+#elif defined(_USE_SHUFFLE3_)||defined(_USE_ZEROBITS_)
 
  #if !defined(_USE_FLOAT16_)	// ZEROBITS and/or SHUFFLE
 
@@ -351,7 +394,30 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 	bitset<BS3> mask;
 	const int expected = deserialize_bitset<BS3>(mask, bufcompression, BITSETSIZE);
 
-#if defined(_USE_SHUFFLE3_)
+#if defined(_USE_FPC3_)||defined(_USE_FPZIP3_)
+        {
+        int outb;
+	int bufsize = 4*1024*1024*sizeof(char);
+        char *tmp = (char *)malloc(bufsize);
+#if defined(_USE_SPDP3_)
+	outb = spdp_uncompress_data(((char *)bufcompression + BITSETSIZE), bytes - BITSETSIZE, tmp, bufsize);
+	printf("spdp : %d -> %d\n", bytes - BITSETSIZE, outb);
+#elif defined(_USE_FPZIP3_)
+	//fpz_decompress3D(char *in, unsigned int inbytes, int layout[4], char *out, unsigned int *outbytes, int isfloat, int prec)
+	int survbytes = bytes - BITSETSIZE;
+	int survivors = survbytes/sizeof(Real);
+	int layout[4] = {1, 1, survivors, 1};
+	fpz_compress3D((char *) (bufcompression + BITSETSIZE), survbytes, layout, tmp, (unsigned int *)&outb, 1, 8*sizeof(Real));
+	printf("fpz : %d -> %d\n", survbytes, outb);
+#endif
+        memcpy((char *) (bufcompression + BITSETSIZE), tmp, outb);
+	free(tmp);
+
+	bytes = BITSETSIZE + outb;
+
+        }
+
+#elif defined(_USE_SHUFFLE3_)
 
  #if !defined(_USE_FLOAT16_)	// SHUFFLE
 	reshuffle3((char *)(bufcompression + BITSETSIZE), bytes - BITSETSIZE, sizeof(DataType));
