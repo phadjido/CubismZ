@@ -69,11 +69,11 @@ extern "C"
 #include "drain.h"
 #endif
 
-#if defined(_USE_ZFP_)
+#if defined(_USE_ZFP_)||defined(_USE_ZFP3_)
 #include "myzfp.h"
 #endif
 
-#if defined(_USE_SZ_)
+#if defined(_USE_SZ_)||defined(_USE_SZ3_)
 extern "C"
 {
 #include "rw.h"

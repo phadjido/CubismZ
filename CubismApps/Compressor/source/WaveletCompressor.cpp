@@ -34,6 +34,19 @@ using namespace std;
 #include "myfpzip.h"
 #endif
 
+#if defined(_USE_ZFP3_)
+#include "myzfp.h"
+#endif
+
+#if defined(_USE_SZ3_)
+extern "C"
+{
+#include "rw.h"
+#include "sz.h"
+}
+#endif
+
+
 void swapbytes(unsigned char *mem, int nbytes)
 {
         unsigned char buf[8];
@@ -235,26 +248,66 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 
 	serialize_bitset<BS3>(mask, bufcompression, BITSETSIZE);
 
-#if defined(_USE_SPDP3_)||defined(_USE_FPZIP3_)
+#if defined(_USE_SPDP3_)||defined(_USE_FPZIP3_)||defined(_USE_ZFP3_)||defined(_USE_SZ3_)
 	{
 	int survbytes = sizeof(DataType)*survivors;
 	int outbytes;
 	int bufsize = 4*1024*1024*sizeof(char);
-	//int bufsize = survbytes + 1024;
-        char *tmp = (char *)malloc(bufsize);
+	unsigned char *tmp = (unsigned char *)malloc(bufsize);
 
 #if defined(_USE_SPDP3_)
-	outbytes = spdp_compress_data((char *)(bufcompression + BITSETSIZE), survbytes, tmp, bufsize);
-	printf("spdp : %d -> %d\n", survbytes, outbytes);
+
+#if 1
+	float *s = (float *) (bufcompression + BITSETSIZE);
+	printf("s = [\n");
+	for (int i = 0; i < survivors; i++) printf("%f\n", s[i]);
+	printf("]\n");
+#endif
+
+	outbytes = spdp_compress_data((char *)(bufcompression + BITSETSIZE), survbytes, (char *)tmp, bufsize);
+	printf("spdp3 (%d): %d -> %d (%.2fx)\n", survivors, survbytes, outbytes, 1.0*survbytes/outbytes);
+
+#if 1
+	printf("buf = {\n");
+	for (int i = 0; i < outbytes; i++) printf("%d,\n", tmp[i]);
+	printf("}\n");
+#endif
+
 #elif defined(_USE_FPZIP3_)
 	int layout[4] = {1, 1, survivors, 1};
 	fpz_compress3D((char *) (bufcompression + BITSETSIZE), survbytes, layout, tmp, (unsigned int *)&outbytes, 1, 8*sizeof(Real));
-	printf("fpz : %d -> %d\n", survbytes, outbytes);
+	printf("fpz3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
+
+#elif defined(_USE_ZFP3_)
+	double zfp_acc = 0.01;
+	if(getenv("ZFP_ACC")) zfp_acc = atof(getenv("ZFP_ACC"));
+	int is_float = sizeof(Real)==4;
+	int layout[4] = {survivors, 1, 1, 1};
+	size_t nbytes_zfp;
+	int status = zfp_compress_buffer((char *)(bufcompression + BITSETSIZE), layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)tmp, &nbytes_zfp);
+	outbytes = nbytes_zfp;
+	printf("zfp3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
+	//if (outbytes > survbytes) exit(1);
+
+#elif defined(_USE_SZ3_)
+	double sz_abs_acc = 0.0;
+	double sz_rel_acc = 0.0;
+	if(getenv("SZ_ABS_ACC")) sz_abs_acc = atof(getenv("SZ_ABS_ACC"));
+	//SZ_ABS_ACC=$PARAM
+	//sz_abs_acc = (double) this->threshold;
+	int layout[5] = {survivors, 1, 1, 0, 0};
+	int bytes_sz;
+	unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)((char *)bufcompression + BITSETSIZE), &bytes_sz, ABS, sz_abs_acc, sz_rel_acc, layout[4], layout[3], layout[2], layout[1], layout[0]);
+	outbytes = bytes_sz;
+	memcpy(tmp, compressed_sz, outbytes);
+	free(compressed_sz);
+	printf("sz3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
 #endif
+
 	memcpy((char *) (bufcompression + BITSETSIZE), tmp, outbytes);
 	free(tmp);
 
-	return BITSETSIZE + outbytes;
+	return (BITSETSIZE + outbytes);
 	}
 
 #elif defined(_USE_SHUFFLE3_)||defined(_USE_ZEROBITS_)
@@ -305,6 +358,7 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 {				
 	full.fwt(wtype);
 	
+	exit(1);
 	assert(BITSETSIZE % sizeof(DataType) == 0);
 	
 	bitset<BS3> mask;
@@ -337,7 +391,7 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
   #endif
 
 
-	// peh: need to verify if this the correct place for byte swapping. However, swapping is in general useless for the compression tool.
+	// peh: need to verify if this is the correct place for byte swapping. However, swapping is in general useless for the compression tool.
 	if (swap)
 	{
 		unsigned char *buf = ((unsigned char *)bufcompression + BITSETSIZE);
@@ -360,7 +414,7 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 		_cvt2f16(*(i + (DataType *)(bufcompression + BITSETSIZE)));
 
 
-	// peh: need to verify if this the correct place for byte swapping. However, swapping is in general useless for the compression tool.
+	// peh: need to verify if this is the correct place for byte swapping. However, swapping is in general useless for the compression tool.
 	if (swap)
 	{
 		unsigned char *buf = ((unsigned char *)bufcompression + BITSETSIZE);
@@ -388,34 +442,77 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 	return BITSETSIZE + sizeof(unsigned short) * survivors;
 }
 
+
 template<int DATASIZE1D, typename DataType>
 void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float16, size_t bytes, int wtype)//, DataType data[DATASIZE1D][DATASIZE1D][DATASIZE1D])
 {
 	bitset<BS3> mask;
 	const int expected = deserialize_bitset<BS3>(mask, bufcompression, BITSETSIZE);
 
-#if defined(_USE_FPC3_)||defined(_USE_FPZIP3_)
+#if defined(_USE_SPDP3_)||defined(_USE_FPZIP3_)||defined(_USE_ZFP3_)||defined(_USE_SZ3_)
         {
-        int outb;
+	int outbytes;
 	int bufsize = 4*1024*1024*sizeof(char);
-        char *tmp = (char *)malloc(bufsize);
+	int survbytes = bytes - BITSETSIZE;
+	int survivors = expected; //survbytes/sizeof(Real);
+
+	printf("compressed survbytes = %d, expected = %d\n", survbytes, expected);
+
+	char *tmp = (char *)malloc(bufsize);
 #if defined(_USE_SPDP3_)
-	outb = spdp_uncompress_data(((char *)bufcompression + BITSETSIZE), bytes - BITSETSIZE, tmp, bufsize);
-	printf("spdp : %d -> %d\n", bytes - BITSETSIZE, outb);
+
+#if 1
+	unsigned char *tmp0 = bufcompression + BITSETSIZE;
+	printf("buf = [\n");
+	for (int i = 0; i < survbytes; i++) printf("%d\n", tmp0[i]);
+	printf("]\n");
+#endif
+
+	outbytes = spdp_uncompress_data((char *)bufcompression + BITSETSIZE, bytes - BITSETSIZE, tmp, bufsize);
+	printf("spdp3(D) : %d -> %d\n", survbytes, outbytes);
+
+	if (1)
+	{
+	float *s1 = (float *)tmp;
+	for (int i = 0; i < survivors; i++)
+	{
+		printf("s1[%d] = %f\n", i, s1[i]);
+	}
+	}
+
 #elif defined(_USE_FPZIP3_)
 	//fpz_decompress3D(char *in, unsigned int inbytes, int layout[4], char *out, unsigned int *outbytes, int isfloat, int prec)
-	int survbytes = bytes - BITSETSIZE;
-	int survivors = survbytes/sizeof(Real);
 	int layout[4] = {1, 1, survivors, 1};
-	fpz_compress3D((char *) (bufcompression + BITSETSIZE), survbytes, layout, tmp, (unsigned int *)&outb, 1, 8*sizeof(Real));
-	printf("fpz : %d -> %d\n", survbytes, outb);
+	fpz_decompress3D((char *)bufcompression + BITSETSIZE, survbytes, layout, tmp, (unsigned int *)&outbytes, 1, 8*sizeof(Real));
+	printf("fpzip3(D) : %d -> %d\n", survbytes, outbytes);
+
+#elif defined(_USE_ZFP3_)
+	double zfp_acc = 0.01;
+	if(getenv("ZFP_ACC")) zfp_acc = atof(getenv("ZFP_ACC"));
+	int is_float = sizeof(Real)==4;
+	int layout[4] = {survivors, 1, 1, 1};
+	size_t nbytes_zfp;
+	int status = zfp_decompress_buffer((char *)((char *)bufcompression + BITSETSIZE), layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)tmp, survbytes, &nbytes_zfp);
+	outbytes = nbytes_zfp;
+	printf("zfp3(D) : %d -> %ld\n", survbytes, nbytes_zfp);
+//	if (nbytes_zfp > survbytes) exit(1);
+
+#elif defined(_USE_SZ3_)
+	int layout[5] = {survivors, 1, 1, 0, 0};
+	//int SZ_decompress_args(int dataType, unsigned char *bytes, int byteLength, void* decompressed_array, int r5, int r4, int r3, int r2, int r1);
+        int sz_decompressedbytes = SZ_decompress_args(SZ_FLOAT, (unsigned char *)((char *)bufcompression + BITSETSIZE), survbytes, tmp, layout[4], layout[3], layout[2], layout[1], layout[0]);
+	outbytes = sz_decompressedbytes;
+//	outbytes = survivors*sizeof(float); 
+
+	printf("sz3(D) : %d -> %d (vs %d)\n", survbytes, outbytes, survivors*sizeof(Real));
 #endif
-        memcpy((char *) (bufcompression + BITSETSIZE), tmp, outb);
+
+	memcpy((char *)bufcompression + BITSETSIZE, tmp, outbytes);
 	free(tmp);
 
-	bytes = BITSETSIZE + outb;
+	bytes = BITSETSIZE + outbytes;
 
-        }
+	}
 
 #elif defined(_USE_SHUFFLE3_)
 
@@ -465,6 +562,7 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 	//const
 	int nelements = (bytes - bytes_read) / (float16 ? sizeof(unsigned short) : sizeof(DataType));
 	if (nelements - expected == 1) {
+		printf("XXXX\n");
 		nelements--;
 	}
 	assert(expected == nelements);
@@ -472,7 +570,10 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 	vector<DataType> datastream(nelements);
 	
 	if (!float16)
+	{
+		printf("copying %d nelements\n", nelements);
 		memcpy((void *)&datastream.front(), bufcompression + bytes_read, sizeof(DataType) * nelements);	
+	}
 	else
 	{
 		/* this is buggy if datastream is not 2-bytes aligned, not? */

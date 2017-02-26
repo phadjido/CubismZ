@@ -280,7 +280,7 @@ public:
 		streamer.fill('0');
 		streamer<<step_id;
 
-#ifdef _USE_SZ_
+#if defined(_USE_SZ_)||defined(_USE_SZ3_)
 		SZ_Init((char *)"sz.config");
 		omp_set_num_threads(1);
 #endif
