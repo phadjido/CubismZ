@@ -252,12 +252,12 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 	{
 	int survbytes = sizeof(DataType)*survivors;
 	int outbytes;
-	int bufsize = 4*1024*1024*sizeof(char);
+	int bufsize = 6*1024*1024*sizeof(char);
 	unsigned char *tmp = (unsigned char *)malloc(bufsize);
 
 #if defined(_USE_SPDP3_)
 
-#if 1
+#if 0
 	float *s = (float *) (bufcompression + BITSETSIZE);
 	printf("s = [\n");
 	for (int i = 0; i < survivors; i++) printf("%f\n", s[i]);
@@ -265,9 +265,11 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 #endif
 
 	outbytes = spdp_compress_data((char *)(bufcompression + BITSETSIZE), survbytes, (char *)tmp, bufsize);
+#if 0
 	printf("spdp3 (%d): %d -> %d (%.2fx)\n", survivors, survbytes, outbytes, 1.0*survbytes/outbytes);
+#endif
 
-#if 1
+#if 0
 	printf("buf = {\n");
 	for (int i = 0; i < outbytes; i++) printf("%d,\n", tmp[i]);
 	printf("}\n");
@@ -456,12 +458,12 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 	int survbytes = bytes - BITSETSIZE;
 	int survivors = expected; //survbytes/sizeof(Real);
 
-	printf("compressed survbytes = %d, expected = %d\n", survbytes, expected);
+	//printf("compressed survbytes = %d, expected = %d\n", survbytes, expected);
 
 	char *tmp = (char *)malloc(bufsize);
 #if defined(_USE_SPDP3_)
 
-#if 1
+#if 0
 	unsigned char *tmp0 = bufcompression + BITSETSIZE;
 	printf("buf = [\n");
 	for (int i = 0; i < survbytes; i++) printf("%d\n", tmp0[i]);
@@ -469,9 +471,9 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 #endif
 
 	outbytes = spdp_uncompress_data((char *)bufcompression + BITSETSIZE, bytes - BITSETSIZE, tmp, bufsize);
-	printf("spdp3(D) : %d -> %d\n", survbytes, outbytes);
+	//printf("spdp3(D) : %d -> %d\n", survbytes, outbytes);
 
-	if (1)
+	if (0)
 	{
 	float *s1 = (float *)tmp;
 	for (int i = 0; i < survivors; i++)
@@ -562,7 +564,6 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 	//const
 	int nelements = (bytes - bytes_read) / (float16 ? sizeof(unsigned short) : sizeof(DataType));
 	if (nelements - expected == 1) {
-		printf("XXXX\n");
 		nelements--;
 	}
 	assert(expected == nelements);
@@ -571,7 +572,6 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 	
 	if (!float16)
 	{
-		printf("copying %d nelements\n", nelements);
 		memcpy((void *)&datastream.front(), bufcompression + bytes_read, sizeof(DataType) * nelements);	
 	}
 	else

@@ -8,18 +8,83 @@
 #include "myspdp.h"
 
 #ifndef dtype
-#define dtype double
+#define dtype float
 #endif
 
-#ifndef SZ
-#define SZ1	19
-#define SZ	(SZ1*SZ1*SZ1)
-#endif
+//#ifndef SZ
+//#define SZ1	19
+//#define SZ	(SZ1*SZ1*SZ1)
+//#endif
 
-static dtype indat[SZ];
-static dtype indat_copy[SZ];
-static dtype outdat[SZ+1024];
-static dtype outdat2[SZ];
+#define SZ 64
+
+static dtype indat[SZ] = {
+74.781006,
+74.485474,
+74.242538,
+74.013138,
+74.480980,
+74.186523,
+73.960701,
+73.733688,
+74.224289,
+73.955582,
+73.719452,
+73.489540,
+73.987694,
+73.745850,
+73.509781,
+73.280853,
+74.497154,
+74.212654,
+73.980255,
+73.742233,
+74.209595,
+73.963776,
+73.747650,
+73.504349,
+73.982895,
+73.771866,
+73.551422,
+73.320114,
+73.774063,
+73.577942,
+73.364258,
+73.150467,
+74.270187,
+73.999680,
+73.745987,
+73.503830,
+74.006592,
+73.760941,
+73.531067,
+73.322205,
+73.778854,
+73.562210,
+73.368080,
+73.184608,
+73.568115,
+73.374245,
+73.203499,
+73.027229,
+74.054031,
+73.783684,
+73.528091,
+73.310310,
+73.798599,
+73.539078,
+73.327698,
+73.163956,
+73.564117,
+73.343010,
+73.178856,
+73.025520,
+73.354980,
+73.179695,
+73.032501,
+72.855309 
+};
+
 
 char buf[186]=
 {
@@ -210,20 +275,31 @@ char buf[186]=
 255,
 1,
 };
+
+//static dtype indat_copy[SZ];
+//static dtype outdat[SZ];
+//static dtype outdat2[SZ];
+
+
 int main(int argc, char *argv[])
 {
         size_t outs;
         size_t outs2;
 
+	dtype *indat_copy = (dtype *)malloc(SZ*sizeof(dtype));
+	dtype *outdat = (dtype *)malloc(SZ*sizeof(dtype)+16);
+	dtype *outdat2 = (dtype *)malloc(SZ*sizeof(dtype));
+
         int i;
-	//for (i = 0; i < SZ; i++) indat[i] = exp(-i);
-	srand48(1);
-	for (i = 0; i < SZ; i++) indat[i] = -1+2*drand48();
 	for (i = 0; i < SZ; i++) indat_copy[i] = indat[i];
 
+//	for (i = 0; i < SZ; i++) printf("A %d : %lf\n", i, indat_copy[i]);
+
 	double t0 = omp_get_wtime();
-	outs = spdp_compress_data( (const char*)indat, SZ*sizeof(dtype), (char *) outdat, SZ*sizeof(dtype)+1024);
+	outs = spdp_compress_data( (const char*)indat, SZ*sizeof(dtype), (char *) outdat, SZ*sizeof(dtype));
 	double t1 = omp_get_wtime();
+
+//	for (i = 0; i < SZ; i++) printf("B %d : %lf\n", i, indat_copy[i]);
 	
         printf("outs = %ld\n", outs);
         printf("rate = %.2lf\n", (1.0*SZ*sizeof(dtype))/outs);
@@ -240,14 +316,15 @@ int main(int argc, char *argv[])
 		if (outdat2[i] != indat_copy[i])
 			printf("%d : %lf vs %lf\n", i, indat_copy[i], outdat2[i]);
 		
-
 	float fff[4096];
 	int outs3 = spdp_uncompress_data((const char*)buf, 186, (char *) fff, 4096);
-
 	printf("outs3 = %d\n", outs3);
-
 	for (i = 0 ; i < outs3/4; i++)
 		printf("f[%d] = %f\n", i, fff[i]);
+
+	free(indat_copy);
+	free(outdat);
+	free(outdat2);
 
 	return 0;
 }

@@ -11,52 +11,24 @@ typedef unsigned int word_t;
 extern "C"
 {
 extern size_t spdp_compress(const byte_t level, const size_t length, byte_t* const buf1, byte_t* const buf2);
-extern void spdp_decompress(const byte_t level, const size_t length, byte_t* const buf2, byte_t* const buf1);
+extern size_t spdp_decompress(const byte_t level, const size_t length, byte_t* const buf2, byte_t* const buf1);
 }
 
 static size_t spdp_compress_data( const char* buffIn, size_t buffInSize, char* buffOut, size_t buffOutSize )
 {
-	int clevel = 5;
+	int clevel = 9;
 
-	char *ptr = &buffOut[0];
-
-	size_t csize;
-
-	memcpy(ptr, &buffInSize, sizeof(buffInSize));
-	ptr += sizeof(buffInSize);
-
-	csize = 0;
-	memcpy(ptr, &csize, sizeof(csize));
-	char *ptr_csize = ptr;
-	ptr += sizeof(csize);
-
-	csize = spdp_compress(clevel, buffInSize, (byte_t *)buffIn, (byte_t *)ptr); 	//buffOut);
-	ptr += csize;
-
-	size_t total_size = csize; // + 2*sizeof(size_t);
-	memcpy(ptr_csize, &total_size, sizeof(total_size));
-
+	size_t csize = spdp_compress(clevel, buffInSize, (byte_t *)buffIn, (byte_t *)buffOut); 	//buffOut);
 	return csize;
 }
 
 static size_t spdp_uncompress_data( const char* buffIn, size_t buffInSize, char* buffOut, size_t buffOutSize)
 {
-	int clevel = 5;
+	int clevel = 9;
 
-	size_t dsize, csize;
-	char *ptr = (char *)&buffIn[0];
-
-	memcpy(&dsize, ptr, sizeof(dsize));
-	ptr += sizeof(dsize);
-
-	memcpy(&csize, ptr, sizeof(csize));
-	ptr += sizeof(csize);
-
-	printf("UncompressData: dsize = %ld, csize = %ld\n", dsize, csize);
-	//csize = csize - 2*sizeof(size_t);
-
-	spdp_decompress(clevel, csize, (byte_t *)ptr, (byte_t *)buffOut);
+	size_t dsize = spdp_decompress(clevel, buffInSize, (byte_t *)buffIn, (byte_t *)buffOut);
 	return dsize;
+//	return total_size;
 }
 
 
