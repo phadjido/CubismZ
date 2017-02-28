@@ -252,7 +252,7 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 	{
 	int survbytes = sizeof(DataType)*survivors;
 	int outbytes;
-	int bufsize = 6*1024*1024*sizeof(char);
+	int bufsize = 4*1024*1024*sizeof(char);
 	unsigned char *tmp = (unsigned char *)malloc(bufsize);
 
 #if defined(_USE_SPDP3_)
@@ -277,8 +277,17 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 
 #elif defined(_USE_FPZIP3_)
 	int layout[4] = {1, 1, survivors, 1};
-	fpz_compress3D((char *) (bufcompression + BITSETSIZE), survbytes, layout, tmp, (unsigned int *)&outbytes, 1, 8*sizeof(Real));
+	int is_float = sizeof(Real)==4;
+
+	int fpzip_bits = 8*sizeof(Real);
+	if(getenv("FPZIP_BITS")) fpzip_bits = atoi(getenv("FPZIP_BITS"));
+	if (fpzip_bits > 8*sizeof(Real)) fpzip_bits = 8*sizeof(Real);
+
+//	fpz_compress3D((char *) (bufcompression + BITSETSIZE), survbytes, layout, tmp, (unsigned int *)&outbytes, 1, 8*sizeof(Real));
+	fpz_compress3D((char *) (bufcompression + BITSETSIZE), survbytes, layout, tmp, (unsigned int *)&outbytes, is_float, fpzip_bits);
+#if VERBOSE
 	printf("fpz3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
+#endif
 
 #elif defined(_USE_ZFP3_)
 	double zfp_acc = 0.01;
@@ -288,8 +297,13 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 	size_t nbytes_zfp;
 	int status = zfp_compress_buffer((char *)(bufcompression + BITSETSIZE), layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)tmp, &nbytes_zfp);
 	outbytes = nbytes_zfp;
+#if VERBOSE
 	printf("zfp3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
-	//if (outbytes > survbytes) exit(1);
+#endif
+	if (outbytes > survbytes) {
+		printf("zfp3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
+		exit(1);
+	}
 
 #elif defined(_USE_SZ3_)
 	double sz_abs_acc = 0.0;
@@ -485,8 +499,17 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 #elif defined(_USE_FPZIP3_)
 	//fpz_decompress3D(char *in, unsigned int inbytes, int layout[4], char *out, unsigned int *outbytes, int isfloat, int prec)
 	int layout[4] = {1, 1, survivors, 1};
-	fpz_decompress3D((char *)bufcompression + BITSETSIZE, survbytes, layout, tmp, (unsigned int *)&outbytes, 1, 8*sizeof(Real));
+	int is_float = sizeof(Real)==4;
+
+	int fpzip_bits = 8*sizeof(Real);
+	if(getenv("FPZIP_BITS")) fpzip_bits = atoi(getenv("FPZIP_BITS"));
+	if (fpzip_bits > 8*sizeof(Real)) fpzip_bits = 8*sizeof(Real);
+
+//	fpz_decompress3D((char *)bufcompression + BITSETSIZE, survbytes, layout, tmp, (unsigned int *)&outbytes, 1, 8*sizeof(Real));
+	fpz_decompress3D((char *)bufcompression + BITSETSIZE, survbytes, layout, tmp, (unsigned int *)&outbytes, is_float, fpzip_bits);
+#if VERBOSE
 	printf("fpzip3(D) : %d -> %d\n", survbytes, outbytes);
+#endif
 
 #elif defined(_USE_ZFP3_)
 	double zfp_acc = 0.01;
@@ -496,7 +519,9 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 	size_t nbytes_zfp;
 	int status = zfp_decompress_buffer((char *)((char *)bufcompression + BITSETSIZE), layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)tmp, survbytes, &nbytes_zfp);
 	outbytes = nbytes_zfp;
+#if VERBOSE
 	printf("zfp3(D) : %d -> %ld\n", survbytes, nbytes_zfp);
+#endif
 //	if (nbytes_zfp > survbytes) exit(1);
 
 #elif defined(_USE_SZ3_)

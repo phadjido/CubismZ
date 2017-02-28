@@ -52,12 +52,12 @@ protected:
 
 #if 1
 		int myrank, mypeindex[3], pesize[3];
-		bool periodic[3];
-		MPI::Cartcomm cartcomm;
+		int periodic[3];
+		MPI_Comm cartcomm;
 
-		periodic[0] = true;
-		periodic[1] = true;
-		periodic[2] = true;
+		periodic[0] = 1;
+		periodic[1] = 1;
+		periodic[2] = 1;
 
 		pesize[0] = XPESIZE;
 		pesize[1] = YPESIZE;
@@ -65,10 +65,13 @@ protected:
 
 		assert(XPESIZE*YPESIZE*ZPESIZE == MPI::COMM_WORLD.Get_size());
 
-		cartcomm = MPI::COMM_WORLD.Create_cart(3, pesize, periodic, true);
-		myrank = cartcomm.Get_rank();
+		//cartcomm = MPI::COMM_WORLD.Create_cart(3, pesize, periodic, true);
+		// myrank = cartcomm.Get_rank();
+		//cartcomm.Get_coords(myrank, 3, mypeindex);
 
-		cartcomm.Get_coords(myrank, 3, mypeindex);
+		MPI_Cart_create(MPI_COMM_WORLD, 3, pesize, periodic, true, &cartcomm);
+		MPI_Comm_rank(cartcomm, &myrank);
+		MPI_Cart_coords(cartcomm, myrank, 3, mypeindex);
 #endif
 
 #if 1
@@ -200,6 +203,7 @@ protected:
 		status = H5Fclose(file_id);
 
 		H5close();
+		MPI_Comm_free(&cartcomm);
 
 		delete [] array_all;
 
@@ -245,6 +249,7 @@ public:
 
 		_setup_mpi_constants(XPESIZE, YPESIZE, ZPESIZE);
 
+		VERBOSITY = 0;
 		if (!isroot)
 			VERBOSITY = 1;
 
@@ -261,6 +266,7 @@ public:
 
 		_ic(*grid);
 		vp(*grid, step_id);
+
 	}
 
 
@@ -302,7 +308,9 @@ public:
 
 	void dispose()
 	{
+		printf("calling dispose\n");
 		if (grid!=NULL) {
+			printf("deleting grid\n");
 			delete grid;
 			grid = NULL;
 		}

@@ -18,6 +18,7 @@ nb=$(echo "$ds/$bs" | bc)
 #h5file=ch4s300.h5
 #h5file=ch5s300.h5
 
+nb=2
 rm -f ref.channel0
 
 make clean

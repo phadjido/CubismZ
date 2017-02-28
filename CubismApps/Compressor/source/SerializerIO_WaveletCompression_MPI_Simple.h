@@ -549,6 +549,7 @@ protected:
 #endif
 		}
 
+		MPI_Info_free(&myfileinfo);
 		MPI_File_close(&myfile); //bon voila tu vois ou quoi
 	}
 

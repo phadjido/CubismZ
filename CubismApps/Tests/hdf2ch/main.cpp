@@ -55,7 +55,7 @@ int main (int argc, char ** argv)
 	
 	sim = NULL;
 	
-	if (isroot) printf("Finishing...");
+	if (isroot) printf("Finishing...\n");
 	
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Finalize();

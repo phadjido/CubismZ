@@ -43,8 +43,8 @@ protected:
 	enum
 	{
 		BS3 = DATASIZE1D * DATASIZE1D * DATASIZE1D,
-//		BITSETSIZE = (BS3 + 7) / 8,
-		BITSETSIZE = BS3,
+		BITSETSIZE = (BS3 + 7) / 8,
+//		BITSETSIZE = BS3,
 		BUFMAXSIZE = BITSETSIZE + sizeof(DataType) * BS3
 	};
 

@@ -16,7 +16,8 @@ extern size_t spdp_decompress(const byte_t level, const size_t length, byte_t* c
 
 static size_t spdp_compress_data( const char* buffIn, size_t buffInSize, char* buffOut, size_t buffOutSize )
 {
-	int clevel = 9;
+	int clevel = 6;
+	if(getenv("SPDP_CLEVEL")) clevel = atof(getenv("SPDP_CLEVEL"));	
 
 	size_t csize = spdp_compress(clevel, buffInSize, (byte_t *)buffIn, (byte_t *)buffOut); 	//buffOut);
 	return csize;
@@ -24,7 +25,8 @@ static size_t spdp_compress_data( const char* buffIn, size_t buffInSize, char* b
 
 static size_t spdp_uncompress_data( const char* buffIn, size_t buffInSize, char* buffOut, size_t buffOutSize)
 {
-	int clevel = 9;
+	int clevel = 6;
+	if(getenv("SPDP_CLEVEL")) clevel = atof(getenv("SPDP_CLEVEL"));	
 
 	size_t dsize = spdp_decompress(clevel, buffInSize, (byte_t *)buffIn, (byte_t *)buffOut);
 	return dsize;
