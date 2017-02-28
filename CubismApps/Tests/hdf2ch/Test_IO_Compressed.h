@@ -308,6 +308,12 @@ public:
 
 	void dispose()
 	{
+
+#if defined(_USE_SZ_)||defined(_USE_SZ3_)
+		SZ_Finalize();
+#endif
+
+
 		printf("calling dispose\n");
 		if (grid!=NULL) {
 			printf("deleting grid\n");
