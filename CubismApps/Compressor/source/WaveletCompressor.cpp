@@ -309,15 +309,21 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 	double sz_abs_acc = 0.0;
 	double sz_rel_acc = 0.0;
 	if(getenv("SZ_ABS_ACC")) sz_abs_acc = atof(getenv("SZ_ABS_ACC"));
+	if(getenv("SZ_REL_ACC")) sz_rel_acc = atof(getenv("SZ_REL_ACC"));
 	//SZ_ABS_ACC=$PARAM
 	//sz_abs_acc = (double) this->threshold;
-	int layout[5] = {survivors, 1, 1, 0, 0};
+	int layout[5] = {survivors, 1, 0, 0, 0};
 	int bytes_sz;
-	unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)((char *)bufcompression + BITSETSIZE), &bytes_sz, ABS, sz_abs_acc, sz_rel_acc, layout[4], layout[3], layout[2], layout[1], layout[0]);
+//	unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)((char *)bufcompression + BITSETSIZE), &bytes_sz, ABS, sz_abs_acc, sz_rel_acc, layout[4], layout[3], layout[2], layout[1], layout[0]);
+	unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)((char *)bufcompression + BITSETSIZE), &bytes_sz, REL, sz_abs_acc, sz_rel_acc, layout[4], layout[3], layout[2], layout[1], layout[0]);
 	outbytes = bytes_sz;
 	memcpy(tmp, compressed_sz, outbytes);
 	free(compressed_sz);
+
+#if VERBOSE
 	printf("sz3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
+#endif
+
 #endif
 
 	memcpy((char *) (bufcompression + BITSETSIZE), tmp, outbytes);
@@ -525,13 +531,17 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 //	if (nbytes_zfp > survbytes) exit(1);
 
 #elif defined(_USE_SZ3_)
-	int layout[5] = {survivors, 1, 1, 0, 0};
+	int layout[5] = {survivors, 1, 0, 0, 0};
 	//int SZ_decompress_args(int dataType, unsigned char *bytes, int byteLength, void* decompressed_array, int r5, int r4, int r3, int r2, int r1);
-        int sz_decompressedbytes = SZ_decompress_args(SZ_FLOAT, (unsigned char *)((char *)bufcompression + BITSETSIZE), survbytes, tmp, layout[4], layout[3], layout[2], layout[1], layout[0]);
-	outbytes = sz_decompressedbytes;
-//	outbytes = survivors*sizeof(float); 
+        int sz_elements = SZ_decompress_args(SZ_FLOAT, (unsigned char *)((char *)bufcompression + BITSETSIZE), survbytes, tmp, layout[4], layout[3], layout[2], layout[1], layout[0]);
+	//if (sz_elements < 0) exit(1);
+	outbytes = sz_elements*sizeof(Real);
+//	if (outbytes != survivors*sizeof(Real)) exit(1); 
 
+#if VERBOSE
 	printf("sz3(D) : %d -> %d (vs %d)\n", survbytes, outbytes, survivors*sizeof(Real));
+#endif
+
 #endif
 
 	memcpy((char *)bufcompression + BITSETSIZE, tmp, outbytes);

@@ -453,6 +453,8 @@ protected:
 #else
 		MPI_File_open(MPI_COMM_SELF, (char*)fileName.c_str(),  MPI_MODE_WRONLY | MPI_MODE_CREATE, myfileinfo, &myfile);
 #endif
+		MPI_Info_free(&myfileinfo);
+
 		size_t current_displacement = 0;
 
 		//write the mini-header
@@ -549,7 +551,6 @@ protected:
 #endif
 		}
 
-		MPI_Info_free(&myfileinfo);
 		MPI_File_close(&myfile); //bon voila tu vois ou quoi
 	}
 
@@ -1106,6 +1107,7 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 		MPI_Info_set(myfileinfo, (char*)key.c_str(), (char*)val.c_str());
 
 		MPI_File_open(mycomm, (char*)fileName.c_str(),  MPI_MODE_WRONLY | MPI_MODE_CREATE, myfileinfo, &myopenfile);
+		MPI_Info_free(&myfileinfo);
 
 		size_t current_displacement = 0;
 
