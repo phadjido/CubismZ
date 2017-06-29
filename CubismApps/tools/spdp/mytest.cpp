@@ -82,7 +82,7 @@ static dtype indat[SZ] = {
 73.354980,
 73.179695,
 73.032501,
-72.855309 
+72.855309
 };
 
 
@@ -300,7 +300,7 @@ int main(int argc, char *argv[])
 	double t1 = omp_get_wtime();
 
 //	for (i = 0; i < SZ; i++) printf("B %d : %lf\n", i, indat_copy[i]);
-	
+
         printf("outs = %ld\n", outs);
         printf("rate = %.2lf\n", (1.0*SZ*sizeof(dtype))/outs);
         printf("time = %.2lf s\n", t1-t0);
@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
 	for (i = 0; i < SZ; i++)
 		if (outdat2[i] != indat_copy[i])
 			printf("%d : %lf vs %lf\n", i, indat_copy[i], outdat2[i]);
-		
+
 	float fff[4096];
 	int outs3 = spdp_uncompress_data((const char*)buf, 186, (char *) fff, 4096);
 	printf("outs3 = %d\n", outs3);
