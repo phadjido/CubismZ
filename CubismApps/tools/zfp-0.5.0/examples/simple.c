@@ -7,6 +7,10 @@
 
 #include "myzfp.h"
 
+#ifndef max
+#define max(a,b) ((a) > (b))? (a):(b)
+#endif
+
 double ZFP_ACC = 0.0;
 
 int main(int argc, char* argv[])

@@ -134,8 +134,8 @@ protected:
 		{
 			/* TODO: replace the following code with: zbytes = zcompress(inputbuffer, bufsize, maxsize); */
 			z_stream myzstream = {0};
-			//deflateInit(&myzstream, Z_DEFAULT_COMPRESSION); // Z_BEST_COMPRESSION
-			deflateInit(&myzstream, Z_BEST_COMPRESSION);
+			deflateInit(&myzstream, Z_DEFAULT_COMPRESSION); // Z_BEST_COMPRESSION
+			//deflateInit(&myzstream, Z_BEST_COMPRESSION);
 
 			unsigned mah = maxsize;
 			int err = deflate_inplace(&myzstream, inputbuffer, bufsize, &mah);

@@ -89,6 +89,49 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len, uns
 inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned char * outputbuf, const size_t maxsize);
 
 
+
+#if defined(_USE_ZSHUFFLE_)
+void zshuffle(char *in, int n, int s)
+{
+        int i, j, k;
+        int b;
+
+        char *tmp = (char *)malloc(n);
+
+        j = 0;
+	for (b = 0; b < s; b++)
+        {
+                for (i = b; i < n; i+= s) {
+                        tmp[j] = in[i];
+                        j++;
+                }
+        }
+
+	memcpy(in, tmp, n);
+        free(tmp);
+}
+
+void zreshuffle(char *in, int n, int s)
+{
+        int i, j, k;
+        int b;
+
+        char *tmp = (char *)malloc(n);
+        int c = n/s;
+
+        j = 0;
+	for (i = 0; i < n/s; i++) {
+                for (b = 0; b < s; b++) {
+                        tmp[j] = in[i + b*c]; j++;
+
+                }
+        }
+
+	memcpy(in, tmp, n);
+        free(tmp);
+}
+#endif
+
 inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned char * outputbuf, const size_t maxsize)
 {
 #if defined(VERBOSE)
@@ -131,24 +174,12 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 		abort();
 	}
 #elif defined(_USE_LZMA_)
-#if 0
-	unsigned char *lzma_decompressed;
-	int rc = simpleDecompress(ELZMA_lzma, inputbuf, ninputbytes, &lzma_decompressed, (size_t *)&decompressedbytes);
-	if (rc != ELZMA_E_OK)
-	{
-		printf("LZMA DECOMPRESSION FAILURE!!\n");
-		abort();
-	}
-	memcpy(outputbuf, lzma_decompressed, decompressedbytes);
-	free(lzma_decompressed);
-#else
 	decompressedbytes = lzma_decompress((unsigned char *) inputbuf, ninputbytes, (unsigned char *) outputbuf, maxsize);
 	if (decompressedbytes < 0)
 	{
 		printf("LZMA DECOMPRESSION FAILURE!!\n");
 		abort();
 	}
-#endif
 #elif defined(_USE_ZSTD0_)
 	{
 	ZSTD_DStream* const dstream = ZSTD_createDStream();
@@ -198,6 +229,11 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 	decompressedbytes = ninputbytes;
 	memcpy(outputbuf, inputbuf, ninputbytes);
 #endif
+
+#if defined(_USE_ZSHUFFLE_)
+	zreshuffle((char *)outputbuf, decompressedbytes, sizeof(Real));
+#endif
+
 	return decompressedbytes;
 }
 
@@ -223,9 +259,14 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
  reused across multiple calls to deflate_inplace().  This avoids unnecessary
  memory allocations and deallocations from the repeated use of deflateInit()
  and deflateEnd(). */
+
 inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 						   unsigned *max)
 {
+#if defined(_USE_ZSHUFFLE_)
+	zshuffle((char *)buf, len, sizeof(Real));
+#endif
+
 #if defined(_USE_ZLIB_)||defined(_USE_ZSTD_)
     int ret;                    /* return code from deflate functions */
     unsigned have;              /* number of bytes in temp[] */
@@ -370,7 +411,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 		}
 #elif defined(_USE_BLOSC_)
 		{
-		int clevel = 5;
+		int clevel = 6;
 		int doshuffle = 1;
 		int typesize = sizeof(Real);
 
@@ -406,44 +447,3 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 }
 
 
-#if defined(_USE_SHUFFLE_)
-void shuffle(char *in, int n, int s)
-{
-        int i, j, k;
-        int b;
-
-        char *tmp = (char *)malloc(n);
-
-        j = 0;
-	for (b = 0; b < s; b++)
-        {
-                for (i = b; i < n; i+= s) {
-                        tmp[j] = in[i];
-                        j++;
-                }
-        }
-
-	memcpy(in, tmp, n);
-        free(tmp);
-}
-
-void reshuffle(char *in, int n, int s)
-{
-        int i, j, k;
-        int b;
-
-        char *tmp = (char *)malloc(n);
-        int c = n/s;
-
-        j = 0;
-	for (i = 0; i < n/s; i++) {
-                for (b = 0; b < s; b++) {
-                        tmp[j] = in[i + b*c]; j++;
-
-                }
-        }
-
-	memcpy(in, tmp, n);
-        free(tmp);
-}
-#endif
