@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-
+#include <sys/stat.h>
 #include <mpi.h>
 
 using namespace std;
@@ -67,6 +67,10 @@ protected:
 	float threshold;	// peh: new
 
 	vector<CompressedBlock> idx2chunk;
+
+	char *data;		// peh: new
+
+	double t_decode, t_wavelet;
 
 	int _id(int ix, int iy, int iz) const
 	{
@@ -183,6 +187,13 @@ protected:
 public:
 
 	Reader_WaveletCompression(const string path, bool doswapping, int wtype): NBLOCKS(-1), global_header_displacement(-1), path(path), doswapping(doswapping), wtype(wtype) { }
+
+	void print_times()
+	{
+		printf("t_iwt = %f seconds\n", t_wavelet);
+		printf("t_dec = %f seconds\n", t_decode);
+		t_decode = t_wavelet = 0;
+	}
 
 	virtual void load_file()
 	{
@@ -313,6 +324,10 @@ public:
 				MYASSERT(buf == string("isa"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
 						" and i have " << "isa"  << "\n");
+#elif defined(_USE_WBLOSC_)
+				MYASSERT(buf == string("wblosc"),
+						"\nATTENZIONE:\nWavelets in the file is " << buf <<
+						" and i have " << "wblosc"  << "\n");
 #elif defined(_USE_SHUFFLE_)
 				MYASSERT(buf == string("shuffle"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
@@ -612,8 +627,8 @@ public:
 		assert(!feof(f));
 
 		size_t zz_bytes = compressedbuf.size();
-		//static vector<unsigned char> waveletbuf(2 << 21); // 21: 4MB, 22: 8MB, 28: 512MB
-		static vector<unsigned char> waveletbuf(2 << 28);
+		static vector<unsigned char> waveletbuf(2 << 21); // 21: 4MB, 22: 8MB, 28: 512MB
+		//static vector<unsigned char> waveletbuf(2 << 28);
 		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)
@@ -730,6 +745,15 @@ public:
 				abort();
 			}
 
+#elif defined(_USE_WBLOSC_)
+			size_t dsize = blosc_decompress((char *)compressor.compressed_data(), (char *)MYBLOCK, (_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real));
+//			printf("blosc_decompress: %d -> %d\n", nbytes, dsize);
+			if ((dsize < 0)  || (dsize != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("BLOSC: Decompression error.  Error code: %d\n", dsize);
+				abort();
+			}
+
 #elif defined(_USE_SHUFFLE_)
                         reshuffle((char *)compressor.compressed_data(), nbytes, sizeof(Real));
                         memcpy((void *) MYBLOCK, (void *)compressor.compressed_data(), nbytes);
@@ -745,6 +769,195 @@ public:
 		}
 
 		fclose(f);
+
+		return zratio1*zratio2;
+	}
+
+	float load_block3(int ix, int iy, int iz, Real MYBLOCK[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_])
+	{
+		double t0, t1;
+
+		float zratio1, zratio2;
+
+		//printf("trying to load <%s>\n", path.c_str());
+		//FILE * f = fopen(path.c_str(), "rb");
+		if (data == NULL) {
+			printf("File not loaded into memory. Aborting...\n");
+			abort();
+		}
+
+		char *f0 = data;
+		char *f;
+
+		//assert(f);
+
+		CompressedBlock compressedchunk = idx2chunk[_id(ix, iy, iz)];
+
+		size_t start = compressedchunk.start;
+
+		assert(start >= miniheader_bytes);
+		assert(start < global_header_displacement);
+		assert(start + compressedchunk.extent <= global_header_displacement);
+
+		vector<unsigned char> compressedbuf(compressedchunk.extent);
+		//fseek(f, compressedchunk.start, SEEK_SET);
+		f = f0 + compressedchunk.start; 
+		//fread(&compressedbuf.front(), compressedchunk.extent, 1, f);
+		memcpy(&compressedbuf.front(), f, compressedchunk.extent);
+
+		//assert(!feof(f));
+
+		size_t zz_bytes = compressedbuf.size();
+		static vector<unsigned char> waveletbuf(2 << 21); // 21: 4MB, 22: 8MB, 28: 512MB
+		//static vector<unsigned char> waveletbuf(2 << 28);
+
+		t0 = omp_get_wtime();
+		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
+		t1 = omp_get_wtime();
+		t_decode += (t1-t0);
+
+		zratio1 = (1.0*decompressedbytes)/zz_bytes;
+#if defined(VERBOSE)
+		printf("zdecompressed %d bytes to %d bytes...(%.2lf)\n", zz_bytes, decompressedbytes, zratio1);
+#endif
+		int readbytes = 0;
+		for(int i = 0; i<compressedchunk.subid; ++i)
+		{
+			int nbytes = * (int *) & waveletbuf[readbytes];
+			nbytes = swapint(nbytes);
+			readbytes += sizeof(int);
+			readbytes += nbytes;
+
+			assert(readbytes <= decompressedbytes);
+		}
+
+		t0 = omp_get_wtime();
+		{
+			int nbytes = *(int *)&waveletbuf[readbytes];
+			nbytes = swapint(nbytes);
+			readbytes += sizeof(int);
+			assert(readbytes <= decompressedbytes);
+#if defined(VERBOSE)
+			printf("wavelet decompressing %d bytes...\n", nbytes);
+#endif
+			WaveletCompressor compressor;
+
+			{ // swapping
+			enum
+			{
+				BS3 = _BLOCKSIZE_ * _BLOCKSIZE_ * _BLOCKSIZE_,
+				BITSETSIZE = (BS3 + 7) / 8
+			};
+
+			unsigned char *buf = & waveletbuf[readbytes];
+			for (int i = BITSETSIZE; i < nbytes; i+=4)
+				swapbytes(buf+i, 4);
+			}
+			memcpy(compressor.compressed_data(), &waveletbuf[readbytes], nbytes);
+			readbytes += nbytes;
+
+#if defined(_USE_WAVZ_)
+
+			compressor.decompress(halffloat, nbytes, wtype, MYBLOCK);
+
+#elif defined(_USE_FPC_)
+
+			int fpc_decompressedbytes;
+			fpc_decompress((char *)compressor.compressed_data(), nbytes, (char*) MYBLOCK, &fpc_decompressedbytes);
+			if ((fpc_decompressedbytes < 0)||(fpc_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("FPC DECOMPRESSION FAILURE!!\n");
+				abort();
+			}
+
+#elif defined(_USE_FPZIP_)
+			int fpzip_prec = (int) this->threshold;
+			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int fpz_decompressedbytes;
+			fpz_decompress3D((char *)compressor.compressed_data(), nbytes, layout, (char *) MYBLOCK, (unsigned int *)&fpz_decompressedbytes, (sizeof(Real)==4)?1:0, fpzip_prec);
+			if ((fpz_decompressedbytes < 0)||(fpz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("FPZ DECOMPRESSION FAILURE:  %d!!\n", fpz_decompressedbytes);
+				abort();
+			}
+
+#elif defined(_USE_DRAIN_)
+			int drain_level = (int) this->threshold;
+			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int drain_decompressedbytes;
+			drain_decompressedbytes = pour_3df_buffer((unsigned char *) compressor.compressed_data(), layout[0], layout[1], layout[2], (float *) MYBLOCK);
+			if ((drain_decompressedbytes < 0)||(drain_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("DRAIN DECOMPRESSION FAILURE:  %d!!\n", drain_decompressedbytes);
+				abort();
+			}
+
+#elif defined(_USE_ZFP_)
+//			double zfp_acc = 0.0;
+//			if(getenv("ZFP_ACC")) zfp_acc = atof(getenv("ZFP_ACC"));
+			double zfp_acc = (double)this->threshold;
+			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			size_t zfp_decompressedbytes;
+			int is_float = 1;
+			int status = zfp_decompress_buffer(MYBLOCK, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)compressor.compressed_data(), nbytes, &zfp_decompressedbytes);
+			if ((zfp_decompressedbytes < 0)||(zfp_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("ZFP DECOMPRESSION FAILURE:  %d!!\n", zfp_decompressedbytes);
+				abort();
+			}
+
+#elif defined(_USE_SZ_)
+			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int sz_decompressedbytes;
+
+			//int SZ_decompress_args(int dataType, unsigned char *bytes, int byteLength, void* decompressed_array, int r5, int r4, int r3, int r2, int r1);
+			sz_decompressedbytes = SZ_decompress_args(SZ_FLOAT, (unsigned char *)compressor.compressed_data(), nbytes, MYBLOCK, 0, 0, layout[2], layout[1], layout[0]);
+			sz_decompressedbytes *= sizeof(Real);
+			if ((sz_decompressedbytes < 0)||(sz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("SZ DECOMPRESSION FAILURE:  %d!!\n", sz_decompressedbytes);
+				abort();
+			}
+
+#elif defined(_USE_ISA_)
+			double isa_rate = (double) this->threshold;
+			int is_float = 1;
+			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int isa_decompressedbytes;
+			int status2 = isa_decompress_buffer((char *)MYBLOCK, layout[0], layout[1], layout[2], isa_rate, is_float, (char *)compressor.compressed_data(), nbytes, &isa_decompressedbytes);
+
+			if ((isa_decompressedbytes < 0)||(isa_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("ISA DECOMPRESSION FAILURE:  %d!!\n", isa_decompressedbytes);
+				abort();
+			}
+
+#elif defined(_USE_WBLOSC_)
+			size_t dsize = blosc_decompress((char *)compressor.compressed_data(), (char *)MYBLOCK, (_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real));
+//			printf("blosc_decompress: %d -> %d\n", nbytes, dsize);
+			if ((dsize < 0)  || (dsize != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			{
+				printf("BLOSC: Decompression error.  Error code: %d\n", dsize);
+				abort();
+			}
+
+#elif defined(_USE_SHUFFLE_)
+                        reshuffle((char *)compressor.compressed_data(), nbytes, sizeof(Real));
+                        memcpy((void *) MYBLOCK, (void *)compressor.compressed_data(), nbytes);
+
+#else
+                        memcpy((void *) MYBLOCK, (void *)compressor.compressed_data(), nbytes);
+#endif
+			const int BS3 = (_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_)*sizeof(Real);
+			zratio2 = (1.0*BS3)/nbytes;
+#if defined(VERBOSE)
+			printf("decompressed %d bytes to %d bytes...(%.2lf)\n", nbytes, BS3, zratio2);
+#endif
+		}
+		t1 = omp_get_wtime();
+		t_wavelet += (t1-t0);
+
+		//fclose(f);
 
 		return zratio1*zratio2;
 	}
@@ -765,7 +978,7 @@ public:
 	virtual void load_file()
 	{
 		int myrank;
-        MPI_Comm_rank(comm, &myrank);
+		MPI_Comm_rank(comm, &myrank);
 
 		if (myrank == 0)
 			Reader_WaveletCompression::load_file();
@@ -780,7 +993,24 @@ public:
 			MPI_Bcast(&halffloat, sizeof(halffloat), MPI_CHAR, 0, comm);
 			MPI_Bcast(&doswapping, sizeof(doswapping), MPI_CHAR, 0, comm);
 			MPI_Bcast(&threshold, sizeof(threshold), MPI_CHAR, 0, comm);
-		}
+		}	
+
+#if 1
+		t_decode = t_wavelet = 0;
+
+		struct stat st; 
+		unsigned long fsize;
+		if (stat(path.c_str(), &st) == 0)
+			fsize = st.st_size;
+
+		data = (char *)malloc(fsize);
+		FILE * f = fopen(path.c_str(), "rb");
+	
+		fread(data, fsize, 1, f);
+		fclose(f);
+#else
+		data = NULL;
+#endif
 
 		size_t nentries = idx2chunk.size();
 

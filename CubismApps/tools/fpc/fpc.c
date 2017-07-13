@@ -22,7 +22,7 @@ Software License Terms and Conditions
 #include <assert.h>
 #include <string.h>
 
-#define SIZE 32768
+#define SIZE (16*32768)
 
 static const long long mask[8] =
 {0x0000000000000000LL,

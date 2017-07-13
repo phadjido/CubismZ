@@ -33,6 +33,8 @@ int main(int argc, char **argv)
 	/* Initialize MPI */
 	MPI_Init(&argc, &argv);
 
+//	blosc_init();
+
 #if defined(_USE_SZ_)||defined(_USE_SZ3_)
 	printf("sz.config...\n");
 	SZ_Init((char *)"sz.config");

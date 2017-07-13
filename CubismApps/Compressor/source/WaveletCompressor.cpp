@@ -46,6 +46,13 @@ extern "C"
 }
 #endif
 
+#if defined(_USE_FPC_)||defined(_USE_FPC2_)||defined(_USE_FPC3_)
+extern "C"
+{
+#include "fpc.h"
+}
+#endif
+
 
 void swapbytes(unsigned char *mem, int nbytes)
 {
@@ -248,11 +255,11 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 
 	serialize_bitset<BS3>(mask, bufcompression, BITSETSIZE);
 
-#if defined(_USE_SPDP3_)||defined(_USE_FPZIP3_)||defined(_USE_ZFP3_)||defined(_USE_SZ3_)
+#if defined(_USE_SPDP3_)||defined(_USE_FPZIP3_)||defined(_USE_ZFP3_)||defined(_USE_SZ3_)||defined(_USE_FPC3_)
 	{
 	int survbytes = sizeof(DataType)*survivors;
 	int outbytes;
-	int bufsize = 4*1024*1024*sizeof(char);
+	int bufsize = 8*1024*1024*sizeof(char);
 	unsigned char *tmp = (unsigned char *)malloc(bufsize);
 
 #if defined(_USE_SPDP3_)
@@ -295,7 +302,7 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 	int is_float = sizeof(Real)==4;
 	int layout[4] = {survivors, 1, 1, 1};
 	size_t nbytes_zfp;
-	int status = zfp_compress_buffer((char *)(bufcompression + BITSETSIZE), layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)tmp, &nbytes_zfp);
+	int status = zfp_compress_buffer((char *)bufcompression + BITSETSIZE, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)tmp, &nbytes_zfp);
 	outbytes = nbytes_zfp;
 #if VERBOSE
 	printf("zfp3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
@@ -323,6 +330,20 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 #if VERBOSE
 	printf("sz3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
 #endif
+
+#elif defined(_USE_FPC3_)
+
+        fpc_compress((char *)(bufcompression + BITSETSIZE), survbytes, (char*) tmp, &outbytes, 8);
+        if (outbytes < 0)
+        {
+                printf("FPC DECOMPRESSION FAILURE!!\n");
+                abort();
+        }
+
+#if VERBOSE
+	printf("fpc3 : %d -> %d (%.2fx)\n", survbytes, outbytes, 1.0*survbytes/outbytes);
+#endif
+
 
 #endif
 
@@ -471,7 +492,7 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 	bitset<BS3> mask;
 	const int expected = deserialize_bitset<BS3>(mask, bufcompression, BITSETSIZE);
 
-#if defined(_USE_SPDP3_)||defined(_USE_FPZIP3_)||defined(_USE_ZFP3_)||defined(_USE_SZ3_)
+#if defined(_USE_SPDP3_)||defined(_USE_FPZIP3_)||defined(_USE_ZFP3_)||defined(_USE_SZ3_)||defined(_USE_FPC3_)
         {
 	int outbytes;
 	int bufsize = 4*1024*1024*sizeof(char);
@@ -540,6 +561,19 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 
 #if VERBOSE
 	printf("sz3(D) : %d -> %d (vs %d)\n", survbytes, outbytes, survivors*sizeof(Real));
+#endif
+
+#elif defined(_USE_FPC3_)
+
+        fpc_decompress((char *)bufcompression + BITSETSIZE, survbytes, (char*) tmp, &outbytes);
+        if (outbytes < 0)
+        {
+                printf("FPC DECOMPRESSION FAILURE!!\n");
+                abort();
+        }
+
+#if VERBOSE
+	printf("fpc3(D) : %d -> %d (vs %d)\n", survbytes, outbytes, survivors*sizeof(Real));
 #endif
 
 #endif

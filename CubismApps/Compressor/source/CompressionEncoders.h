@@ -40,7 +40,7 @@ extern "C"
 }
 #endif
 
-#if defined(_USE_BLOSC_)
+#if defined(_USE_BLOSC_)||defined(_USE_WBLOSC_)
 #include "blosc.h"
 #endif
 
@@ -51,7 +51,7 @@ extern "C"
 }
 #endif
 
-#if defined(_USE_FPC_)||defined(_USE_FPC2_)
+#if defined(_USE_FPC_)||defined(_USE_FPC2_)||defined(_USE_FPC3_)
 extern "C"
 {
 #include "fpc.h"

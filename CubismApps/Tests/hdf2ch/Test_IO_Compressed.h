@@ -303,7 +303,7 @@ public:
 		double t1 = omp_get_wtime();
 
 		if (isroot) std::cout << "done" << endl;
-		if (isroot) std::cout << "elapsed time: " << t1-t0 << " s" << endl;
+		if (isroot) std::cout << "elapsed time: " << t1-t0 << " seconds" << endl;
 	}
 
 	void dispose()

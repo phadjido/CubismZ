@@ -6,6 +6,14 @@ h5file=$1
 
 ./genref.sh $h5file
 
+./build.sh 16   # make all wavz=1 zlib=1 zshuffle=1
+./bench_wavz.sh ./test_wavz.sh $h5file
+
+./build.sh 17  # make all zfp=1 zlib=1
+./bench_zfp.sh ./test_zfp.sh $h5file
+
+exit 
+
 #./build.sh 11  # make all sz=1
 #./bench_sz1.sh ./test_sz.sh $h5file
 
@@ -15,13 +23,11 @@ h5file=$1
 #./build.sh 2   # make all wavz=1 lzma=1 shuffle3=1
 #./bench_wavz1.sh ./test_wavz1.sh $h5file
 
-#exit
+#./build.sh 2   # make all wavz=1 lzma=1 shuffle3=1
+#./bench_wavz.sh ./test_wavz.sh $h5file
 
-./build.sh 2   # make all wavz=1 lzma=1 shuffle3=1
-./bench_wavz.sh ./test_wavz.sh $h5file
-
-./build.sh 14   # make all wavz=1 lzm=1 shuffle3=1
-./bench_wavz.sh ./test_zstd.sh $h5file
+#./build.sh 14   # make all wavz=1 zstd=1 shuffle3=1
+#./bench_wavz.sh ./test_zstd.sh $h5file
 
 exit
 

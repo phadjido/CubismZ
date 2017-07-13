@@ -238,6 +238,9 @@ protected:
 
 					WaveletCompressor compressor;
 
+#if 0	// xxx
+					Real * const mysoabuffer = &b(0, 0, 0).u;
+#else	// xxx
 					Real * const mysoabuffer = &compressor.uncompressed_data()[0][0][0];
 #if 0
 					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
@@ -261,6 +264,8 @@ protected:
 								mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = mystreamer.operate(ix, iy, iz);
 					}
 #endif
+
+#endif // xxx
 
 					//wavelet digestion
 #if defined(_USE_WAVZ_) /* WAVELET COMPRESSION */
@@ -297,7 +302,7 @@ protected:
 					int drain_level = (int)this->threshold;
 					char drain_level_value[16];
 					sprintf(drain_level_value, "%d", drain_level);
-					if(getenv("DRAIN_LEVEL") == NULL) setenv("DRAIN_LEVEL",drain_level_value, 1));
+					if(getenv("DRAIN_LEVEL") == NULL) setenv("DRAIN_LEVEL",drain_level_value, 1);
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 					nbytes = drain_3df_buffer((float * const)mysoabuffer, layout[0], layout[1], layout[2], (unsigned char *)compressor.compressed_data());
 #if VERBOSE
@@ -376,6 +381,33 @@ protected:
 					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
 					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+
+#elif defined(_USE_WBLOSC_)
+					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					int nbytes;
+#if defined(_USE_MORTON_)
+					APPLY_MORTON();
+#endif
+
+					int clevel = 6;
+					int doshuffle = 1;
+					int typesize = sizeof(Real);
+					int ZBUFSIZE = 4*1024*1024;
+
+					/* Compress with clevel=6 and shuffle active  */
+					size_t csize = blosc_compress(clevel, doshuffle, typesize, inbytes, mysoabuffer, compressor.compressed_data(), ZBUFSIZE);
+					if (csize < 0) {
+						printf("Compression error.  Error code: %d\n", csize);
+					}
+					nbytes = csize;
+#if VERBOSE
+					printf("blosc_compressor: from %d to %d bytes\n", inbytes, nbytes);
+#endif
+
+					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					mybytes += sizeof(nbytes);
+					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+
 
 #else /* NO COMPRESSION */
 //#error	"Compression method for blocks has not been defined!"
@@ -632,6 +664,8 @@ protected:
 				ss << "Wavelets: " << "sz" << "\n";
 #elif defined(_USE_ISA_)
 				ss << "Wavelets: " << "isa" << "\n";
+#elif defined(_USE_WBLOSC_)
+				ss << "Wavelets: " << "wblosc" << "\n";
 #elif defined(_USE_SHUFFLE_)
 				ss << "Wavelets: " << "shuffle" << "\n";
 #else
@@ -661,6 +695,7 @@ protected:
 
 		//compress my data, prepare for serialization
 		{
+			double t0 = omp_get_wtime();
 			written_bytes = pending_writes = completed_writes = 0;
 
 			if (allmydata.size() == 0)
@@ -691,8 +726,12 @@ protected:
 
 				written_bytes += extrabytes;
 			}
+			double t1 = omp_get_wtime();
+			printf("SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization %f seconds\n", t1-t0); 
 		}
 
+		double io_t0 = omp_get_wtime();
+		///
 		const MPI_Comm mycomm = inputGrid.getCartComm();
 		int mygid;
 		int comm_size;
@@ -701,8 +740,12 @@ protected:
 
 		//write into the file
 		Timer timer; timer.start();
+		if (getenv("CUBISMZ_NOIO") == NULL)
 		_to_file(mycomm, fileName);
 		vector<float> workload_file(1, timer.stop());
+		///
+		double io_t1 = omp_get_wtime();
+		printf("SerializerIO_WaveletCompression_MPI_Simple.h: _to_file %f seconds\n", io_t1-io_t0); 
 
 		//just a report now
 		if (verbosity)

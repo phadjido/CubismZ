@@ -68,6 +68,12 @@ then
 elif [ $method -eq 15 ]
 then
 	make all wavz=1 zstd0=1 shuffle3=1
+elif [ $method -eq 16 ]
+then
+	make all wavz=1 zlib=1 zshuffle=1
+elif [ $method -eq 17 ]
+then
+	make all zfp=1 zlib=1
 else
 	echo "no valid option"
 fi

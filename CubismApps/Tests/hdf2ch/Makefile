@@ -54,7 +54,7 @@ VPATH := ../../../Cubism/source/ ../../MPCFcluster/source/ ../../MPCFnode/source
 
 OBJECTS = main.o WaveletCompressor.o
 
-all: hdf2ch ch2diff
+all: hdf2ch ch2diff decompr
 
 hdf2ch: $(OBJECTS) 
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
@@ -62,11 +62,14 @@ hdf2ch: $(OBJECTS)
 ch2diff: ch2diff.o WaveletCompressor.o
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
 
+decompr: decompr.o WaveletCompressor.o
+	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
+
 %.o: %.cpp 
 	$(CC)  $(OPTFLAGS) $(CPPFLAGS) -c $^ -o $@
 
 clean:
-	rm -f *.o hdf2ch ch2diff
+	rm -f *.o hdf2ch ch2diff decompr
 
 cleanall:
 	rm -f *.o hdf2ch out*
