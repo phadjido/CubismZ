@@ -19,7 +19,11 @@ nb=$(echo "$ds/$bs" | bc)
 
 make clean
 
-if [ $method -eq 0 ]
+if [ $method -eq -1 ]
+then
+    # bypass all compression stages and write into channel format
+	make all
+elif [ $method -eq 0 ]
 then
 	make all wavz=1 zlib=1 shuffle3=1
 elif [ $method -eq 1 ]
