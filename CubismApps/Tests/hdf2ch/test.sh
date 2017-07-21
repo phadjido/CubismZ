@@ -18,7 +18,7 @@ inputfile=/home/chatzidp/gitlab/fabdata/data_010000-p.h5
 #./hdf2ch -bpdx 16 -bpdy 16 -bpdz 16 -sim io -simdata /home/chatzidp/gitlab/fabdata/data_010000-p.h5 -outdata tmp -threshold 0.0001 -wtype_write 3
 #./ch2diff -simdata1 tmp00000.StreamerGridPointIterative.channel0 -simdata2 ref.channel0 -wtype 3
 
-#./ch2diff -simdata1 tmp00000.StreamerGridPointIterative.channel0 -simdata2 ref.channel0 -wtype $wt
+./ch2diff -simdata1 tmp00000.StreamerGridPointIterative.channel0 -simdata2 ref.channel0 -wtype $wt
 
 ./decompr -simdata1 tmp00000.StreamerGridPointIterative.channel0 -simdata2 ref.channel0 -wtype $wt
 

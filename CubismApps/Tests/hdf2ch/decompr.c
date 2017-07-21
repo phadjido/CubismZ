@@ -83,8 +83,6 @@ int main(int argc, char **argv)
 //	myreader2.load_file();
 	const double init_t1 = omp_get_wtime();
 
-	const double t0 = omp_get_wtime();
-
 	int dim[3], period[3], reorder;
 	int coord[3], id;
 
@@ -94,6 +92,8 @@ int main(int argc, char **argv)
 	if (isroot) fprintf(stdout, "[A] I found in total %dx%dx%d blocks.\n", NBX1, NBY1, NBZ1);
 
 	static Real targetdata1[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
+
+	const double t0 = omp_get_wtime();
 
 	const int nblocks = NBX1*NBY1*NBZ1;
 	const int b_end = ((nblocks + (mpi_size - 1))/ mpi_size) * mpi_size;
@@ -116,9 +116,9 @@ int main(int argc, char **argv)
 		else {
 		}
 	}
+	const double t1 = omp_get_wtime();
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	const double t1 = omp_get_wtime();
 
 	if (!mpi_rank)
 	{

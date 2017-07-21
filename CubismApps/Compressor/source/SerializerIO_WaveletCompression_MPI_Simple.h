@@ -349,7 +349,7 @@ protected:
 
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 
-					int *bytes_sz = (int *)malloc(sizeof(int));
+					size_t *bytes_sz = (size_t *)malloc(sizeof(size_t));
 					unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, 0, 0, layout[2], layout[1], layout[0]);
 					nbytes = *bytes_sz;
 					memcpy(compressor.compressed_data(), compressed_sz, nbytes);
