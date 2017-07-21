@@ -59,7 +59,6 @@ then
 elif [ $method -eq 11 ]
 then
 	make all sz=1
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jvm/java-1.8.0/jre/lib/amd64/server
 elif [ $method -eq 12 ]
 then
 	make all isa=1
