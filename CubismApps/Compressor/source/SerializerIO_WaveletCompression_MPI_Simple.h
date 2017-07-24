@@ -344,18 +344,23 @@ protected:
 					double sz_abs_acc = 0.0;
 					double sz_rel_acc = 0.0;
 					double sz_pwr_acc = 0.0;
+#if !defined(_USE_SZ148_)
 					int sz_pwr_type = SZ_PWR_MAX_TYPE;
+#endif
 					if(getenv("SZ_ABS_ACC")) sz_abs_acc = atof(getenv("SZ_ABS_ACC"));
 					//SZ_ABS_ACC=$PARAM
 					sz_abs_acc = (double) this->threshold;
 
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 
+#if !defined(_USE_SZ148_)
 					size_t *bytes_sz = (size_t *)malloc(sizeof(size_t));
-//					unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, 0, 0, layout[2], layout[1], layout[0]);
 					unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, sz_pwr_acc, sz_pwr_type, 0, 0, layout[2], layout[1], layout[0]);
 //unsigned char* SZ_compress_args(int dataType, void *data, size_t *outSize, int errBoundMode, double absErrBound, double relBoundRatio, double pwrBoundRatio, int pwrType, size_t r5, size_t r4, size_t r3, size_t r2, size_t r1);
-
+#else
+					int *bytes_sz = (int *)malloc(sizeof(int));
+					unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, 0, 0, layout[2], layout[1], layout[0]);
+#endif
 
 					nbytes = *bytes_sz;
 					memcpy(compressor.compressed_data(), compressed_sz, nbytes);

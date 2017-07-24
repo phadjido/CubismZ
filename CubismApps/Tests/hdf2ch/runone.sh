@@ -7,7 +7,7 @@ h5file=$1
 ./genref.sh $h5file
 
 ./build.sh 11  # make all sz=1
-./bench_sz1.sh ./test_sz.sh $h5file
+./bench_sz.sh ./test_sz.sh $h5file
 
 exit
 
@@ -48,7 +48,3 @@ fpz24=`echo $h5file | sed 's/\// /g' | awk '{print $NF}'`_fpzip24_res.txt
 fpz16=`echo $h5file | sed 's/\// /g' | awk '{print $NF}'`_fpzip16_res.txt
 fpz=`echo $h5file | sed 's/\// /g' | awk '{print $NF}'`_fpzip_res.txt
 cat $fpz24 $fpz16 > $fpz
-
-
-./build.sh 11  # make all sz=1
-./bench_sz.sh ./test_sz.sh $h5file

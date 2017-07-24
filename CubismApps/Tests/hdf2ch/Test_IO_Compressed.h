@@ -287,7 +287,11 @@ public:
 		streamer<<step_id;
 
 #if defined(_USE_SZ_)||defined(_USE_SZ3_)
+#if defined(_USE_SZ148_)
+		SZ_Init((char *)"sz148.config");
+#else
 		SZ_Init((char *)"sz.config");
+#endif
 		omp_set_num_threads(1);
 #endif
 
