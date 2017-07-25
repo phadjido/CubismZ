@@ -58,7 +58,8 @@ then
 	make all zfp=1
 elif [ $method -eq 11 ]
 then
-	make all sz=1 sz148=1  # xx
+	# make all sz=1 sz148=1  # xx
+	make all sz=1
 elif [ $method -eq 12 ]
 then
 	make all isa=1

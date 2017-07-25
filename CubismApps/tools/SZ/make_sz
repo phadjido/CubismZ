@@ -5,12 +5,15 @@
 # Description: Build sz library
 # Copyright 2017 ETH Zurich. All Rights Reserved.
 CWD="$(pwd -P)"
-mkdir -p build
 
 # SZ
-git clone https://github.com/disheng222/SZ.git src
+if [[ ! -d "./src" ]]; then
+    git clone https://github.com/disheng222/SZ.git src
+fi
+rm -rf build
+mkdir -p build
 cd src
-./configure --prefix=${CWD}/build --enable-static
+./configure --prefix=${CWD}/build --disable-shared
 make -j4
 make install
 make clean
