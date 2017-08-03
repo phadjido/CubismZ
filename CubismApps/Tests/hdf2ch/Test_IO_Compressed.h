@@ -139,13 +139,13 @@ protected:
 
 		H5open();
 		fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-		status = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+//		status = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
 		file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
 		status = H5Pclose(fapl_id);
 
 		dataset_id = H5Dopen2(file_id, "data", H5P_DEFAULT);
 		fapl_id = H5Pcreate(H5P_DATASET_XFER);
-		H5Pset_dxpl_mpio(fapl_id, H5FD_MPIO_COLLECTIVE);
+//		H5Pset_dxpl_mpio(fapl_id, H5FD_MPIO_COLLECTIVE);
 
 		fspace_id = H5Dget_space(dataset_id);
 		H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
@@ -250,7 +250,7 @@ public:
 		_setup_mpi_constants(XPESIZE, YPESIZE, ZPESIZE);
 
 		VERBOSITY = 0;
-		if (!isroot)
+		if (isroot)
 			VERBOSITY = 1;
 
 		if (VERBOSITY)
@@ -307,7 +307,14 @@ public:
 		double t1 = omp_get_wtime();
 
 		if (isroot) std::cout << "done" << endl;
-		if (isroot) std::cout << "elapsed time: " << t1-t0 << " seconds" << endl;
+//		if (isroot) std::cout << "elapsed time: " << t1-t0 << " seconds" << endl;
+
+		int nthreads;
+		#pragma omp parallel
+		#pragma omp master 
+		nthreads = omp_get_num_threads();
+
+		if (isroot) std::cout << "threads: " << nthreads << " elapsed time: " << t1-t0 << " seconds" << endl;
 	}
 
 	void dispose()

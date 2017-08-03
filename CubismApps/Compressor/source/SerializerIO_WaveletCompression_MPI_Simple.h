@@ -215,7 +215,7 @@ protected:
 		int compress_threads = omp_get_max_threads();	// peh: recheck this on BGQ
 		if (compress_threads < 1) compress_threads = 1;
 
-#pragma omp parallel num_threads(compress_threads)
+#pragma omp parallel //num_threads(compress_threads)
 		{
 		  const int tid = omp_get_thread_num();
 
@@ -239,7 +239,10 @@ protected:
 					WaveletCompressor compressor;
 
 #if 0	// xxx
-					Real * const mysoabuffer = &b(0, 0, 0).u;
+					Real * const bp = &b.data[0][0][0].u;
+					Real * const mysoabuffer = bp; 
+//					Real * const mysoabuffer = &compressor.uncompressed_data()[0][0][0];
+//					memcpy(mysoabuffer, bp, _BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_*sizeof(Real));
 #else	// xxx
 					Real * const mysoabuffer = &compressor.uncompressed_data()[0][0][0];
 #if 0
@@ -250,10 +253,20 @@ protected:
 #else
 					if(streamer.name() == "StreamerGridPointIterative")
 					{
+#if 1
 					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
 						for(int iy=0; iy<FluidBlock::sizeY; iy++)
 							for(int ix=0; ix<FluidBlock::sizeX; ix++)
 								mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = streamer.template operate<channel>(b(ix, iy, iz));
+#else
+					Real * const bp = &b.data[0][0][0].u;
+
+					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
+						for(int iy=0; iy<FluidBlock::sizeY; iy++)
+							for(int ix=0; ix<FluidBlock::sizeX; ix++)
+								mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = 
+								bp[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)]; 
+#endif
 					}
 					else
 					{
@@ -482,6 +495,9 @@ protected:
 		int nranks;
 		MPI_Comm_rank(mycomm, &mygid);
 		MPI_Comm_size(mycomm, &nranks);
+
+
+		printf("_to_file 11111\n"); fflush(0);
 
 		MPI_Info myfileinfo;
 		MPI_Info_create(&myfileinfo);
@@ -1147,6 +1163,9 @@ class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCo
 	{
 		if (nofcalls)
 			_wait_all_quiet();
+
+
+		printf("_to_file 22222\n"); fflush(0);
 
 		int mygid;
 		int nranks;

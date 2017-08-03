@@ -10,7 +10,8 @@ else
 fi
 
 bs=32
-ds=512
+#ds=512
+ds=1024
 nb=$(echo "$ds/$bs" | bc)
 
 #make clean

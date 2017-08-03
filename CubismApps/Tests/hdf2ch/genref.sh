@@ -23,7 +23,7 @@ rm -f ref.channel0
 
 make clean
 make all
-./hdf2ch -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata c1 
+srun ./hdf2ch -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata c1 
 mv c100000.StreamerGridPointIterative.channel0 ref.channel0
 
 

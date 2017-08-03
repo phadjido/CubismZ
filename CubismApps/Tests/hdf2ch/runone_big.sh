@@ -4,27 +4,25 @@ set -x #echo on
 ##################
 h5file=$1
 
-./genref.sh $h5file
-
-./build.sh 11  # make all sz=1
-./bench_sz1.sh ./test_sz.sh $h5file
-
-exit
+./genref_big.sh $h5file
 
 ./build.sh 16   # make all wavz=1 zlib=1 zshuffle=1
-./bench_wavz.sh ./test_wavz.sh $h5file
+./bench_wavz.sh ./test_wavz_big.sh $h5file
 
 ./build.sh 10  # make all zfp=1
-./bench_zfp.sh ./test_zfp.sh $h5file
+./bench_zfp.sh ./test_zfp_big.sh $h5file
 
+./build.sh 11  # make all sz=1
+./bench_sz.sh ./test_sz_big.sh $h5file
 
 ./build.sh 8   # make all fpzip=1 
-./bench_fpzip1.sh ./test_fpzip.sh $h5file
+./bench_fpzip1.sh ./test_fpzip_big.sh $h5file
+
+exit 
 
 #./build.sh 17  # make all zfp=1 zlib=1
 #./bench_zfp.sh ./test_zfp.sh $h5file
 
-exit 
 
 
 #./build.sh 2   # make all wavz=1 lzma=1 shuffle3=1
