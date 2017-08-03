@@ -58,6 +58,10 @@ then
 	make all zfp=1
 elif [ $method -eq 11 ]
 then
+<<<<<<< HEAD
+=======
+	# make all sz=1 sz148=1  # xx
+>>>>>>> b3fbc77e020504accb73849bdb1b188bebd37478
 	make all sz=1
 elif [ $method -eq 12 ]
 then
