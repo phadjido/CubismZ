@@ -93,7 +93,7 @@ protected:
 	struct CompressionBuffer
 	{
 	  BlockMetadata hotblocks[ENTRIES];
-	  unsigned char compressedbuffer[BUFFERSIZE];
+	  unsigned char compressedbuffer[2*BUFFERSIZE];
 	};
 
 	struct TimingInfo { float total, fwt, encoding; };
@@ -113,7 +113,7 @@ protected:
 	vector< float > workload_total, workload_fwt, workload_encode; //per-thread cpu time for imbalance insight for fwt and encoding
 	vector<CompressionBuffer> workbuffer; //per-thread compression buffer
 
-	float _encode_and_flush(unsigned char inputbuffer[], int& bufsize, const int maxsize, BlockMetadata metablocks[], int& nblocks)
+	float _encode_and_flush(unsigned char inputbuffer[], long& bufsize, const long maxsize, BlockMetadata metablocks[], int& nblocks)
 	{
 		//0. setup
 		//1. compress the data with zlib, obtain zptr, zbytes
@@ -126,7 +126,7 @@ protected:
 		Timer timer; timer.start();
 		const unsigned char * const zptr = inputbuffer;
 		size_t zbytes = bufsize;
-		int dstoffset = -1;
+		size_t dstoffset = -1;
 		int idcompression = -1;
 
 		//1.
@@ -162,7 +162,9 @@ protected:
 				while (pending_writes != completed_writes) sched_yield();
 
 				//safely resize
+				printf("resizing allmydata to %ld bytes\n", written_bytes);
 				allmydata.resize(written_bytes);
+				
 			}
 
 			idcompression = lut_compression.size();
@@ -173,6 +175,7 @@ protected:
 
 		//4.
 		assert(allmydata.size() >= written_bytes);
+		//printf("zptr = %p,  zbytes = %ld, allmydata.size()=%ld, written_bytes=%ld, dstoffset=%ld\n", zptr, zbytes, allmydata.size(), written_bytes, dstoffset);
 		memcpy(&allmydata.front() + dstoffset, zptr, zbytes);
 
 #pragma omp atomic
@@ -221,7 +224,7 @@ protected:
 
 		  CompressionBuffer & mybuf = workbuffer[tid];
 
-			int mybytes = 0, myhotblocks = 0;
+			long mybytes = 0; int myhotblocks = 0;
 
 			float tfwt = 0, tencode = 0;
 			Timer timer;
@@ -477,11 +480,11 @@ protected:
 				}
 
 				if (mybytes >= ALERT || myhotblocks >= ENTRIES)
-					tencode = _encode_and_flush(mybuf.compressedbuffer, mybytes, BUFFERSIZE, mybuf.hotblocks, myhotblocks);
+					tencode = _encode_and_flush(mybuf.compressedbuffer, mybytes, (long)BUFFERSIZE, mybuf.hotblocks, myhotblocks);
 			}
 
 			if (mybytes > 0)
-				tencode = _encode_and_flush(mybuf.compressedbuffer, mybytes, BUFFERSIZE, mybuf. hotblocks, myhotblocks);
+				tencode = _encode_and_flush(mybuf.compressedbuffer, mybytes, (long)BUFFERSIZE, mybuf. hotblocks, myhotblocks);
 
 			workload_total[tid] = timer.stop();
 			workload_fwt[tid] = tfwt;
@@ -728,7 +731,7 @@ protected:
 			if (allmydata.size() == 0)
 			{
 				const size_t speculated_compression_rate = 10;
-				allmydata.resize(NBLOCKS * sizeof(Real) * NPTS);
+				allmydata.resize(NBLOCKS * sizeof(Real) * NPTS + 4*1024*1024);
 			}
 
 			myblockindices.clear();
