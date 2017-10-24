@@ -19,6 +19,7 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <mpi.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -59,13 +60,13 @@ struct lru_cache_type
 	unsigned char cachedbuf[16][4*1024*1024];	// cached decompressed chunk
 	unsigned long start[16];			// chunk id
 	double timestamp[16];				// last accessed time
-	
+
 	unsigned char *fetch_buffer(int chunk_start, int *ready)
 	{
 		for (int i = 0; i < 16; i++) {
 			if (chunk_start == start[i]) {
 				timestamp[i] = -omp_get_wtime();
-				*ready = 1;	
+				*ready = 1;
 				return cachedbuf[i];
 			}
 		}
@@ -82,7 +83,7 @@ struct lru_cache_type
 		}
 
 		*ready = 0;
-		timestamp[lru_index] = -omp_get_wtime();	
+		timestamp[lru_index] = -omp_get_wtime();
 		start[lru_index] = chunk_start;
 		return cachedbuf[lru_index];
 	}
@@ -848,12 +849,12 @@ public:
 		assert(start + compressedchunk.extent <= global_header_displacement);
 
 		//vector<unsigned char> compressedbuf(compressedchunk.extent);
-		unsigned char *compressedbuf; 
+		unsigned char *compressedbuf;
 		//fseek(f, compressedchunk.start, SEEK_SET);
-		f = f0 + compressedchunk.start; 
+		f = f0 + compressedchunk.start;
 		//fread(&compressedbuf.front(), compressedchunk.extent, 1, f);
 		//memcpy(&compressedbuf.front(), f, compressedchunk.extent);
-		compressedbuf = f; 
+		compressedbuf = f;
 
 		t1 = omp_get_wtime();
 		t_other += (t1-t0);
@@ -1053,12 +1054,12 @@ public:
 		unsigned char *decompressedchunk = lru_cache.fetch_buffer(start, &ready);
 
 		//vector<unsigned char> compressedbuf(compressedchunk.extent);
-		unsigned char *compressedbuf; 
+		unsigned char *compressedbuf;
 		//fseek(f, compressedchunk.start, SEEK_SET);
-		f = f0 + compressedchunk.start; 
+		f = f0 + compressedchunk.start;
 		//fread(&compressedbuf.front(), compressedchunk.extent, 1, f);
 		//memcpy(&compressedbuf.front(), f, compressedchunk.extent);
-		compressedbuf = f; 
+		compressedbuf = f;
 
 		t1 = omp_get_wtime();
 		t_other += (t1-t0);
@@ -1068,7 +1069,7 @@ public:
 		//size_t zz_bytes = compressedbuf.size();
 		size_t zz_bytes = compressedchunk.extent;
 		//static vector<unsigned char> waveletbuf(2 << 21); // 21: 4MB, 22: 8MB, 28: 512MB
-		unsigned char *waveletbuf = decompressedchunk; 
+		unsigned char *waveletbuf = decompressedchunk;
 		//static unsigned char waveletbuf[4*1024*1024];
 		//static vector<unsigned char> waveletbuf(2 << 28);
 
@@ -1262,26 +1263,26 @@ public:
 			MPI_Bcast(&halffloat, sizeof(halffloat), MPI_CHAR, 0, comm);
 			MPI_Bcast(&doswapping, sizeof(doswapping), MPI_CHAR, 0, comm);
 			MPI_Bcast(&threshold, sizeof(threshold), MPI_CHAR, 0, comm);
-		}	
+		}
 
 #if 1
 		t_decode = t_wavelet = 0;
 
-		struct stat st; 
+		struct stat st;
 		unsigned long fsize;
 		if (stat(path.c_str(), &st) == 0)
 			fsize = st.st_size;
 
 		data = (unsigned char *)malloc(fsize);
 		FILE * f = fopen(path.c_str(), "rb");
-	
+
 		fread(data, fsize, 1, f);
 		fclose(f);
 //		double dd = 0;
-//		for (long i = fsize-1; i >= 0; i--) 
+//		for (long i = fsize-1; i >= 0; i--)
 //		{
 //			dd += data[i];
-//		} 
+//		}
 #else
 		data = NULL;
 #endif
