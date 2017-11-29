@@ -1,4 +1,9 @@
-*.a
-*.la*
-*.so*
-!./DRain/lib/libDRain.a
+/ch2diff/ch2diff
+/ch2hdf/ch2hdf
+/ch2hdf/ch2roi
+/dataf/compdat
+/dataf/compdat2
+/dataf/printdat
+/dataf/printdat_stride
+/dataf/writedat
+/reader/mytest

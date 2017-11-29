@@ -1,6 +1,6 @@
 /*
  *  main.cpp
- *  
+ *
  *
  *  Created by Diego Rossinelli on 3/27/13.
  *  Copyright 2013 ETH Zurich. All rights reserved.
@@ -12,16 +12,19 @@
 int main(int argc, const char **  argv)
 {
 	ArgumentParser argparser(argc, argv);
-	
+
 	const string pathtosimdata = argparser("-simdata").asString("data.channel0");
-	Reader_WaveletCompression myreader(pathtosimdata);
+	const bool swap = argparser("-swap").asBool(false);
+	const int wtype = argparser("-wtype_read").asInt(1);
+
+	Reader_WaveletCompression myreader(pathtosimdata, swap, wtype);
 	myreader.load_file();
 	printf("I found in total %dx%dx%d blocks.\n", myreader.xblocks(), myreader.yblocks(), myreader.zblocks());
-	
+
 	if (true)
 	{
 		Real targetdata[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
-		
+
 		printf("OK FINAL TEST: THE DATA\n");
 		const int xblocks = myreader.xblocks();
 		const int yblocks = myreader.yblocks();
@@ -40,6 +43,6 @@ int main(int argc, const char **  argv)
 							}
 				}
 	}
-	
+
 	return 0;
 }

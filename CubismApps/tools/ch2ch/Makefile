@@ -4,6 +4,7 @@ CC ?= mpic++
 bs ?= 32
 ap ?= float
 config ?=release
+fpzip = 1
 
 include ../../Makefile.config
 

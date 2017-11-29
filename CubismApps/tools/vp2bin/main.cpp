@@ -1,6 +1,6 @@
 /*
  *  main.cpp
- *  
+ *
  *
  *  Created by Panagiotis Chatzidoukas on 3/28/13.
  *  Copyright 2013 ETH Zurich. All rights reserved.
@@ -44,6 +44,8 @@ int main(int argc, const char **argv)
 
 	const string inputfile_name = argparser("-simdata").asString("none");
 	const string binfile_name = argparser("-binfile").asString("none");
+    const bool swap = argparser("-swap").asBool(false);
+    const int wtype = argparser("-wtype_read").asInt(1);
 
 	if ((inputfile_name == "none")||(binfile_name == "none"))
 	{
@@ -51,12 +53,12 @@ int main(int argc, const char **argv)
 		exit(1);
 	}
 
-	Reader_WaveletCompressionMPI myreader(mycomm, inputfile_name);
+	Reader_WaveletCompressionMPI myreader(mycomm, inputfile_name, swap, wtype);
 
 	myreader.load_file();
 	const double init_t1 = omp_get_wtime();
 
-	const double t0 = omp_get_wtime(); 
+	const double t0 = omp_get_wtime();
 
 	string binfile_fullname = binfile_name + ".bin";;
 
@@ -72,17 +74,17 @@ int main(int argc, const char **argv)
 	int NBY = myreader.yblocks();
 	int NBZ = myreader.zblocks();
 	fprintf(stdout, "I found in total %dx%dx%d blocks.\n", NBX, NBY, NBZ);
-	
+
 	static Real targetdata[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
 	static Real storedata[_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_];
 
 	const int nblocks = NBX*NBY*NBZ;
-	const int b_end = ((nblocks + (mpi_size - 1))/ mpi_size) * mpi_size; 
+	const int b_end = ((nblocks + (mpi_size - 1))/ mpi_size) * mpi_size;
 
 	const Real scalefactor = (Real) argparser("-scalefactor").asDouble(1.0);
 	if (isroot) printf("scalefactor = %lf\n" , scalefactor);
 
-	for (int b = mpi_rank; b < b_end; b += mpi_size)	
+	for (int b = mpi_rank; b < b_end; b += mpi_size)
 	{
 #if defined(_TRANSPOSE_DATA_)
 		int x = b / (NBY * NBZ);
@@ -96,13 +98,13 @@ int main(int argc, const char **argv)
 		if (b < nblocks)
 		{
 #if defined(VERBOSE)
-			fprintf(stdout, "loading block( %d, %d, %d )...\n", x, y, z); 
+			fprintf(stdout, "loading block( %d, %d, %d )...\n", x, y, z);
 #endif
 			double zratio = myreader.load_block2(x, y, z, targetdata);
 #if defined(VERBOSE)
-			fprintf(stdout, "compression ratio was %.2lf\n", zratio); 
+			fprintf(stdout, "compression ratio was %.2lf\n", zratio);
 #endif
-			
+
 			if (scalefactor != 1.0) {
 			for (int zb = 0; zb < _BLOCKSIZE_; zb++)
 				for (int yb = 0; yb < _BLOCKSIZE_; yb++)
@@ -130,7 +132,7 @@ int main(int argc, const char **argv)
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	const double t1 = omp_get_wtime(); 
+	const double t1 = omp_get_wtime();
 
 	if (!mpi_rank)
 	{
@@ -138,7 +140,7 @@ int main(int argc, const char **argv)
 		fprintf(stdout, "Elapsed time = %.3lf seconds\n", t1-t0);
 		fflush(0);
 	}
-	
+
 
 	/* Close/release resources */
         pio.Finalize();

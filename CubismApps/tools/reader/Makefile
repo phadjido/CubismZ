@@ -1,6 +1,7 @@
 bs ?= 16
+align ?= 16
 
-MYFLAGS =  -D_BLOCKSIZE_=$(bs) -D_FLOAT_PRECISION_ -D_SP_COMP_ -g -fopenmp -I../../../Cubism/source/
+MYFLAGS =  -D_ALIGNBYTES_=$(align) -D_BLOCKSIZE_=$(bs) -D_FLOAT_PRECISION_ -D_SP_COMP_ -g -fopenmp -I../../../Cubism/source/
 
 mytest: main.o WaveletCompressor.o
 	$(CC) WaveletCompressor.o  main.o  -o mytest  $(MYFLAGS) -lz -lstdc++
