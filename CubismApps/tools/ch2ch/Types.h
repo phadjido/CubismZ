@@ -1,6 +1,6 @@
 /*
  *  Types.h
- *  MPCFnode
+ *  CubismZ
  *
  *  Created by Jonas Sukys on May 10, 2015.
  *  Copyright 2015 ETH Zurich. All rights reserved.
@@ -25,7 +25,7 @@ using namespace std;
 class Simulation
 {
 public:
-    
+
 	virtual void setup() { }
 	virtual void dispose() { }
 	virtual ~Simulation() { }
@@ -34,9 +34,9 @@ public:
 struct FluidElement
 {
   Real r, u, v, w, p, G, P, dummy;
-  
+
   void clear() { r = u = v = w = p = G = P = dummy = 0; }
-  
+
   FluidElement& operator = (const FluidElement & gp)
   {
     this->r = gp.r;
@@ -46,7 +46,7 @@ struct FluidElement
     this->p = gp.p;
     this->G = gp.G;
     this->P = gp.P;
-    
+
     return *this;
   }
 };
@@ -58,52 +58,52 @@ struct FluidBlock
 	static const int sizeZ = _BLOCKSIZE_;
 
 	static const int gptfloats = sizeof(FluidElement)/sizeof(Real);
-	
+
 	typedef FluidElement ElementType;
 	typedef FluidElement element_type;
-	
+
 	FluidElement __attribute__((__aligned__(_ALIGNBYTES_))) data[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
-    
+
 	void clear_data()
 	{
 		const int N = sizeX*sizeY*sizeZ;
 		FluidElement * const e = &data[0][0][0];
 		for(int i=0; i<N; ++i) e[i].clear();
 	}
-    
+
 	void clear()
 	{
 		clear_data();
 	}
-    
+
 	inline FluidElement& operator()(int ix, int iy=0, int iz=0)
 	{
 		assert(ix>=0 && ix<sizeX);
 		assert(iy>=0 && iy<sizeY);
 		assert(iz>=0 && iz<sizeZ);
-		
+
 		return data[iz][iy][ix];
 	}
-		
+
 	template <typename Streamer>
 	inline void minmax(Real minval[Streamer::channels], Real maxval[Streamer::channels], Streamer streamer = Streamer())
 	{
 		enum { NCHANNELS = Streamer::channels };
-				
+
 		streamer.operate(data[0][0][0], minval);
 		streamer.operate(data[0][0][0], maxval);
-		
+
 		for(int iz=0; iz<sizeZ; iz++)
 			for(int iy=0; iy<sizeY; iy++)
 				for(int ix=0; ix<sizeX; ix++)
 				{
 					Real tmp[NCHANNELS];
-					
+
 					streamer.operate(data[iz][iy][ix], tmp);
-					
+
 					for(int ic = 0; ic < NCHANNELS; ++ic)
 						minval[ic] = std::min(minval[ic], tmp[ic]);
-					
+
 					for(int ic = 0; ic < NCHANNELS; ++ic)
 						maxval[ic] = std::max(maxval[ic], tmp[ic]);
 				}
@@ -113,7 +113,7 @@ struct FluidBlock
 struct StreamerGridPointIterative
 {
 	static const int channels = 7;
-  
+
 	FluidBlock * ref;
 	StreamerGridPointIterative(FluidBlock& b): ref(&b) {}
 	StreamerGridPointIterative(): ref(NULL) {}
@@ -143,65 +143,65 @@ template<> inline Real StreamerGridPointIterative::operate<7>(const FluidElement
 struct StreamerVelocityMagnitude
 {
   static const int channels = 1;
-  
+
   FluidBlock * ref;
   StreamerVelocityMagnitude (FluidBlock& b) : ref (&b) {}
   StreamerVelocityMagnitude () : ref (NULL) {}
-  
+
   template<int channel>
   static inline Real operate(const FluidElement& input) { abort(); return 0; }
-  
+
   inline Real operate(const int ix, const int iy, const int iz) const
   {
     const Real& u = ref->data[iz][iy][ix].u;
     const Real& v = ref->data[iz][iy][ix].v;
     const Real& w = ref->data[iz][iy][ix].w;
-    
+
     Real m = sqrt ( u*u + v*v + w*w );
-    
+
     return m;
   }
-  
+
   const char * name() { return "StreamerVelocityMagnitude" ; }
 };
 
 struct StreamerSpeedOfSound
 {
   static const int channels = 1;
-  
+
   FluidBlock * ref;
   StreamerSpeedOfSound (FluidBlock& b) : ref (&b) {}
   StreamerSpeedOfSound () : ref (NULL) {}
-  
+
   template<int channel>
   static inline Real operate(const FluidElement& input) { abort(); return 0; }
-  
+
   inline Real operate(const int ix, const int iy, const int iz) const
   {
     const Real& r = ref->data[iz][iy][ix].r;
     const Real& p = ref->data[iz][iy][ix].p;
     const Real& G = ref->data[iz][iy][ix].G;
     const Real& P = ref->data[iz][iy][ix].P;
-    
+
     Real c = sqrt ( (1/G + 1) * (p + P/G / (1/G + 1)) / r);
-    
+
     return c;
   }
-  
+
   const char * name() { return "StreamerSpeedOfSound" ; }
 };
 
 struct StreamerMachNumber
 {
   static const int channels = 1;
-  
+
   FluidBlock * ref;
   StreamerMachNumber (FluidBlock& b) : ref (&b) {}
   StreamerMachNumber () : ref (NULL) {}
-  
+
   template<int channel>
   static inline Real operate(const FluidElement& input) { abort(); return 0; }
-  
+
   inline Real operate(const int ix, const int iy, const int iz) const
   {
     const Real& r = ref->data[iz][iy][ix].r;
@@ -211,14 +211,14 @@ struct StreamerMachNumber
     const Real& p = ref->data[iz][iy][ix].p;
     const Real& G = ref->data[iz][iy][ix].G;
     const Real& P = ref->data[iz][iy][ix].P;
-    
+
     Real m = sqrt ( u*u + v*v + w*w );
     Real c = sqrt ( (1/G + 1) * (p + P/G / (1/G + 1)) / r);
     Real M = m / c;
-    
+
     return M;
   }
-  
+
   const char * name() { return "StreamerMachNumber" ; }
 };
 

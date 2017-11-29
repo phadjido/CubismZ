@@ -46,17 +46,17 @@ LIBS += -ldl
 #endif
 
 
-CPPFLAGS += -I../../Cubism/source -I../Cubism/source -I../../../Cubism/source/ -I../../MPCFcluster/source/ -I../../MPCFnode/source -I../../MPCcore/source -I.  -I../../tools/reader
+CPPFLAGS += -I../../../Cubism/source/ -I../../Compressor/source -I. -I../../tools/reader
 
 ##################
-VPATH := ../../../Cubism/source/ ../../MPCFcluster/source/ ../../MPCFnode/source/ .
+VPATH := ../../../Cubism/source/ ../../Compressor/source/ .
 #.DEFAULT_GOAL := hdf2ch
 
 OBJECTS = main.o WaveletCompressor.o
 
 all: hdf2ch ch2diff decompr
 
-hdf2ch: $(OBJECTS) 
+hdf2ch: $(OBJECTS)
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
 
 ch2diff: ch2diff.o WaveletCompressor.o
@@ -65,7 +65,7 @@ ch2diff: ch2diff.o WaveletCompressor.o
 decompr: decompr.o WaveletCompressor.o
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
 
-%.o: %.cpp 
+%.o: %.cpp
 	$(CC)  $(OPTFLAGS) $(CPPFLAGS) -c $^ -o $@
 
 clean:

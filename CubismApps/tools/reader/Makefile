@@ -7,9 +7,9 @@ mytest: main.o WaveletCompressor.o
 
 main.o: main.cpp
 	$(CC) $(MYFLAGS) -c main.cpp -o main.o
-	
-WaveletCompressor.o: ../../MPCFnode/source/WaveletCompressor.cpp
-	$(CC) $(MYFLAGS) -c ../../MPCFnode/source/WaveletCompressor.cpp -o WaveletCompressor.o
-	
+
+WaveletCompressor.o: ../../Compressor/source/WaveletCompressor.cpp
+	$(CC) $(MYFLAGS) -c ../../Compressor/source/WaveletCompressor.cpp -o WaveletCompressor.o
+
 clean: *.o
 	rm mytest *.o

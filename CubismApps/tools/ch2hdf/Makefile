@@ -3,9 +3,9 @@ CC = mpic++
 #CC = CC
 bs = 32
 hdf = 1
-include ../../Makefile.config 
+include ../../Makefile.config
 
-CPPFLAGS += -I../reader 
+CPPFLAGS += -I../reader
 CPPFLAGS += $(extra)
 
 # CSCS
@@ -39,8 +39,8 @@ LIBS += -ldl
 #endif
 #
 #ifeq "$(lz4)" "1"
-#	MYFLAGS += -D_USE_LZ4_  
-#endif    
+#	MYFLAGS += -D_USE_LZ4_
+#endif
 
 all: ch2hdf ch2roi
 
@@ -49,16 +49,16 @@ ch2hdf: main.o WaveletCompressor.o
 
 main.o: main.cpp
 	$(CC) $(CPPFLAGS) -c main.cpp -o main.o
-	
+
 ch2roi: main_roi.o WaveletCompressor.o
 	$(CC) $(CPPFLAGS) WaveletCompressor.o  main_roi.o  -o ch2roi $(LIBS)
 
 main_roi.o: main_roi.cpp
 	$(CC) $(CPPFLAGS) -c main_roi.cpp -o main_roi.o
 
-WaveletCompressor.o: ../../MPCFnode/source/WaveletCompressor.cpp
-	$(CC) $(CPPFLAGS) -c ../../MPCFnode/source/WaveletCompressor.cpp -o WaveletCompressor.o
-	
+WaveletCompressor.o: ../../Compressor/source/WaveletCompressor.cpp
+	$(CC) $(CPPFLAGS) -c ../../Compressor/source/WaveletCompressor.cpp -o WaveletCompressor.o
+
 clean:
 	rm -f ch2hdf ch2roi *.o *.lst
 

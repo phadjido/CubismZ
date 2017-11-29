@@ -1,6 +1,6 @@
 /*
  *  Types.h
- *  MPCFnode
+ *  CubismZ
  *
  *  Created by Diego Rossinelli on 6/14/11.
  *  Extended by Panos Hadjidoukas.
@@ -26,7 +26,7 @@ using namespace std;
 class Simulation
 {
 public:
-    
+
 	virtual void setup() { }
 	virtual void dispose() { }
 	virtual ~Simulation() { }
@@ -37,15 +37,15 @@ struct FluidElement
     Real phi;
 
     void clear() { phi = 0; }
-    
+
     FluidElement& operator = (const FluidElement & gp)
-    {       
+    {
         this->phi = gp.phi;
-        
+
         return *this;
     }
 };
-    
+
 struct FluidBlock
 {
 	static const int sizeX = _BLOCKSIZE_;
@@ -53,52 +53,52 @@ struct FluidBlock
 	static const int sizeZ = _BLOCKSIZE_;
 
 	static const int gptfloats = sizeof(FluidElement)/sizeof(Real);
-	
+
 	typedef FluidElement ElementType;
 	typedef FluidElement element_type;
-	
+
 	FluidElement __attribute__((__aligned__(_ALIGNBYTES_))) data[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
-    
+
 	void clear_data()
 	{
 		const int N = sizeX*sizeY*sizeZ;
 		FluidElement * const e = &data[0][0][0];
 		for(int i=0; i<N; ++i) e[i].clear();
 	}
-    
+
 	void clear()
 	{
 		clear_data();
 	}
-    
+
 	inline FluidElement& operator()(int ix, int iy=0, int iz=0)
 	{
 		assert(ix>=0 && ix<sizeX);
 		assert(iy>=0 && iy<sizeY);
 		assert(iz>=0 && iz<sizeZ);
-		
+
 		return data[iz][iy][ix];
 	}
-		
+
 	template <typename Streamer>
 	inline void minmax(Real minval[Streamer::channels], Real maxval[Streamer::channels], Streamer streamer = Streamer())
 	{
 		enum { NCHANNELS = Streamer::channels };
-				
+
 		streamer.operate(data[0][0][0], minval);
 		streamer.operate(data[0][0][0], maxval);
-		
+
 		for(int iz=0; iz<sizeZ; iz++)
 			for(int iy=0; iy<sizeY; iy++)
 				for(int ix=0; ix<sizeX; ix++)
 				{
 					Real tmp[NCHANNELS];
-					
+
 					streamer.operate(data[iz][iy][ix], tmp);
-					
+
 					for(int ic = 0; ic < NCHANNELS; ++ic)
 						minval[ic] = std::min(minval[ic], tmp[ic]);
-					
+
 					for(int ic = 0; ic < NCHANNELS; ++ic)
 						maxval[ic] = std::max(maxval[ic], tmp[ic]);
 				}
@@ -111,7 +111,7 @@ struct FluidBlock
 //    static const int channels = 1;
 //    template<int channel>
 //    static inline Real operate(const FluidElement& input) { abort(); return 0; }
-//    
+//
 //    const char * name() { return "StreamerGridPointIterative" ; }
 //};
 //template<> inline Real StreamerGridPointIterative::operate<0>(const FluidElement& e) { return e.phi; }
