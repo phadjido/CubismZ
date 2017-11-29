@@ -86,7 +86,7 @@ static dtype indat[SZ] = {
 };
 
 
-char buf[186]=
+unsigned char buf[186]=
 {
 0,
 1,

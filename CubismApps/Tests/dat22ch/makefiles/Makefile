@@ -31,11 +31,11 @@ ifneq "$(findstring daint,$(shell hostname))" ""
         mpi-lib = $(CRAY_MPICH2_DIR)/lib/
 endif
 
-CPPFLAGS += -I../../../Cubism/source/ -I../../../Compressor/source/ -I. 
-CPPFLAGS += -I../../../../CubismApps/tools/reader/
+CPPFLAGS += -I../../../Cubism/source/ -I../../../Compressor/source/ -I.
+CPPFLAGS += -I../../../../CubismApps/Tools/reader/
 CPPFLAGS +=  -I$(mpi-inc)
 
-#CPPFLAGS += -I${HOME}/usr/fpc 
+#CPPFLAGS += -I${HOME}/usr/fpc
 #LIBS += -L${HOME}/usr/fpc -lfpc
 
 
@@ -59,7 +59,7 @@ endif
 
 ##################
 VPATH := ../../../Cubism/source/ ../../../Compressor/source/ .
-.DEFAULT_GOAL := dat2ch 
+.DEFAULT_GOAL := dat2ch
 
 OBJECTS1 = dat2ch.o WaveletCompressor.o
 OBJECTS2 = ch2dat.o WaveletCompressor.o
@@ -89,7 +89,7 @@ compdat: compdat.c
 	$(CC)  $(OPTFLAGS) $(CPPFLAGS) -c $^ -o $@
 
 clean:
-	rm -f *.o dat2ch data_generator ch2dat compdat out* 
+	rm -f *.o dat2ch data_generator ch2dat compdat out*
 
 cleanall:
 	rm -f *.o dat2ch data_generator ch2dat compdat out* in.dat

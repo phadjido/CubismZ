@@ -1,0 +1,8 @@
+/build
+*.o
+*.a
+*.so
+*.bak
+*~
+*.log
+*.status

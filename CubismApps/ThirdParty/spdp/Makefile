@@ -1,7 +1,8 @@
 CC = gcc
 
 # all: spdp libspdp.a mytest_spdp
-all: libspdp.a mytest_spdp
+# all: libspdp.a mytest_spdp
+all: libspdp.a
 
 spdp: spdp_10.c
 	$(CC) $(extra) -O3 spdp_10.c -o spdp
