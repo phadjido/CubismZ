@@ -4,7 +4,7 @@
 # Author     : Fabian Wermelinger
 # Description: Build Tools utilities
 # Copyright 2017 ETH Zurich. All Rights Reserved.
-HDF='-I/home/fabs/local/hdf5/build-parallel/include -L/home/fabs/local/hdf5/build-parallel/lib'
+HDF="$1"
 BUILD="$(pwd -P)/build"
 rm -rf ${BUILD}
 mkdir -p "${BUILD}/bin"
@@ -32,7 +32,7 @@ movebin ch2diff/ch2diff
 make -C ch2diff/ clean
 
 ###############################################################################
-make -B -C ch2hdf/ CC=mpic++ extra=${HDF}
+make -B -C ch2hdf/ CC=mpic++ extra="${HDF}"
 movebin ch2hdf/ch2hdf ch2hdf/ch2roi
 make -C ch2hdf/ clean
 
@@ -45,3 +45,5 @@ make -C dataf/ clean
 make -B -C vp2bin/ CC=mpic++
 movebin vp2bin/compbin vp2bin/diffbin vp2bin/printbin vp2bin/testbin vp2bin/vp2bin
 make -C vp2bin/ clean
+
+exit 0
