@@ -5,15 +5,12 @@
 # Copyright 2017 ETH Zurich. All Rights Reserved.
 MYHDF = '-I/home/fabs/local/hdf5/build-parallel/include -L/home/fabs/local/hdf5/build-parallel/lib'
 
-<<<<<<< HEAD
-all: thirdparty
-=======
+all: thirdparty tools
 #compression stage-1 (floating point)
 wavz ?= 0
 
 fpzip ?= 0
 fpzip_eps ?= 32
-shuffle ?= 0
 zerobits ?= 0
 zfp ?= 0
 sz ?= 0
@@ -23,31 +20,23 @@ zlib ?= 0
 lz4 ?= 0
 
 # shuffling before encoding
-zshuffle ?= 0
 
-zfp3 ?= 0	# for wavz + zfp
-sz3 ?= 0	# for wavz + sz
 shuffle3 ?= 0	# for wavz + shuffle3
 
-all: tools
-
 tools: thirdparty
-	cd Tools && ./build_all.sh \
-		wavz=$(wavz) \
-		fpzip=$(fpzip) \
-		fpzip_eps=$(fpzip_eps) \
-		shuffle=$(shuffle) \
-		zerobits=$(zerobits) \
-		zfp=$(zfp) \
-		sz=$(sz) \
-		zlib=$(zlib) \
-		lz4=$(lz4) \
-		zshuffle=$(zshuffle) \
-		zfp3=$(zfp3) \
-		sz3=$(sz3) \
-		shuffle3=$(shuffle3) \
-		extra=$(MYHDF)
->>>>>>> 9b443c9e2ea8440d4f6f68a3658d36bab48d7d38
+#	cd Tests && ./build_all.sh \
+#		wavz=$(wavz) \
+#		fpzip=$(fpzip) \
+#		fpzip_eps=$(fpzip_eps) \
+#		shuffle=$(shuffle) \
+#		zerobits=$(zerobits) \
+#		zfp=$(zfp) \
+#		sz=$(sz) \
+#		zlib=$(zlib) \
+#		lz4=$(lz4) \
+#		zshuffle=$(zshuffle) \
+#		shuffle3=$(shuffle3) \
+#		extra=$(MYHDF)
 
 thirdparty:
 	cd ThirdParty && ./build_all.sh
