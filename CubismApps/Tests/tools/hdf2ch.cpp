@@ -12,7 +12,6 @@
 #include <mpi.h>
 using namespace std;
 #include "Test_IO_Compressed.h"
-//#include "Test_Statistics.h"
 #include "ArgumentParser.h"
 
 
@@ -20,6 +19,12 @@ Simulation * sim = NULL;
 
 int main (int argc, char ** argv)
 {
+#if defined(_USE_SZ_)
+//	SZ_Init((char *)"sz.config");
+//	omp_set_num_threads(1);
+#endif
+
+
 	MPI_Init(&argc, &argv);
 //	int provided; 
 //	MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
@@ -35,17 +40,7 @@ int main (int argc, char ** argv)
 	if (!isroot)
 		parser.mute();
   
-	if ( parser("-sim").asString() == "io" )
-		sim = new Test_IO_Compressed(isroot, argc, (const char **)argv);
-	else {
-		if (isroot)
-		{
-			printf("-sim value not recognized. Aborting.\n");
-			printf("usage: %s -inputpath <path> -outputpath <path> [-stepid <number>] [-channel <number>] [-swap] [-restart] [-wtype_read <type1>] [-wtype_write <type2>]\n", argv[0]);
-			//abort();
-		}
-			MPI_Abort(MPI_COMM_WORLD, 1);
-	} 
+	sim = new Test_IO_Compressed(isroot, argc, (const char **)argv);
  
 	sim->setup();
 

@@ -157,7 +157,6 @@ int main(int argc, const char **argv)
 
 	fprintf(stdout, "ROI = [%d,%d]x[%d,%d]x[%d,%d]\n", StartX, EndX, StartY, EndY, StartZ, EndZ);	
 	
-//	exit(0);
 #if 0	// who else and what else
 	int StartX = 16, EndX = 48-1;
 	int StartY = 16, EndY = 48-1;

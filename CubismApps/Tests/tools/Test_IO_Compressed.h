@@ -65,10 +65,6 @@ protected:
 
 		assert(XPESIZE*YPESIZE*ZPESIZE == MPI::COMM_WORLD.Get_size());
 
-		//cartcomm = MPI::COMM_WORLD.Create_cart(3, pesize, periodic, true);
-		// myrank = cartcomm.Get_rank();
-		//cartcomm.Get_coords(myrank, 3, mypeindex);
-
 		MPI_Cart_create(MPI_COMM_WORLD, 3, pesize, periodic, true, &cartcomm);
 		MPI_Comm_rank(cartcomm, &myrank);
 		MPI_Cart_coords(cartcomm, myrank, 3, mypeindex);
@@ -88,7 +84,6 @@ protected:
 
 		int coords[3];
 		coords[0] = mypeindex[0]; coords[1] = mypeindex[1]; coords[2] = mypeindex[2];
-		//grid.peindex(coords);
 
 		const int NX = BPDX*_BLOCKSIZE_;
 		const int NY = BPDY*_BLOCKSIZE_;
@@ -170,7 +165,6 @@ protected:
 			BlockInfo info = vInfo[i];
 			const int idx[3] = {info.index[0], info.index[1], info.index[2]};
 			FluidBlock& b = *(FluidBlock*)info.ptrBlock;
-			//Streamer streamer(b);
 #if VERBOSE
 			printf("idx=[%d,%d,%d]\n", idx[0], idx[1], idx[2]);
 #endif
@@ -185,7 +179,6 @@ protected:
 						Real * const ptr_input = array_all + NCHANNELS*(gz + NZ * (gy + NY * gx));
 						Real val = ptr_input[channel];
 
-						//streamer.operate(ptr_input, ix, iy, iz);
 						b(ix, iy, iz).u = val;
 						if (val < min_u) min_u = val;
 						if (val > max_u) max_u = val;
@@ -286,12 +279,8 @@ public:
 		streamer.fill('0');
 		streamer<<step_id;
 
-#if defined(_USE_SZ_)||defined(_USE_SZ3_)
-#if defined(_USE_SZ148_)
-		SZ_Init((char *)"sz148.config");
-#else
+#if defined(_USE_SZ_)
 		SZ_Init((char *)"sz.config");
-#endif
 		omp_set_num_threads(1);
 #endif
 
@@ -320,10 +309,9 @@ public:
 	void dispose()
 	{
 
-#if defined(_USE_SZ_)||defined(_USE_SZ3_)
+#if defined(_USE_SZ_)
 		SZ_Finalize();
 #endif
-
 
 		printf("calling dispose\n");
 		if (grid!=NULL) {
