@@ -5,14 +5,10 @@
 # Copyright 2017 ETH Zurich. All Rights Reserved.
 MYHDF = '-I/home/fabs/local/hdf5/build-parallel/include -L/home/fabs/local/hdf5/build-parallel/lib'
 
-all: tools
-
-tools: thirdparty
-	cd Tools && ./build_all.sh $(MYHDF)
+all: thirdparty
 
 thirdparty:
 	cd ThirdParty && ./build_all.sh
 
 clean:
 	rm -rf ThirdParty/build
-	rm -rf Tools/build

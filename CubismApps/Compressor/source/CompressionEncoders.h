@@ -37,49 +37,6 @@ extern "C"
 inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len, unsigned *max);
 inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned char * outputbuf, const size_t maxsize);
 
-
-#if defined(_USE_ZSHUFFLE_)
-void zshuffle(char *in, int n, int s)
-{
-        int i, j, k;
-        int b;
-
-        char *tmp = (char *)malloc(n);
-
-        j = 0;
-	for (b = 0; b < s; b++)
-        {
-                for (i = b; i < n; i+= s) {
-                        tmp[j] = in[i];
-                        j++;
-                }
-        }
-
-	memcpy(in, tmp, n);
-        free(tmp);
-}
-
-void zreshuffle(char *in, int n, int s)
-{
-        int i, j, k;
-        int b;
-
-        char *tmp = (char *)malloc(n);
-        int c = n/s;
-
-        j = 0;
-	for (i = 0; i < n/s; i++) {
-                for (b = 0; b < s; b++) {
-                        tmp[j] = in[i + b*c]; j++;
-
-                }
-        }
-
-	memcpy(in, tmp, n);
-        free(tmp);
-}
-#endif
-
 inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned char * outputbuf, const size_t maxsize)
 {
 #if defined(VERBOSE)
@@ -119,10 +76,6 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 	memcpy(outputbuf, inputbuf, ninputbytes);
 #endif
 
-#if defined(_USE_ZSHUFFLE_)
-	zreshuffle((char *)outputbuf, decompressedbytes, sizeof(Real));
-#endif
-
 	return decompressedbytes;
 }
 
@@ -152,10 +105,6 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 						   unsigned *max)
 {
-#if defined(_USE_ZSHUFFLE_)
-	zshuffle((char *)buf, len, sizeof(Real));
-#endif
-
 #if defined(_USE_ZLIB_)
     int ret;                    /* return code from deflate functions */
     unsigned have;              /* number of bytes in temp[] */
@@ -234,8 +183,6 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 #elif defined(_USE_LZ4_)
 
 	#define ZBUFSIZE (4*1024*1024)	/* fix this */
-
-//	static char bufzlib[ZBUFSIZE];	/* and this per thread (threadprivate or better a small cyclic array of buffers ) */
 	#define MAXBUFFERS	12	/* todo */
 	static char bufzlibA[MAXBUFFERS][ZBUFSIZE];	/* and this per thread (threadprivate or better a small cyclic array of buffers ) */
 
