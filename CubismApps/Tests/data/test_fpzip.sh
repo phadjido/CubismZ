@@ -11,10 +11,10 @@ fi
 
 if [ -z "$2" ]
 then
-	echo "setting err=0.1"
-	err=16
+	echo "setting err=22"
+	err=22
 else
-	err=$1
+	err=$2
 fi
 
 bs=32

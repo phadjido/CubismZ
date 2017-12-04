@@ -44,7 +44,7 @@ int convertDataTypeSize(int dataTypeSize);
 
 void new_TightDataPointStorageI_Empty(TightDataPointStorageI **self);
 int new_TightDataPointStorageI_fromFlatBytes(TightDataPointStorageI **self, unsigned char* flatBytes, size_t flatBytesLength);
-void new_TightDataPointStorageI(TightDataPointStorageI **this,
+void new_TightDataPointStorageI(TightDataPointStorageI **self,
 		size_t dataSeriesLength, size_t exactDataNum, int byteSize, 
 		int* type, unsigned char* exactDataBytes, size_t exactDataBytes_size,
 		double realPrecision, long minValue, int intervals, int dataType);

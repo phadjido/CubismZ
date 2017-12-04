@@ -11,8 +11,8 @@ fi
 
 if [ -z "$2" ]
 then
-	echo "setting err=0.1"
-	err=0.1
+	echo "setting err=0.5"
+	err=0.5
 else
 	err=$2
 fi
