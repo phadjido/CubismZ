@@ -3,19 +3,22 @@
 # Author     : Fabian Wermelinger
 # Description: Build CubismZ tools
 # Copyright 2017 ETH Zurich. All Rights Reserved.
+CC = mpic++
+cc = mpicc
+blocksize ?= 32
+
 all: tools
 
-tools: #thirdparty
-	$(MAKE) -C Tools/ install dir=default
-	$(MAKE) -C Tools/ install dir=wavz_zlib wavz=1 zlib=1
-	$(MAKE) -C Tools/ install dir=fpzip fpzip=1
-	$(MAKE) -C Tools/ install dir=zfp zfp=1
-	$(MAKE) -C Tools/ install dir=sz sz=1
-	$(MAKE) -C Tools/ clean
+tools: thirdparty
+	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=default
+	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=wavz_zlib wavz=1 zlib=1
+	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=fpzip fpzip=1
+	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=zfp zfp=1
+	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=sz sz=1
 
 thirdparty:
-	cd ThirdParty && ./build_all.sh
+	$(MAKE) -C ThirdParty/ CC=$(CC) cc=$(cc)
 
 clean:
-	rm -rf Tools/bin
-	rm -rf ThirdParty/build
+	$(MAKE) -C Tools/ clean
+	$(MAKE) -C ThirdParty/ clean

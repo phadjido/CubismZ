@@ -1,11 +1,17 @@
 MAKEFLAGS += --no-print-directory
 
-all:
-	@cd src; $(MAKE) clean static
-	@cd examples; $(MAKE) clean all
+all: static
+	mkdir -p ../build/include/zfp
+	mkdir -p ../build/lib
+	cp inc/*.h ../build/include/zfp
+	cp lib/* ../build/lib
+
+static:
+	@cd src; $(MAKE) static cc=$(cc)
+	@cd examples; $(MAKE) all CXX=$(CC) CC=$(cc)
 
 shared:
-	@cd src; $(MAKE) shared
+	@cd src; $(MAKE) shared cc=$(cc)
 
 test:
 	@cd examples; $(MAKE) test

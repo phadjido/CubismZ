@@ -3,10 +3,11 @@ SHELL := /bin/bash
 CC = mpic++
 config ?=release
 dir ?= default
+hdf = 1
+nchannels = 1
 
 include ../Makefile.config
 
-nchannels ?= 1
 CPPFLAGS += -DTOTAL_CHANNELS=$(nchannels)
 LIBS += -L../ThirdParty/build/lib
 LIBS += -ldl
@@ -40,7 +41,5 @@ install: all
 	rm -f *.o
 
 clean:
+	rm -rf bin
 	rm -f *.o hdf2ch ch2hdf ch2diff decompr
-
-cleanall:
-	rm -f *.o hdf2ch ch2hdf ch2diff decompr out*
