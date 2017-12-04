@@ -919,7 +919,9 @@ public:
 	void Write(GridType & inputGrid, string fileName, IterativeStreamer streamer = IterativeStreamer())
 	{
 		std::stringstream ss;
-		ss << "." << streamer.name() << ".channel"  << channel;
+		//ss << "." << streamer.name() << ".channel"  << channel;
+		if (channel > 0)
+			ss << "." << streamer.name() << ".ch"  << channel;
 
 		_write<channel>(inputGrid, fileName + ss.str(), streamer);
 	}
@@ -929,7 +931,8 @@ public:
 		for(int channel = 0; channel < NCHANNELS; ++channel)
 		{
 			std::stringstream ss;
-			ss << "." << streamer.name() << ".channel"  << channel;
+			if (channel > 0)
+				ss << "." << streamer.name() << ".ch"  << channel;
 
 			_read(fileName + ss.str());
 		}

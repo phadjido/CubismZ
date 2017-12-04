@@ -16,6 +16,5 @@ nb=$(echo "$ds/$bs" | bc)
 
 rm -f ref.channel0
 
-../../Tools/bin/default/hdf2ch -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata c1
-mv c100000.StreamerGridPointIterative.channel0 ref.channel0
+../../Tools/bin/default/hdf2ch -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata ref.cz
 

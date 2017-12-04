@@ -37,6 +37,7 @@ decompr: decompr.o WaveletCompressor.o
 install: all
 	mkdir -p bin/$(dir)
 	mv hdf2ch ch2hdf ch2diff decompr bin/$(dir)
+	rm -f *.o
 
 clean:
 	rm -f *.o hdf2ch ch2hdf ch2diff decompr

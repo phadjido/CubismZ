@@ -9,13 +9,21 @@ else
     	h5file=$1
 fi
 
+if [ -z "$2" ]
+then
+    	echo "setting err=0.1"
+	err=0.1
+else
+    	err=$1
+fi
+
 bs=32
 ds=512
 nb=$(echo "$ds/$bs" | bc)
 
-rm -f tmp00000.StreamerGridPointIterative.channel0
+rm -f tmp.cz
 
-../../Tools/bin/sz/hdf2ch -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata tmp  -threshold $2
+../../Tools/bin/sz/hdf2ch -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata tmp.cz  -threshold $err
 
-mpirun -n 8 ../tools/ch2diff -simdata1 tmp00000.StreamerGridPointIterative.channel0  -simdata2 ref.channel0
+mpirun -n 8 ../../Tools/bin/sz/ch2diff -simdata1 tmp.cz -simdata2 ref.cz
 

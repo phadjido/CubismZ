@@ -262,10 +262,10 @@ public:
 		streamer<<path;
 		streamer<<"/";
 		streamer<<outputfile_name;
-		streamer.setf(ios::dec | ios::right);
-		streamer.width(5);
-		streamer.fill('0');
-		streamer<<step_id;
+//		streamer.setf(ios::dec | ios::right);
+//		streamer.width(5);
+//		streamer.fill('0');
+//		streamer<<step_id;
 
 #if defined(_USE_SZ_)
 		SZ_Init((char *)"sz.config");
