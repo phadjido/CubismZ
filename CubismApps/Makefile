@@ -15,7 +15,6 @@ tools: thirdparty
 	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=fpzip fpzip=1
 	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=zfp zfp=1
 	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=sz sz=1
-	$(MAKE) -C Tools/ clean
 
 thirdparty:
 	$(MAKE) -C ThirdParty/ CC=$(CC) cc=$(cc)

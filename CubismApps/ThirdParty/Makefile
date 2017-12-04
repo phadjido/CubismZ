@@ -1,37 +1,15 @@
-SHELL := /bin/bash
-
-hdf = 1
-
-include ../Makefile.config
-
-CC = mpic++
-cc = mpicc
-dir ?= default
-nchannels ?= 1
-
-CPPFLAGS += -DTOTAL_CHANNELS=$(nchannels)
-LIBS += -L../ThirdParty/build/lib
-
-# PANDA
-LIBS += -ldl
-
-CPPFLAGS += -I../../Cubism/source/ -I../Compressor/source -I. -I../Compressor/reader
-
-##################
 .PHONY: clean
-VPATH := ../../Cubism/source/ ../Compressor/source/ .
 
-
-all: fpzip lz4 SZ zfp
+all: fpzip lzfour sz zfp
 
 fpzip:
-	$(MAKE) -C fpzip-1.1.0/ CC=$(CC) cc=$(cc)
+	$(MAKE) -C fpzip-1.1.0/ CC=$(CC)
 
-lz4:
-	$(MAKE) -C lz4/ CC=$(CC) cc=$(cc)
+lzfour:
+	$(MAKE) -C lz4/ CC=$(cc) cc=$(cc)
 
-SZ:
-	$(MAKE) -C SZ/ CC=$(CC) cc=$(cc)
+sz:
+	$(MAKE) -C SZ/ CC=$(cc) cc=$(cc)
 
 zfp:
 	$(MAKE) -C zfp-0.5.0/ CC=$(CC) cc=$(cc)

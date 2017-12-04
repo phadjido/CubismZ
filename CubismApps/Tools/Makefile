@@ -4,6 +4,7 @@ CC = mpic++
 config ?=release
 dir ?= default
 hdf = 1
+nchannels = 1
 
 include ../Makefile.config
 
