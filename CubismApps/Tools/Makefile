@@ -1,7 +1,6 @@
 SHELL := /bin/bash
 
 CC = mpic++
-hdf = 1
 config ?=release
 dir ?= default
 
@@ -10,8 +9,6 @@ include ../Makefile.config
 nchannels ?= 1
 CPPFLAGS += -DTOTAL_CHANNELS=$(nchannels)
 LIBS += -L../ThirdParty/build/lib
-
-# PANDA
 LIBS += -ldl
 
 CPPFLAGS += -I../../Cubism/source/ -I../Compressor/source -I. -I../Compressor/reader

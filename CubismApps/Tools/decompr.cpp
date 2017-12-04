@@ -17,9 +17,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-//#include "ParIO.h"
 #include <omp.h>
-//#define _TRANSPOSE_DATA_
 
 #include "ArgumentParser.h"
 #include "Reader_WaveletCompression.h"
@@ -32,10 +30,7 @@ int main(int argc, char **argv)
 	/* Initialize MPI */
 	MPI_Init(&argc, &argv);
 
-//	blosc_init();
-
-#if defined(_USE_SZ_)||defined(_USE_SZ3_)
-	printf("sz.config...\n");
+#if defined(_USE_SZ_)
 	SZ_Init((char *)"sz.config");
 	omp_set_num_threads(1);
 #endif
@@ -60,11 +55,8 @@ int main(int argc, char **argv)
 	const string inputfile_name1 = argparser("-simdata1").asString("none");
 	const string inputfile_name2 = argparser("-simdata2").asString("none");
 
-//	float threshold = 0.1;	// 0.1%
 	const double threshold = (double) argparser("-threshold").asDouble(1);
 	if (isroot) printf("threshold = %.2lf%%\n", threshold);
-//	printf("give threshold =");
-//	scanf("%f", &threshold);
 
 	if ((inputfile_name1 == "none")||(inputfile_name2 == "none"))
 	{
@@ -76,10 +68,8 @@ int main(int argc, char **argv)
 	const int wtype = argparser("-wtype").asInt(1);
 
 	Reader_WaveletCompressionMPI  myreader1(mycomm, inputfile_name1, swapbytes, wtype);
-//	Reader_WaveletCompressionMPI0 myreader2(mycomm, inputfile_name2, swapbytes, wtype);
 
 	myreader1.load_file();
-//	myreader2.load_file();
 	const double init_t1 = omp_get_wtime();
 
 	int dim[3], period[3], reorder;
@@ -109,7 +99,6 @@ int main(int argc, char **argv)
 			fprintf(stdout, "loading block( %d, %d, %d )...\n", x, y, z);
 #endif
 			double zratio1 = myreader1.load_block3(x, y, z, targetdata1);
-//			double zratio1 = myreader1.load_block2(x, y, z, targetdata1);
 
 		}
 		else {

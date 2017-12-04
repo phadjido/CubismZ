@@ -17,9 +17,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-//#include "ParIO.h"
 #include <omp.h>
-//#define _TRANSPOSE_DATA_
 
 #include "ArgumentParser.h"
 #include "Reader_WaveletCompression.h"
@@ -31,8 +29,6 @@ int main(int argc, char **argv)
 
 	/* Initialize MPI */
 	MPI_Init(&argc, &argv);
-
-//	blosc_init();
 
 #if defined(_USE_SZ_)||defined(_USE_SZ3_)
 	printf("sz.config...\n");
@@ -60,11 +56,8 @@ int main(int argc, char **argv)
 	const string inputfile_name1 = argparser("-simdata1").asString("none");
 	const string inputfile_name2 = argparser("-simdata2").asString("none");
 
-//	float threshold = 0.1;	// 0.1%
 	const double threshold = (double) argparser("-threshold").asDouble(1);
 	if (isroot) printf("threshold = %.2lf%%\n", threshold);
-//	printf("give threshold =");
-//	scanf("%f", &threshold);
 
 	if ((inputfile_name1 == "none")||(inputfile_name2 == "none"))
 	{
@@ -116,11 +109,6 @@ int main(int argc, char **argv)
 	double n_inf = 0;
 	double n_1 = 0;
 	double n_2 = 0;
-
-//	double threshold = 0.1;	// 0.1%
-
-//	printf("give threshold =");
-//	scanf("%f", &threshold);
 
 	long over_counter = 0;
 
@@ -174,14 +162,12 @@ int main(int argc, char **argv)
 						double rel_err;
 
 						if (v != 0.0)
-//						if (fabs(v) >= 1e-6)
 							rel_err = 100.0 * (err / v);
 						else
 							rel_err = 0.0;
 
 						// absolute relative % error
 						if (rel_err >= threshold)
-//						if ((rel_err >= threshold)&&(err >= 0.001)) //&&(v > 0.001))
 						{
 							over_counter++;
 							//printf("%5d: %15.8f %15.8f (%15.8f)\n", over_counter, f1, f2, err);

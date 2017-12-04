@@ -50,7 +50,6 @@ protected:
 		vector<BlockInfo> vInfo = grid.getResidentBlocksInfo();	//grid.getBlocksInfo();
 		Real min_u = 1e8, max_u = -1e8;
 
-#if 1
 		int myrank, mypeindex[3], pesize[3];
 		int periodic[3];
 		MPI_Comm cartcomm;
@@ -68,9 +67,7 @@ protected:
 		MPI_Cart_create(MPI_COMM_WORLD, 3, pesize, periodic, true, &cartcomm);
 		MPI_Comm_rank(cartcomm, &myrank);
 		MPI_Cart_coords(cartcomm, myrank, 3, mypeindex);
-#endif
 
-#if 1
 		// open HDF5
 		// read data block
 		// store in grid block
@@ -149,15 +146,6 @@ protected:
 		status = H5Dread(dataset_id, HDF_REAL, mspace_id, fspace_id, fapl_id, array_all);
 
 		MPI_Barrier(MPI_COMM_WORLD);
-#if VERBOSE
-		printf("after barrier1\n"); fflush(0);
-#endif
-
-#endif
-
-#if VERBOSE
-		std::cout << "vInfo size: " << vInfo.size() << endl;
-#endif
 
 		//#pragma omp parallel for
 		for(int i=0; i<(int)vInfo.size(); i++)
@@ -313,7 +301,6 @@ public:
 		SZ_Finalize();
 #endif
 
-		printf("calling dispose\n");
 		if (grid!=NULL) {
 			printf("deleting grid\n");
 			delete grid;

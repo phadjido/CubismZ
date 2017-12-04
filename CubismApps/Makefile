@@ -5,7 +5,7 @@
 # Copyright 2017 ETH Zurich. All Rights Reserved.
 all: tools
 
-tools: thirdparty
+tools: #thirdparty
 	$(MAKE) -C Tools/ install dir=default
 	$(MAKE) -C Tools/ install dir=wavz_zlib wavz=1 zlib=1
 	$(MAKE) -C Tools/ install dir=fpzip fpzip=1
