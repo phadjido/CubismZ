@@ -1,5 +1,5 @@
 /*
- *  Types.h
+ *  Types_single.h
  *  CubismZ
  *
  *  Created by Diego Rossinelli on 6/14/11.
@@ -34,13 +34,13 @@ public:
 
 struct FluidElement
 {
-    Real phi;
+    Real u;
 
-    void clear() { phi = 0; }
+    void clear() { u = 0; }
 
     FluidElement& operator = (const FluidElement & gp)
     {
-        this->phi = gp.phi;
+        this->u = gp.u;
 
         return *this;
     }
@@ -105,16 +105,6 @@ struct FluidBlock
 	}
 };
 
-//typedef Grid<FluidBlock, std::allocator> FluidGrid;
-//struct StreamerGridPointIterative
-//{
-//    static const int channels = 1;
-//    template<int channel>
-//    static inline Real operate(const FluidElement& input) { abort(); return 0; }
-//
-//    const char * name() { return "StreamerGridPointIterative" ; }
-//};
-//template<> inline Real StreamerGridPointIterative::operate<0>(const FluidElement& e) { return e.phi; }
 
 struct StreamerGridPointIterative
 {
@@ -124,21 +114,22 @@ struct StreamerGridPointIterative
     StreamerGridPointIterative(FluidBlock& b): ref(&b) {}
     StreamerGridPointIterative(): ref(NULL) {}
 
-        template<int channel>
+	template<int channel>
         static inline Real operate(const FluidElement& input) { abort(); return 0; }
 
-        inline Real operate(const int ix, const int iy, const int iz) const
+	inline Real operate(const int ix, const int iy, const int iz) const
         {
-	cout << "You must not call this operate method of StreamerGridPointIterative" << endl;
+        cout << "You must not call this operate method of StreamerGridPointIterative" << endl;
         abort();
         return 0;
-        }
+	}
 
-	const char * name() { return "StreamerGridPointIterative" ; }
+        const char * name() { return "StreamerGridPointIterative" ; }
 };
 
-template<> inline Real StreamerGridPointIterative::operate<0>(const FluidElement& e) { return e.phi; }
+template<> inline Real StreamerGridPointIterative::operate<0>(const FluidElement& e) { return e.u; }
 
 typedef Grid <FluidBlock, std::allocator> FluidGridBase;
 typedef FluidGridBase FluidGrid;
+
 
