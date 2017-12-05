@@ -1,10 +1,8 @@
 /*
- *  Matrix3D.h
- *  Cubism
+ * Matrix3D.h
+ * Cubism
  *
- *  Created by Diego Rossinelli on 10/19/06.
- *  Copyright 2006 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #pragma once
 #include <assert.h>

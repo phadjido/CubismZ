@@ -1,10 +1,8 @@
 /*
- *  Grid.h
- *  Cubism
+ * Grid.h
+ * Cubism
  *
- *  Created by Diego Rossinelli on 5/24/09.
- *  Copyright 2009 CSE Lab, ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #pragma once
 

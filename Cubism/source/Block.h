@@ -1,36 +1,8 @@
 /*
- *  Block.h
- *  Cubism
+ * Block.h
+ * Cubism
  *
- *  Created by Ivica Kicic on 07/28/17.
- *  Copyright 2017 ETH Zurich. All rights reserved.
- *
- */
-
-/*
- * Defined the Block<T, SX, SY, SZ> class, a container for a 3D matrix:
- *    T data[SZ][SY][SX];
- *
- * Requirements:
- *    All members of `T` must have the same basic type, usually either `float`
- *    or `double`. For example, the following is allowed:
- *        struct GOOD {
- *            double omega;
- *            double chi;
- *            double u[2];
- *        };
- *    while the following is not allowed: (*)
- *        struct BAD {
- *            double omega;
- *            double chi;
- *            float u[2];
- *        };
- *
- *    Type `T` must have a `.clear()` member function, that resets (sets to
- *    zero) all elements.
- *
- *    (*) Certain cases as `BAD` might actually still work with some hacks, but
- *    without any guarantees.
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #ifndef _CUBISM_BLOCK_H_
 #define _CUBISM_BLOCK_H_

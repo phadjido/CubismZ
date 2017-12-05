@@ -1,10 +1,8 @@
 /*
- *  StencilInfo.h
- *  Cubism
+ * StencilInfo.h
+ * Cubism
  *
- *  Created by Diego Rossinelli on 11/17/11.
- *  Copyright 2011 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #pragma once
 

@@ -1,10 +1,8 @@
 /*
- *  Timer.h
- *  Cubism
+ * Timer.h
+ * Cubism
  *
- *  Created by Diego Rossinelli on 10/17/11.
- *  Copyright 2011 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #pragma once

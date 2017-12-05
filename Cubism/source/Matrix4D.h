@@ -1,10 +1,8 @@
 /*
- *  Matrix4D.h
- *  Cubism
+ * Matrix4D.h
+ * Cubism
  *
- *  Created by Diego Rossinelli on 12/5/06.
- *  Copyright 2006 ETH Zurich. All rights reserved. 0
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #pragma once
 #include <assert.h>

@@ -1,19 +1,9 @@
 /*
- *  ArgumentParser.h
- *  Cubism
+ * ArgumentParser.h
+ * Cubism
  *
- *	This argument parser assumes that all arguments are optional ie, each of the argument names is preceded by a '-'
- *		all arguments are however NOT optional to avoid a mess with default values and returned values when not found!
- *
- *	More converter could be required:
- *		add as needed
- *			TypeName as{TypeName}() in Value
- *
- *  Created by Christian Conti on 6/7/10.
- *  Copyright 2010 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
-
 #pragma once
 #include <cstdio>
 #include <cstdlib>

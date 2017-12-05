@@ -1,10 +1,9 @@
-//
-//  HDF5Dumper.h
-//  Cubism
-//
-//  Created by Babak Hejazialhosseini on 1/23/12.
-//  Copyright 2011 ETH Zurich. All rights reserved.
-//
+/*
+ * HDF5Dumper.h
+ * Cubism
+ *
+ * Copyright 2017 ETH Zurich. All rights reserved.
+ */
 #pragma once
 
 #include <iostream>

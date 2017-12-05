@@ -1,10 +1,8 @@
 /*
- *  ZBinDumper.h
- *  Cubism
+ * ZBinDumper.h
+ * Cubism
  *
- *  Created by Panos Hadjidoukas on 3/18/14.
- *  Copyright 2014 CSE Lab, ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #pragma once
 

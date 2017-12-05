@@ -1,10 +1,8 @@
 /*
- *  SerializerIO_VP.h
- *  Cubism
+ * SerializerIO_VP.h
+ * Cubism
  *
- *  Created by Babak Hejazialhosseini  on 6/15/11.
- *  Copyright 2011 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #pragma once
 

@@ -1,10 +1,8 @@
 /*
- *  PlainBinDumper_MPI.h
- *  Cubism
+ * PlainBinDumper_MPI.h
+ * Cubism
  *
- *  Created by Panos Hadjidoukas on 9/30/16.
- *  Copyright 2016 CSE Lab, ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #pragma once

@@ -1,10 +1,9 @@
-//
-//  HDF5SliceDumperMPI.h
-//  Cubism
-//
-//  Created by Fabian Wermelinger 09/28/2016
-//  Copyright 2016 ETH Zurich. All rights reserved.
-//
+/*
+ * HDF5SliceDumperMPI.h
+ * Cubism
+ *
+ * Copyright 2017 ETH Zurich. All rights reserved.
+ */
 #ifndef HDF5SLICEDUMPERMPI_H_ZENQHJA6
 #define HDF5SLICEDUMPERMPI_H_ZENQHJA6
 

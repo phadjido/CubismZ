@@ -1,10 +1,8 @@
 /*
- *  GridMPI.h
- *  FacesMPI
+ * GridMPI.h
+ * Cubism
  *
- *  Created by Diego Rossinelli on 10/21/11.
- *  Copyright 2011 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #pragma once
 

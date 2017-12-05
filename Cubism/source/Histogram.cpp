@@ -1,10 +1,8 @@
 /*
- *  Histogram.cpp
+ * Histogram.cpp
+ * Cubism
  *
- *
- *  Created by Babak Hejazialhosseini on 3/15/12.
- *  Copyright 2012 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #include "Histogram.h"
 #include <fstream>
