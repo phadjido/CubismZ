@@ -18,7 +18,7 @@ CPPFLAGS += -I../../Cubism/source/ -I../Compressor/source -I. -I../Compressor/re
 VPATH := ../../Cubism/source/ ../Compressor/source/ .
 
 
-all: hdf2cz cz2hdf cz2diff ch2membuf
+all: hdf2cz cz2hdf cz2diff
 
 hdf2cz: hdf2cz.o WaveletCompressor.o
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
