@@ -18,18 +18,15 @@ CPPFLAGS += -I../../Cubism/source/ -I../Compressor/source -I. -I../Compressor/re
 VPATH := ../../Cubism/source/ ../Compressor/source/ .
 
 
-all: hdf2ch ch2hdf ch2diff decompr
+all: hdf2cz cz2hdf cz2diff ch2membuf
 
-hdf2ch: hdf2ch.o WaveletCompressor.o
+hdf2cz: hdf2cz.o WaveletCompressor.o
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
 
-ch2hdf: ch2hdf.o WaveletCompressor.o
+cz2hdf: cz2hdf.o WaveletCompressor.o
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
 
-ch2diff: ch2diff.o WaveletCompressor.o
-	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
-
-decompr: decompr.o WaveletCompressor.o
+cz2diff: cz2diff.o WaveletCompressor.o
 	$(CC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
 
 %.o: %.cpp
@@ -37,9 +34,9 @@ decompr: decompr.o WaveletCompressor.o
 
 install: all
 	mkdir -p bin/$(dir)
-	mv hdf2ch ch2hdf ch2diff decompr bin/$(dir)
+	mv hdf2cz cz2hdf cz2diff bin/$(dir)
 	rm -f *.o
 
 clean:
 	rm -rf bin
-	rm -f *.o hdf2ch ch2hdf ch2diff decompr
+	rm -f *.o hdf2cz cz2hdf cz2diff 
