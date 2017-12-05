@@ -1,10 +1,8 @@
 /*
- *  QPXEMU.h
+ * QPXEMU.h
+ * CubismZ
  *
- *
- *  Created by Diego Rossinelli on 4/10/13.
- *  Copyright 2013 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #pragma once

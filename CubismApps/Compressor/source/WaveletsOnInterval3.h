@@ -1,10 +1,8 @@
 /*
- *  WaveletsOnInterval3.h
- *  
+ * WaveletsOnInterval3.h
+ * CubismZ
  *
- *  Created by Diego Rossinelli on 3/1/13.
- *  Copyright 2013 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #pragma once

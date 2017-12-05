@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# test_wavz.sh
+# CubismZ
+#
+# Copyright 2017 ETH Zurich. All rights reserved.
+#
 set -x #echo on
 
 h5file=../Data/data_005000-p.h5

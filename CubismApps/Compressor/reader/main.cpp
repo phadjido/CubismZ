@@ -1,10 +1,8 @@
 /*
- *  main.cpp
+ * main.cpp
+ * CubismZ
  *
- *
- *  Created by Diego Rossinelli on 3/27/13.
- *  Copyright 2013 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #include <ArgumentParser.h>
 #include "Reader_WaveletCompression.h"

@@ -1,11 +1,8 @@
 /*
- *  Types_single.h
- *  CubismZ
+ * Types_single.h
+ * CubismZ
  *
- *  Created by Diego Rossinelli on 6/14/11.
- *  Extended by Panos Hadjidoukas.
- *  Copyright 2011 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #pragma once

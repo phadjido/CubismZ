@@ -1,3 +1,9 @@
+/*
+ * WaveletsOnIntervalQPX.h
+ * CubismZ
+ *
+ * Copyright 2017 ETH Zurich. All rights reserved.
+ */
 #ifndef _WAVELETSONINTERVALQPX_H_
 #define _WAVELETSONINTERVALQPX_H_ 1
 

@@ -1,10 +1,8 @@
 /*
- *  main.cpp
- *  
+ * cz2hdf.cpp
+ * CubismZ
  *
- *  Created by Panagiotis Hadjidoukas on 3/28/13.
- *  Copyright 2013 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #include <iostream>

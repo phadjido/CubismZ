@@ -1,10 +1,8 @@
 /*
- *  WaveletsOnInterval.h
- *  
+ * WaveletsOnInterval.h
+ * CubismZ
  *
- *  Created by Diego Rossinelli and Babak Hejazialhosseini on 3/1/13.
- *  Copyright 2013 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #ifndef _WAVELETSONINTERVAL_H_

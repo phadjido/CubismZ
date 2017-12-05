@@ -1,10 +1,8 @@
 /*
- *  CompressionEncoders0.h
- *  
+ * CompressionEncoders0.h
+ * CubismZ
  *
- *  Created by Panos Hadjidoukas on 01/15/17.
- *  Copyright 2013 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #pragma once

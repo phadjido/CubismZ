@@ -1,10 +1,8 @@
 /*
- *  main.cpp
- *  MPCFcluster
+ * hdf2cz.cpp
+ * CubismZ
  *
- *  Created by Panos Hadjidoukas on 4/4/16.
- *  Copyright 2016 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 #include <map>
 #include <iomanip>

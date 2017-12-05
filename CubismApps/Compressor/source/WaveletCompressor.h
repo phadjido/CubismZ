@@ -1,10 +1,8 @@
 /*
- *  WaveletCompressor.h
+ * WaveletCompressor.h
+ * CubismZ
  *
- *
- *  Created by Diego Rossinelli on 3/4/13.
- *  Copyright 2013 ETH Zurich. All rights reserved.
- *
+ * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
 #ifndef _WAVELETCOMPRESSOR_H_
