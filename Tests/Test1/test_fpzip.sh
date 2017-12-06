@@ -23,7 +23,7 @@ nb=$(echo "$ds/$bs" | bc)
 
 rm -f tmp.cz
 
-../../Tools/bin/fpzip/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file -outdata tmp.cz -threshold $bits
+mpirun -n 1 ../../Tools/bin/fpzip/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file -outdata tmp.cz -threshold $bits
 
 mpirun -n 8 ../../Tools/bin/fpzip/cz2diff -simdata1 tmp.cz  -simdata2 ref.cz
 

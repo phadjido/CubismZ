@@ -3,21 +3,27 @@
 # Author     : Fabian Wermelinger
 # Description: Build CubismZ tools
 # Copyright 2017 ETH Zurich. All Rights Reserved.
-CC = mpic++
-cc = mpicc
+
+MPICC = mpic++
+mpicc = mpicc
 blocksize ?= 32
+hdf-incdir ?= /opt/hdf5_mpich/include
+hdf-libdir ?= /opt/hdf5_mpich/lib
 
 all: tools
 
-tools: #thirdparty
-	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=default
-	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=wavz_zlib wavz=1 zlib=1
-	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=fpzip fpzip=1
-	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=zfp zfp=1
-	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=sz sz=1
+tools: thirdparty tools-only
+
+
+tools-only:
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default dir=wavz_zlib wavz=1 zlib=1
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default dir=fpzip fpzip=1
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default dir=zfp zfp=1
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default dir=sz sz=1
 
 thirdparty:
-	$(MAKE) -C ThirdParty/ CC=$(CC) cc=$(cc)
+	$(MAKE) -C ThirdParty/ CC=$(MPICC) cc=$(mpicc)
 
 clean:
 	$(MAKE) -C Tools/ clean

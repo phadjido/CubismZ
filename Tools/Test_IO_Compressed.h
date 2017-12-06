@@ -23,7 +23,6 @@
 #define HDF_REAL H5T_NATIVE_DOUBLE
 #endif
 
-
 typedef GridMPI < FluidGrid > G;
 
 class Test_IO_Compressed : public Simulation
@@ -44,7 +43,6 @@ protected:
 
 	void _ic(G& grid)
 	{
-					
 		vector<BlockInfo> vInfo = grid.getResidentBlocksInfo();	//grid.getBlocksInfo();
 		Real min_u = 1e8, max_u = -1e8;
 
@@ -145,6 +143,7 @@ protected:
 
 		MPI_Barrier(MPI_COMM_WORLD);
 
+		// fill in the blocks
 		//#pragma omp parallel for
 		for(int i=0; i<(int)vInfo.size(); i++)
 		{
@@ -172,8 +171,9 @@ protected:
 					}
 		}
 
-
+#if VERBOSE
 		printf("min_u = %lf max_u = %lf\n", min_u, max_u);
+#endif
 
 		status = H5Pclose(fapl_id);
 		status = H5Dclose(dataset_id);
@@ -185,7 +185,6 @@ protected:
 		MPI_Comm_free(&cartcomm);
 
 		delete [] array_all;
-
 	}
 
 
@@ -260,10 +259,6 @@ public:
 		streamer<<path;
 		streamer<<"/";
 		streamer<<outputfile_name;
-//		streamer.setf(ios::dec | ios::right);
-//		streamer.width(5);
-//		streamer.fill('0');
-//		streamer<<step_id;
 
 #if defined(_USE_SZ_)
 		SZ_Init((char *)"sz.config");
@@ -300,7 +295,6 @@ public:
 #endif
 
 		if (grid!=NULL) {
-			printf("deleting grid\n");
 			delete grid;
 			grid = NULL;
 		}
