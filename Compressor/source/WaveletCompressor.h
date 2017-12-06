@@ -15,17 +15,13 @@
 
 #include "FullWaveletTransform.h"
 
-#if defined(_USE_ZSTD_)
-#include "zstd_zlibwrapper.h"
-#else
 #include <zlib.h>	// always needed
-#endif
 
 #if defined(_USE_LZ4_)
 #include <lz4.h>
 #endif
 
-#ifdef _SP_COMP_
+#ifdef _FLOAT_PRECISION_
 typedef float Real;
 #else
 typedef double Real;
@@ -42,7 +38,6 @@ protected:
 	{
 		BS3 = DATASIZE1D * DATASIZE1D * DATASIZE1D,
 		BITSETSIZE = (BS3 + 7) / 8,
-//		BITSETSIZE = BS3,
 		BUFMAXSIZE = BITSETSIZE + sizeof(DataType) * BS3
 	};
 
@@ -118,8 +113,7 @@ public:
 		datastream.next_in = (unsigned char*) WaveletCompressorGeneric<DATASIZE1D, DataType>::compressed_data();
 		datastream.next_out = bufzlib;
 
-//		if (Z_OK == deflateInit(&datastream, Z_DEFAULT_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
-		if (Z_OK == deflateInit(&datastream, Z_BEST_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
+		if (Z_OK == deflateInit(&datastream, Z_DEFAULT_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
 			compressedbytes = datastream.total_out;
 		else
 		{
@@ -154,8 +148,7 @@ public:
 		datastream.next_in = (unsigned char*) WaveletCompressorGeneric<DATASIZE1D, DataType>::compressed_data();
 		datastream.next_out = bufzlib;
 
-//		if (Z_OK == deflateInit(&datastream, Z_DEFAULT_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
-		if (Z_OK == deflateInit(&datastream, Z_BEST_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
+		if (Z_OK == deflateInit(&datastream, Z_DEFAULT_COMPRESSION) && Z_STREAM_END == deflate(&datastream, Z_FINISH))
 			compressedbytes = datastream.total_out;
 		else
 		{
@@ -180,7 +173,7 @@ public:
 	{
 		int decompressedbytes = 0;
 
-#if defined(_USE_ZLIB_) || defined(_USE_ZSTD_)
+#if defined(_USE_ZLIB_)
 		z_stream datastream = { 0 };
 		datastream.total_in = datastream.total_out = 0;
 		datastream.avail_in = ninputbytes;

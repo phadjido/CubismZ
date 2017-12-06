@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef _SP_COMP_
+#ifdef _FLOAT_PRECISION_
 typedef float Real;
 #else
 typedef double Real;
@@ -454,92 +454,4 @@ namespace WaveletsOnInterval
 		}
 	};
 }
-
-/* I USE THIS TO TEST MY QPX EMULATION BECAUSE IBM DOES NOT GIVE ME ACCESS TO BGQ :(
-#include "WaveletsOnInterval.h"
-#include "Timer.h"
-struct TestFWTQPX
-{
-	TestFWTQPX()
-	{
-		enum {N = 32 } ;
-		printf("heeeelllllllloooooooooo\n"); 
-		WaveletsOnInterval::WI4QPX asdo;
-		WaveletsOnInterval::WaveletSweepQPX<N, N> mysweep;
-		WaveletsOnInterval::FwtAp __attribute__((aligned(16))) input[4][N];
-		WaveletsOnInterval::FwtAp  __attribute__((aligned(16))) output[4][N];
-		
-		WaveletsOnInterval::FwtAp __attribute__((aligned(16))) inputM[N][N];
-		WaveletsOnInterval::FwtAp __attribute__((aligned(16))) outputM[N][N];
-
-		WaveletsOnInterval::FwtAp __attribute__((aligned(16))) inputM3D[N][N][N];
-		WaveletsOnInterval::FwtAp __attribute__((aligned(16))) outputM3D[N][N][N];
-		
-		for(int d = 0; d < 4; ++d)
-			for(int i = 0; i < N; ++i)
-				input[d][i] = output[d][i] = 1 + drand48();
-		
-		for(int d = 0; d < N; ++d)
-			for(int i = 0; i < N; ++i)
-				inputM[d][i] = outputM[d][i] = 1 + drand48();
-
-		for(int k = 0; k < N; ++k)		
-		for(int d = 0; d < N; ++d)
-			for(int i = 0; i < N; ++i)
-				inputM3D[k][d][i] = outputM3D[k][d][i] = 1 + drand48();
-		
-		mysweep.xy_transpose<N>(outputM);
-		
-		for(int d = 0; d < N; ++d)
-			for(int i = 0; i < N; ++i)
-			{
-			//	printf("%d %d\n", d, i);
-				assert(inputM[i][d] == outputM[d][i]);
-			}
-		
-		mysweep.xz_transpose<N>(outputM3D);
-
-		for(int k = 0; k < N; ++k)		
-			for(int d = 0; d < N; ++d)
-				for(int i = 0; i < N; ++i)
-					assert(inputM3D[i][k][d] == outputM3D[d][k][i]);
-
-//		exit(0);
-	
-		WaveletsOnInterval::WI4<false> myref;
-		Timer timer; timer.start();
-	
-		const int NTIMES = 1e4;
-		for(int i = 0; i< NTIMES; ++i)
-		{
-#if 0
-			for(int d = 0; d < 4; ++d)
-			{
-				myref.transform<N, true>(output[d]);
-				myref.transform<N, false>(output[d]);
-			}
-#elif 0
-			asdo.forward<N>(output[0], output[1], output[2], output[3]);
-			asdo.inverse<N>(output[0], output[1], output[2], output[3]);
-#else
-			//mysweep.xy_transpose<N>(outputM);
-			mysweep.xz_transpose<N>(outputM3D);
-#endif
-		}
-				
-		printf("spent: %f s\n", timer.stop());
-		
-		for(int d = 0; d < 4; ++d)
-			for(int i = 0; i < N; ++i)
-			{
-				if (fabs(input[d][i]- output[d][i])>=1e-6) printf("error: %.2e -> input[%d %d] = %f output = %f\n", input[d][i]- output[d][i], d, i, input[d][i], output[d][i]);
-			}
-		
-		exit(0);
-	}
-};
-
-static TestFWTQPX culo;
- */
-
 #endif
