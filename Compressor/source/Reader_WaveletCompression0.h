@@ -43,12 +43,6 @@ std::exit(EXIT_FAILURE); \
 
 /* peh: support of different endianness */
 
-/* data structures where bytes swapping is applied
-struct BlockMetadata { int idcompression, subid, ix, iy, iz; }  __attribute__((packed));
-struct HeaderLUT { size_t aggregate_bytes; int nchunks; }  __attribute__((packed));
-struct CompressedBlock{ size_t start, extent; int subid; }  __attribute__((packed));
-*/
-
 class Reader_WaveletCompression0
 {
 protected:
@@ -515,7 +509,6 @@ public:
 
 		assert(!feof(f));
 
-		//static vector<unsigned char> waveletbuf(2 << 21);	// 21: 4MB, 22: 8MB, 28: 512MB
 		static vector<unsigned char> waveletbuf(2 << 28);	// 21: 4MB, 22: 8MB, 28: 512MB
 		const size_t decompressedbytes = zdecompress0(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 
@@ -563,7 +556,6 @@ public:
 	{
 		float zratio1, zratio2;
 
-		//printf("trying to load <%s>\n", path.c_str());
 		FILE * f = fopen(path.c_str(), "rb");
 
 		assert(f);
@@ -583,8 +575,7 @@ public:
 		assert(!feof(f));
 
 		size_t zz_bytes = compressedbuf.size();
-		//static vector<unsigned char> waveletbuf(2 << 21);	// 21: 4MB, 22: 8MB, 28: 512MB
-		static vector<unsigned char> waveletbuf(2 << 28);
+		static vector<unsigned char> waveletbuf(2 << 28);	// 21: 4MB, 22: 8MB, 28: 512MB
 		const size_t decompressedbytes = zdecompress0(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)
@@ -655,7 +646,7 @@ public:
 	virtual void load_file()
 	{
 		int myrank;
-        MPI_Comm_rank(comm, &myrank);
+		MPI_Comm_rank(comm, &myrank);
 
 		if (myrank == 0)
 			Reader_WaveletCompression0::load_file();

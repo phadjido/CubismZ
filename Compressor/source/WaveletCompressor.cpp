@@ -147,42 +147,6 @@ int deserialize_bitset(bitset<N>& mybits, const unsigned char * const buf, const
 	return sum;
 }
 
-unsigned short _cvt2f16(const float xfloat)
-{
-	assert(sizeof(unsigned short) == 2);
-	
-	const unsigned int x = *(unsigned int *)& xfloat;
-	
-	//copy sign
-	unsigned short retval = (x & 0x80000000) >> 16; 
-	
-	//reshape exponent
-	const int e = ((x & 0x7fffffff) >> 23) - 127;
-	retval |= max(0, min(31, e + 15)) << 10;
-	
-	//reshape mantissa
-	const unsigned int m = x & 0x007fffff;
-	retval |= m >> 13;
-	
-	return retval;
-}
-
-float _cvtfromf16(const unsigned short f16)
-{
-	//copy sign
-	int retval = (f16 & 0x8000) << 16;
-	
-	//reshape exponent
-	const int e = (((0x1f << 10) & f16) >> 10) - 15;
-	retval |= (e + 127) << 23;
-	
-	//reshape mantissa
-	const int m = f16 & 0x3ff;
-	retval |= m << 13;
-	
-	return *(float *)& retval;
-}
-
 template<int DATASIZE1D, typename DataType>
 size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float threshold, const bool float16, int wtype)
 {				
@@ -240,7 +204,6 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 	}
   #endif
 
-
 	// peh: need to verify if this is the correct place for byte swapping. However, swapping is in general useless for the compression tool.
 	if (swap)
 	{
@@ -296,9 +259,4 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 #ifdef _BLOCKSIZE_
 template class WaveletCompressorGeneric<_BLOCKSIZE_, Real>;
 template class WaveletCompressorGeneric_zlib<_BLOCKSIZE_, Real>;
-#endif
-
-#ifdef _VOXELS_ //mammamia whattahack
-template class WaveletCompressorGeneric<_VOXELS_, float>;
-template class WaveletCompressorGeneric_zlib<_VOXELS_, float>;
 #endif

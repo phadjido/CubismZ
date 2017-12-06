@@ -15,9 +15,6 @@
 #include <bitset>
 
 #include "WaveletsOnInterval.h"	// 4th and 3rd order wavelets in C++ 
-#if defined(_QPX_) || defined(_QPXEMU_)
-#include "WaveletsOnIntervalQPX.h"	// 4th order wavelets (no lifting) in QPX  
-#endif
 
 using namespace std;
 
@@ -36,11 +33,7 @@ namespace WaveletsOnInterval
 	inline const char * ChosenWavelets_GetName(int wtype) { return _name(wtype); } 
 
 	template<int BS, int ROWSIZE, int COLSIZE, int SLICESIZE>
-#if 0	// peh: currently disabled,  #if defined(_QPX_) || defined(_QPXEMU_)
-	struct FullTransformEngine : WaveletSweepQPX< ROWSIZE, COLSIZE>
-#else
 	struct FullTransformEngine : WaveletSweep< ChosenWavelets, ROWSIZE, COLSIZE>
-#endif
 	{		
 		FullTransformEngine<BS/2, ROWSIZE, COLSIZE, SLICESIZE> child;
 		
