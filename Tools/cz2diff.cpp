@@ -15,36 +15,42 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #include "ArgumentParser.h"
 #include "Reader_WaveletCompression.h"
-#include "Reader_WaveletCompression0.h"
+#include "Reader_WaveletCompression_plain.h"
 
 int main(int argc, char **argv)
 {
-	const double init_t0 = omp_get_wtime();
+	const double init_t0 = MPI_Wtime();
 
 	/* Initialize MPI */
-	MPI_Init(&argc, &argv);
+        int provided;
+        MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
-#if defined(_USE_SZ_)||defined(_USE_SZ3_)
+#if defined(_USE_SZ_)
 	printf("sz.config...\n");
 	SZ_Init((char *)"sz.config");
+#ifdef _OPENMP 
 	omp_set_num_threads(1);
 #endif
+#endif
 
-	/* MPI variables */
-	MPI_Comm comm  = MPI_COMM_WORLD;
-	MPI_Info info  = MPI_INFO_NULL;
-	MPI::Intracomm& mycomm = MPI::COMM_WORLD;
+        /* MPI variables */
+        MPI_Comm comm  = MPI_COMM_WORLD;
+        MPI_Info info  = MPI_INFO_NULL;
 
-	const int mpi_rank = mycomm.Get_rank();
-	const int mpi_size = mycomm.Get_size();
+        int mpi_rank, mpi_size;
 
-	const bool isroot = !mpi_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+        MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-	ArgumentParser argparser(argc, (const char **)argv);
+        const bool isroot = !mpi_rank;
+
+        ArgumentParser argparser(argc, (const char **)argv);
 
 	if (isroot)
 		argparser.loud();
@@ -63,14 +69,14 @@ int main(int argc, char **argv)
 	const bool swapbytes = argparser.check("-swap");
 	const int wtype = argparser("-wtype").asInt(1);
 
-	Reader_WaveletCompressionMPI  myreader1(mycomm, inputfile_name1, swapbytes, wtype);
-	Reader_WaveletCompressionMPI0 myreader2(mycomm, inputfile_name2, swapbytes, wtype);
+	Reader_WaveletCompressionMPI  myreader1(comm, inputfile_name1, swapbytes, wtype);
+	Reader_WaveletCompressionMPI_plain myreader2(comm, inputfile_name2, swapbytes, wtype);
 
 	myreader1.load_file();
 	myreader2.load_file();
-	const double init_t1 = omp_get_wtime();
+	const double init_t1 = MPI_Wtime();
 
-	const double t0 = omp_get_wtime();
+	const double t0 = MPI_Wtime();
 
 	int dim[3], period[3], reorder;
 	int coord[3], id;
@@ -159,7 +165,7 @@ int main(int argc, char **argv)
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	const double t1 = omp_get_wtime();
+	const double t1 = MPI_Wtime();
 
 	if (!mpi_rank)
 	{
@@ -221,7 +227,7 @@ int main(int argc, char **argv)
 		double uncompressed_footprint = sizeof(Real) * nall;
 		double compressed_footprint = uncompressed_footprint;
 
-#if 1
+		//quickly open the initial file and get its size
 		FILE *fpz = fopen(inputfile_name1.c_str(), "rb");
 		if (fpz == NULL)
                         printf("fp == NULL for %s\n", argv[3]);
@@ -233,7 +239,6 @@ int main(int argc, char **argv)
 			compressed_footprint = buf.st_size;
 			fclose(fpz);
 		}
-#endif
 
 		printf("compression-rate: %.2f rel-linf-error: %e rel-mean-error: %e\n",
 			uncompressed_footprint / compressed_footprint, linf, l1);

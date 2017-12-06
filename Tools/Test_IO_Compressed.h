@@ -262,7 +262,9 @@ public:
 
 #if defined(_USE_SZ_)
 		SZ_Init((char *)"sz.config");
+#ifdef _OPENMP
 		omp_set_num_threads(1);
+#endif
 #endif
 
 		double threshold = parser("-threshold").asDouble(1e-5);
@@ -272,24 +274,27 @@ public:
 		mywaveletdumper.set_wtype_write(wtype_write);
 
 		MPI_Barrier(MPI_COMM_WORLD);
-		double t0 = omp_get_wtime();
+		double t0 = MPI_Wtime();
 		mywaveletdumper.Write<0>(grid, streamer.str());
-		double t1 = omp_get_wtime();
+		double t1 = MPI_Wtime();
 
 		if (isroot) std::cout << "done" << endl;
 //		if (isroot) std::cout << "elapsed time: " << t1-t0 << " seconds" << endl;
 
 		int nthreads;
+#ifdef _OPENMP
 		#pragma omp parallel
 		#pragma omp master 
 		nthreads = omp_get_num_threads();
+#else
+		nthreads = 1;
+#endif
 
 		if (isroot) std::cout << "threads: " << nthreads << " elapsed time: " << t1-t0 << " seconds" << endl;
 	}
 
 	void dispose()
 	{
-
 #if defined(_USE_SZ_)
 		SZ_Finalize();
 #endif

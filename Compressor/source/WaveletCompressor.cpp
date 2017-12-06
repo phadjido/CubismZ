@@ -88,7 +88,6 @@ void reshuffle3(char *in, int n, int s)
 	memcpy(in, tmp, n);
 	free(tmp);
 }
-
 #endif
 
 template<int N>

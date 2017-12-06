@@ -5,7 +5,15 @@
  * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
-#pragma once
+#ifndef _COMPRESSIONENCODERS_H_
+#define _COMPRESSIONENCODERS_H_ 1
+
+#ifdef _OPENMP
+#include <omp.h>
+#else
+static int omp_get_num_threads(void) { return 1; }
+#endif
+
 
 #include <zlib.h>	// always needed
 
@@ -104,10 +112,10 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 						   unsigned *max)
 {
 #if defined(_USE_ZLIB_)
-    int ret;                    /* return code from deflate functions */
-    unsigned have;              /* number of bytes in temp[] */
-    unsigned char *hold;        /* allocated buffer to hold input data */
-    unsigned char temp[11];     /* must be large enough to hold zlib or gzip
+	int ret;                    /* return code from deflate functions */
+	unsigned have;              /* number of bytes in temp[] */
+	unsigned char *hold;        /* allocated buffer to hold input data */
+	unsigned char temp[11];     /* must be large enough to hold zlib or gzip
 								 header (if any) and one more byte -- 11
 								 works for the worst case here, but if gzip
 								 encoding is used and a deflateSetHeader()
@@ -117,77 +125,84 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 								 header size plus one */
 
 
-    /* initialize deflate stream and point to the input data */
-    ret = deflateReset(strm);
+	/* initialize deflate stream and point to the input data */
+	ret = deflateReset(strm);
 
-    if (ret != Z_OK)
-        return ret;
-    strm->next_in = buf;
-    strm->avail_in = len;
+	if (ret != Z_OK)
+		return ret;
+	strm->next_in = buf;
+	strm->avail_in = len;
 
-    /* kick start the process with a temporary output buffer -- this allows
-	 deflate to consume a large chunk of input data in order to make room for
-	 output data there */
-    if (*max < len)
-        *max = len;
-    strm->next_out = temp;
-    strm->avail_out = sizeof(temp) > *max ? *max : sizeof(temp);
-    ret = deflate(strm, Z_FINISH);
+	/* kick start the process with a temporary output buffer -- this allows
+	   deflate to consume a large chunk of input data in order to make room for
+	   output data there */
+	if (*max < len)
+		*max = len;
+	strm->next_out = temp;
+	strm->avail_out = sizeof(temp) > *max ? *max : sizeof(temp);
+	ret = deflate(strm, Z_FINISH);
 
-    if (ret == Z_STREAM_ERROR)
-        return ret;
+	if (ret == Z_STREAM_ERROR)
+		return ret;
 
-    /* if we can, copy the temporary output data to the consumed portion of the
-	 input buffer, and then continue to write up to the start of the consumed
-	 input for as long as possible */
-    have = strm->next_out - temp;
-    if (have <= (strm->avail_in ? len - strm->avail_in : *max)) {
-        memcpy(buf, temp, have);
-        strm->next_out = buf + have;
-        have = 0;
-        while (ret == Z_OK) {
-            strm->avail_out = strm->avail_in ? strm->next_in - strm->next_out :
-			(buf + *max) - strm->next_out;
-            ret = deflate(strm, Z_FINISH);
-        }
-        if (ret != Z_BUF_ERROR || strm->avail_in == 0) {
-            *max = strm->next_out - buf;
-            return ret == Z_STREAM_END ? Z_OK : ret;
-        }
-    }
+	/* if we can, copy the temporary output data to the consumed portion of the
+	   input buffer, and then continue to write up to the start of the consumed
+	   input for as long as possible */
 
-    /* the output caught up with the input due to insufficiently compressible
-	 data -- copy the remaining input data into an allocated buffer and
-	 complete the compression from there to the now empty input buffer (this
-	 will only occur for long incompressible streams, more than ~20 MB for
-	 the default deflate memLevel of 8, or when *max is too small and less
-	 than the length of the header plus one byte) */
+	have = strm->next_out - temp;
+	if (have <= (strm->avail_in ? len - strm->avail_in : *max)) {
+		memcpy(buf, temp, have);
+		strm->next_out = buf + have;
+		have = 0;
+		while (ret == Z_OK) {
+			strm->avail_out = strm->avail_in ? strm->next_in - strm->next_out :
+				(buf + *max) - strm->next_out;
+				ret = deflate(strm, Z_FINISH);
+		}
+		if (ret != Z_BUF_ERROR || strm->avail_in == 0) {
+			*max = strm->next_out - buf;
+			return ret == Z_STREAM_END ? Z_OK : ret;
+		}
+	}
 
-    hold = (unsigned char*)strm->zalloc(strm->opaque, strm->avail_in, 1);
-    if (hold == Z_NULL)
-        return Z_MEM_ERROR;
-    memcpy(hold, strm->next_in, strm->avail_in);
-    strm->next_in = hold;
-    if (have) {
-        memcpy(buf, temp, have);
-        strm->next_out = buf + have;
-    }
-    strm->avail_out = (buf + *max) - strm->next_out;
-    ret = deflate(strm, Z_FINISH);
-    strm->zfree(strm->opaque, hold);
-    *max = strm->next_out - buf;
-    return ret == Z_OK ? Z_BUF_ERROR : (ret == Z_STREAM_END ? Z_OK : ret);
+	/* the output caught up with the input due to insufficiently compressible
+	   data -- copy the remaining input data into an allocated buffer and
+	   complete the compression from there to the now empty input buffer (this
+	   will only occur for long incompressible streams, more than ~20 MB for
+	   the default deflate memLevel of 8, or when *max is too small and less
+	   than the length of the header plus one byte) */
+
+	hold = (unsigned char*)strm->zalloc(strm->opaque, strm->avail_in, 1);
+	if (hold == Z_NULL)
+		return Z_MEM_ERROR;
+	memcpy(hold, strm->next_in, strm->avail_in);
+	strm->next_in = hold;
+	if (have) {
+		memcpy(buf, temp, have);
+		strm->next_out = buf + have;
+	}
+	strm->avail_out = (buf + *max) - strm->next_out;
+	ret = deflate(strm, Z_FINISH);
+	strm->zfree(strm->opaque, hold);
+	*max = strm->next_out - buf;
+	return ret == Z_OK ? Z_BUF_ERROR : (ret == Z_STREAM_END ? Z_OK : ret);
 
 #elif defined(_USE_LZ4_)
 
 	#define ZBUFSIZE (4*1024*1024)	/* fix this */
-	#define MAXBUFFERS	12	/* todo */
-	static char bufzlibA[MAXBUFFERS][ZBUFSIZE];	/* and this per thread (threadprivate or better a small cyclic array of buffers ) */
+
+#ifdef _OPENMP
+	#define MAXBUFFERS	12	/* MAX NUMBER OF THREADS */
+#else
+	#define MAXBUFFERS	1	
+#endif
 
 	if (omp_get_num_threads() > MAXBUFFERS) {
-		printf("small number of buffers (%d)\n", MAXBUFFERS);
+		printf("Small number of buffers (%d)\n", MAXBUFFERS);
 		abort();
 	}
+
+	static char bufzlibA[MAXBUFFERS][ZBUFSIZE];
 
 	if (ZBUFSIZE < *max) {
 		printf("small ZBUFSIZE\n");
@@ -200,7 +215,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 	int compressedbytes;
 
 #if (MAXBUFFERS == 1)
-#pragma omp critical
+	#pragma omp critical
 #endif
 	{
 #if defined(_USE_LZ4_)
@@ -223,3 +238,4 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 }
 
 
+#endif

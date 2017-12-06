@@ -4,8 +4,8 @@
  *
  * Copyright 2017 ETH Zurich. All rights reserved.
  */
-#ifndef READER_WAVELETCOMPRESSION_H_T7YQFSP3
-#define READER_WAVELETCOMPRESSION_H_T7YQFSP3
+#ifndef READER_WAVELETCOMPRESSION_H_
+#define READER_WAVELETCOMPRESSION_H_ 1
 
 #include <cstdlib>
 #include <cstring>
@@ -16,7 +16,11 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <mpi.h>
+
+#ifdef _OPENMP
 #include <omp.h>
+#else
+#endif
 
 using namespace std;
 
@@ -55,7 +59,7 @@ struct lru_cache_type
 	{
 		for (int i = 0; i < 16; i++) {
 			if (chunk_start == start[i]) {
-				timestamp[i] = -omp_get_wtime();
+				timestamp[i] = -MPI_Wtime();
 				*ready = 1;
 				return cachedbuf[i];
 			}
@@ -73,7 +77,7 @@ struct lru_cache_type
 		}
 
 		*ready = 0;
-		timestamp[lru_index] = -omp_get_wtime();
+		timestamp[lru_index] = -MPI_Wtime();
 		start[lru_index] = chunk_start;
 		return cachedbuf[lru_index];
 	}
@@ -737,7 +741,7 @@ public:
 		unsigned char *f0 = data;
 		unsigned char *f;
 
-		t0 = omp_get_wtime();
+		t0 = MPI_Wtime();
 		CompressedBlock compressedchunk = idx2chunk[_id(ix, iy, iz)];
 
 		size_t start = compressedchunk.start;
@@ -753,19 +757,19 @@ public:
 		f = f0 + compressedchunk.start;
 		compressedbuf = f;
 
-		t1 = omp_get_wtime();
+		t1 = MPI_Wtime();
 		t_other += (t1-t0);
 
 
 		size_t zz_bytes = compressedchunk.extent;
 		unsigned char *waveletbuf = decompressedchunk;
 
-		t0 = omp_get_wtime();
+		t0 = MPI_Wtime();
 		size_t decompressedbytes;
 		if (!ready)
 			decompressedbytes = zdecompress(compressedbuf, compressedchunk.extent, &waveletbuf[0], 4*1024*1024);
 
-		t1 = omp_get_wtime();
+		t1 = MPI_Wtime();
 		t_decode += (t1-t0);
 
 		if (!ready)
@@ -786,7 +790,7 @@ public:
 			assert(readbytes <= decompressedbytes);
 		}
 
-		t0 = omp_get_wtime();
+		t0 = MPI_Wtime();
 		{
 			int nbytes = *(int *)&waveletbuf[readbytes];
 			nbytes = swapint(nbytes);
@@ -860,7 +864,7 @@ public:
 			printf("decompressed %d bytes to %d bytes...(%.2lf)\n", nbytes, BS3, zratio2);
 #endif
 		}
-		t1 = omp_get_wtime();
+		t1 = MPI_Wtime();
 		t_wavelet += (t1-t0);
 
 		return zratio1*zratio2;
@@ -930,4 +934,4 @@ public:
 	}
 };
 
-#endif /* READER_WAVELETCOMPRESSION_H_T7YQFSP3 */
+#endif /* READER_WAVELETCOMPRESSION_H_ */

@@ -1,11 +1,11 @@
 /*
- * Reader_WaveletCompression0.h
+ * Reader_WaveletCompression_plain.h
  * CubismZ
  *
  * Copyright 2017 ETH Zurich. All rights reserved.
  */
-#ifndef READER_WAVELETCOMPRESSION_H_00000000
-#define READER_WAVELETCOMPRESSION_H_00000000
+#ifndef READER_WAVELETCOMPRESSION_PLAIN_H_
+#define READER_WAVELETCOMPRESSION_PLAIN_H_ 1
 
 #include <cstdlib>
 #include <cstring>
@@ -28,7 +28,7 @@ typedef double Real;
 #include "../../Compressor/source/WaveletCompressor.h"
 
 #include "../../Compressor/source/WaveletSerializationTypes.h"
-#include "../../Compressor/source/CompressionEncoders0.h"
+#include "../../Compressor/source/CompressionEncoders_plain.h"
 #include "../../Compressor/source/FullWaveletTransform.h"
 
 //MACRO TAKEN FROM http://stackoverflow.com/questions/3767869/adding-message-to-assert
@@ -43,7 +43,7 @@ std::exit(EXIT_FAILURE); \
 
 /* peh: support of different endianness */
 
-class Reader_WaveletCompression0
+class Reader_WaveletCompression_plain
 {
 protected:
 	string path;
@@ -172,7 +172,7 @@ protected:
 
 public:
 
-	Reader_WaveletCompression0(const string path, bool doswapping, int wtype): NBLOCKS(-1), global_header_displacement(-1), path(path), doswapping(doswapping), wtype(wtype) { }
+	Reader_WaveletCompression_plain(const string path, bool doswapping, int wtype): NBLOCKS(-1), global_header_displacement(-1), path(path), doswapping(doswapping), wtype(wtype) { }
 
 	virtual void load_file()
 	{
@@ -510,7 +510,7 @@ public:
 		assert(!feof(f));
 
 		static vector<unsigned char> waveletbuf(2 << 28);	// 21: 4MB, 22: 8MB, 28: 512MB
-		const size_t decompressedbytes = zdecompress0(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
+		const size_t decompressedbytes = zdecompress_plain(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 
 		int readbytes = 0;
 		for(int i = 0; i<compressedchunk.subid; ++i)
@@ -576,7 +576,7 @@ public:
 
 		size_t zz_bytes = compressedbuf.size();
 		static vector<unsigned char> waveletbuf(2 << 28);	// 21: 4MB, 22: 8MB, 28: 512MB
-		const size_t decompressedbytes = zdecompress0(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
+		const size_t decompressedbytes = zdecompress_plain(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)
 		printf("zdecompressed %d bytes to %d bytes...(%.2lf)\n", zz_bytes, decompressedbytes, zratio1);
@@ -631,14 +631,14 @@ public:
 	}
 };
 
-class Reader_WaveletCompressionMPI0: public Reader_WaveletCompression0
+class Reader_WaveletCompressionMPI_plain: public Reader_WaveletCompression_plain
 {
 	const MPI_Comm comm;
 
 public:
 
-	Reader_WaveletCompressionMPI0(const MPI_Comm comm, const string path, int swapbytes, int wtype):
-	Reader_WaveletCompression0(path,swapbytes,wtype), comm(comm)
+	Reader_WaveletCompressionMPI_plain(const MPI_Comm comm, const string path, int swapbytes, int wtype):
+	Reader_WaveletCompression_plain(path,swapbytes,wtype), comm(comm)
 	{
 
 	}
@@ -649,7 +649,7 @@ public:
 		MPI_Comm_rank(comm, &myrank);
 
 		if (myrank == 0)
-			Reader_WaveletCompression0::load_file();
+			Reader_WaveletCompression_plain::load_file();
 
 		//propagate primitive type data members
 		{
@@ -676,4 +676,4 @@ public:
 	}
 };
 
-#endif /* READER_WAVELETCOMPRESSION_H_00000000 */
+#endif /* READER_WAVELETCOMPRESSION_PLAIN_H_ */

@@ -12,8 +12,9 @@
 #include <cmath>
 #include <algorithm>
 #include "mpi.h"
+#ifdef _OPENMP
 #include <omp.h>
-
+#endif
 #include "BlockInfo.h"
 #include "StencilInfo.h"
 #include "PUPkernelsMPI.h"

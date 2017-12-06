@@ -5,7 +5,9 @@
  * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
-#pragma once
+#ifndef _WAVELETSONINTERVAL3_H_
+#define _WAVELETSONINTERVAL3_H_ 1
+
 #include <cmath>
 #include <vector>
 #include <algorithm>
@@ -184,3 +186,5 @@ struct WI4
 
 
 }
+
+#endif

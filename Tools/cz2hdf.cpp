@@ -11,7 +11,6 @@
 #include <mpi.h>
 #include <hdf5.h>
 #include <H5FDmpio.h>
-#include <omp.h>
 //#define _TRANSPOSE_DATA_
 #define _COLLECTIVE_IO_
 
@@ -24,24 +23,26 @@
 #include "ArgumentParser.h"
 #include "Reader_WaveletCompression.h"
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
-	const double init_t0 = omp_get_wtime();
+	const double init_t0 = MPI_Wtime();
 
 	/* Initialize MPI */
-	MPI::Init_thread(MPI_THREAD_SERIALIZED);
+        int provided;
+        MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
 	/* MPI variables */
 	MPI_Comm comm  = MPI_COMM_WORLD;
 	MPI_Info info  = MPI_INFO_NULL;
-	MPI::Intracomm& mycomm = MPI::COMM_WORLD;
 
-	const int mpi_rank = mycomm.Get_rank();
-	const int mpi_size = mycomm.Get_size();
+	int mpi_rank, mpi_size;
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
 	const bool isroot = !mpi_rank;
 
-	ArgumentParser argparser(argc, argv);
+	ArgumentParser argparser(argc, (const char **)argv);
 
 	if (isroot)
 		argparser.loud();
@@ -84,23 +85,17 @@ int main(int argc, const char **argv)
 	id_t	plist_id; /* property list identifier */
 	herr_t	status;
 
-#if 1
 	Reader_WaveletCompressionMPI *myreader[NCHANNELS];
 
 	for (int i = 0; i < NCHANNELS; i++)
-		myreader[i] =  new Reader_WaveletCompressionMPI (mycomm, inputfile_name[i], swapbytes, wtype);
+		myreader[i] =  new Reader_WaveletCompressionMPI (comm, inputfile_name[i], swapbytes, wtype);
 	
-#else
-	Reader_WaveletCompression myreader(inputfile_name[0], swapbytes, wtype);
-#endif
-
 	for (int i = 0; i < NCHANNELS; i++)
 		myreader[i]->load_file();
 
-	const double init_t1 = omp_get_wtime();
+	const double init_t1 = MPI_Wtime();
 
-
-	const double t0 = omp_get_wtime(); 
+	const double t0 = MPI_Wtime(); 
 
 	string h5file_fullname = h5file_name + ".h5";;
 
@@ -295,7 +290,7 @@ int main(int argc, const char **argv)
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	const double t1 = omp_get_wtime(); 
+	const double t1 = MPI_Wtime(); 
 
 	if (!mpi_rank)
 	{
@@ -319,6 +314,7 @@ int main(int argc, const char **argv)
 
 	if (!mpi_rank)
 	{
+		// prepare the xmf file
 		char wrapper[256];
 		sprintf(wrapper, "%s.xmf", h5file_name.c_str());
 		FILE *xmf = 0;
@@ -374,7 +370,7 @@ int main(int argc, const char **argv)
 		fclose(xmf);
 	}
 	
-	MPI::Finalize();
+	MPI_Finalize();
 
 	return 0;
 }

@@ -5,12 +5,20 @@
  * Copyright 2017 ETH Zurich. All rights reserved.
  */
 
-#pragma once
+#ifndef SERIALIZERIO_WAVELETCOMPRESSION_MPI_SIMPLE_H_
+#define SERIALIZERIO_WAVELETCOMPRESSION_MPI_SIMPLE_H_
+#endif
 
 #include <typeinfo>
 #include <sstream>
 #include <numeric>
+#ifdef _OPENMP
 #include <omp.h>
+#else
+static int omp_get_max_threads(void) { return 1;}
+static int omp_get_thread_num(void) { return 0; }
+#endif
+
 #include <Timer.h>
 #include <map>
 
@@ -21,7 +29,6 @@ using namespace std;
 #include "WaveletCompressor.h"
 
 #include "CompressionEncoders.h"
-#define		_ASYNC_IO_	1	// peh: hardcoded option, not in active code though
 //#define	_WRITE_AT_ALL_	1	// peh:
 
 #if defined(_USE_ZEROBITS_)
@@ -537,8 +544,6 @@ protected:
 				ss << "Wavelets: " << "zfp" << "\n";
 #elif defined(_USE_SZ_)
 				ss << "Wavelets: " << "sz" << "\n";
-#elif defined(_USE_SHUFFLE_)
-				ss << "Wavelets: " << "shuffle" << "\n";
 #else
 				ss << "Wavelets: " << "none" << "\n";
 #endif
@@ -558,7 +563,7 @@ protected:
 
 		//compress my data, prepare for serialization
 		{
-			double t0 = omp_get_wtime();
+			double t0 = MPI_Wtime();
 			written_bytes = pending_writes = completed_writes = 0;
 
 			if (allmydata.size() == 0)
@@ -589,11 +594,11 @@ protected:
 
 				written_bytes += extrabytes;
 			}
-			double t1 = omp_get_wtime();
+			double t1 = MPI_Wtime();
 			printf("SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization %f seconds\n", t1-t0); 
 		}
 
-		double io_t0 = omp_get_wtime();
+		double io_t0 = MPI_Wtime();
 		///
 		const MPI_Comm mycomm = inputGrid.getCartComm();
 		int mygid;
@@ -607,7 +612,7 @@ protected:
 		_to_file(mycomm, fileName);
 		vector<float> workload_file(1, timer.stop());
 		///
-		double io_t1 = omp_get_wtime();
+		double io_t1 = MPI_Wtime();
 		printf("SerializerIO_WaveletCompression_MPI_Simple.h: _to_file %f seconds\n", io_t1-io_t0); 
 
 		//just a report now
@@ -937,6 +942,8 @@ public:
 	}
 };
 
+
+#if 0
 template<typename GridType, typename IterativeStreamer>
 class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCompression_MPI_SimpleBlocking<GridType, IterativeStreamer>
 {
@@ -974,3 +981,4 @@ public:
 			_wait_all_quiet();
 	}
 };
+#endif

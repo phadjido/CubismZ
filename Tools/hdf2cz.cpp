@@ -18,7 +18,11 @@ Simulation * sim = NULL;
 int main (int argc, char ** argv)
 {
 	int provided; 
-	MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+#ifdef _OPENMP
+	MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
+#else
+	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
+#endif
 	
 	int myrank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
