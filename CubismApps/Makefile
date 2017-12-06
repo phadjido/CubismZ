@@ -9,7 +9,7 @@ blocksize ?= 32
 
 all: tools
 
-tools: thirdparty
+tools: #thirdparty
 	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=default
 	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=wavz_zlib wavz=1 zlib=1
 	$(MAKE) -C Tools/ install CC=$(CC) bs=$(blocksize) dir=fpzip fpzip=1
