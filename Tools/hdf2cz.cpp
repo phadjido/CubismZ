@@ -17,15 +17,8 @@ Simulation * sim = NULL;
 
 int main (int argc, char ** argv)
 {
-#if defined(_USE_SZ_)
-//	SZ_Init((char *)"sz.config");
-//	omp_set_num_threads(1);
-#endif
-
-
-	MPI_Init(&argc, &argv);
-//	int provided; 
-//	MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+	int provided; 
+	MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
 	
 	int myrank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);

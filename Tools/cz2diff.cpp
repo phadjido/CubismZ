@@ -54,9 +54,6 @@ int main(int argc, char **argv)
 	const string inputfile_name1 = argparser("-simdata1").asString("none");
 	const string inputfile_name2 = argparser("-simdata2").asString("none");
 
-	const double threshold = (double) argparser("-threshold").asDouble(1);
-	if (isroot) printf("threshold = %.2lf%%\n", threshold);
-
 	if ((inputfile_name1 == "none")||(inputfile_name2 == "none"))
 	{
 		printf("usage: %s -simdata1 <filename>  -simdata2 <filename> [-swap] [-wtype <wtype>]\n", argv[0]);
@@ -108,8 +105,6 @@ int main(int argc, char **argv)
 	double n_1 = 0;
 	double n_2 = 0;
 
-	long over_counter = 0;
-
 	double f1, f2;
 	double maxdata = -DBL_MAX;
 	double mindata =  DBL_MAX;
@@ -133,7 +128,7 @@ int main(int argc, char **argv)
 					for (int xb = 0; xb < _BLOCKSIZE_; xb++) {
 						f1 = (double) targetdata1[zb][yb][xb];
 						f2 = (double) targetdata2[zb][yb][xb];
-#if 1
+
 						if (f2 > maxdata) maxdata = f2;
 						if (f2 < mindata) mindata = f2;
 
@@ -156,27 +151,6 @@ int main(int argc, char **argv)
 						e_1 += err;
 						e_2 += err*err;
 						n++;	// number id
-
-						double rel_err;
-
-						if (v != 0.0)
-							rel_err = 100.0 * (err / v);
-						else
-							rel_err = 0.0;
-
-						// absolute relative % error
-						if (rel_err >= threshold)
-						{
-							over_counter++;
-							//printf("%5d: %15.8f %15.8f (%15.8f)\n", over_counter, f1, f2, err);
-							//printf("%5d: %15.8f %15.8f (%15.8f)\n", over_counter, f1, f2, rel_err);
-
-#if 0
-							printf("%5d: %15.8f %15.8f (%15.8f - %10.2f%%) [%4d,%4d,%4d]:(%2d,%2d,%2d)\n",
-									over_counter, f1, f2, err, rel_err, x, y, z, xb, yb, zb);
-#endif
-						}
-#endif
 					}
 
 		}
@@ -205,7 +179,6 @@ int main(int argc, char **argv)
 		MPI_Reduce(MPI_IN_PLACE, &e_2,   	1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 		MPI_Reduce(MPI_IN_PLACE, &n_2,   	1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 		MPI_Reduce(MPI_IN_PLACE, &n,     	1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
-		MPI_Reduce(MPI_IN_PLACE, &over_counter,	1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 	} else {
 		MPI_Reduce(&mindata, &mindata, 		1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 		MPI_Reduce(&maxdata, &maxdata, 		1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
@@ -216,7 +189,6 @@ int main(int argc, char **argv)
 		MPI_Reduce(&e_2, &e_2,   		1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 		MPI_Reduce(&n_2, &n_2,   		1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 		MPI_Reduce(&n, &n,     			1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
-		MPI_Reduce(&over_counter, &over_counter,1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 	}
 
 
@@ -239,9 +211,6 @@ int main(int argc, char **argv)
 		printf("\n");
 
 		printf("n          = %ld\n", n);
-		printf("counter    = %ld\n", over_counter);
-		printf("threshold  = %lf%%\n", threshold);
-		printf("percentage = %.3f%%\n", 100.0*(float)over_counter/(float)n);
 
 		double linf = e_inf;
 		long nall = n;
@@ -273,21 +242,11 @@ int main(int argc, char **argv)
 		printf("mindata = %f\n", mindata);
 		printf("maxdata = %f\n", maxdata);
 
-		double psnr;
-
-//		if (normalize)
-//			psnr = 10 * (double)log10(1. * 1. / mse);
-//		else
-            		psnr = 20 * log10((maxdata - mindata) / (2 * sqrt(mse)));
-
+		double psnr = 20 * log10((maxdata - mindata) / (2 * sqrt(mse)));
 
 		printf("PSNR-vs-BITRATE: %.04f bps %.04f dB\n", compressed_footprint * 8. / nall, psnr);
-
-		printf("     CR - rel(e_inf) - rel(e_1) - mean(e_1) - rel(e_2) - mean(e_2) BPS PSNR\n");
-
+//		printf("     CR - rel(e_inf) - rel(e_1) - mean(e_1) - rel(e_2) - mean(e_2) BPS PSNR\n");
 		printf("RE : %12s %12s %12s %12s %12s %12s %12s %12s\n", "CR", "rel(e_inf)", "rel(e_1)", "mean(e_1)", "rel(e_2)", "mean(e_2)", "BPS", "PSNR");
-
-
 		printf("RES: %12.2f %.6e %.6e %.6e %.6e %.6e %12.04f %12.04f\n",
 			uncompressed_footprint / compressed_footprint,	// compression-rate
 			e_inf/n_inf,					// rel(e_inf)

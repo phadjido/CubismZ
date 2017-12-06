@@ -155,12 +155,6 @@ int main(int argc, const char **argv)
 
 	fprintf(stdout, "ROI = [%d,%d]x[%d,%d]x[%d,%d]\n", StartX, EndX, StartY, EndY, StartZ, EndZ);	
 	
-#if 0	// who else and what else
-	int StartX = 16, EndX = 48-1;
-	int StartY = 16, EndY = 48-1;
-	int StartZ = 0, EndZ = 32-1;
-#endif	
-	
 	int NX = (EndX-StartX+1)*_BLOCKSIZE_;
 	int NY = (EndY-StartY+1)*_BLOCKSIZE_;
 	int NZ = (EndZ-StartZ+1)*_BLOCKSIZE_;
@@ -236,7 +230,7 @@ int main(int argc, const char **argv)
 			for (int i = 0; i < NCHANNELS; i++)
 			{
 			double zratio = myreader[i]->load_block2(x, y, z, targetdata);
-#if 1 //defined(VERBOSE)
+#if defined(VERBOSE)
 			fprintf(stdout, "compression ratio was %.2lf\n", zratio); 
 #endif
 
@@ -244,12 +238,7 @@ int main(int argc, const char **argv)
 				for (int yb = 0; yb < _BLOCKSIZE_; yb++)
 					for (int zb = 0; zb < _BLOCKSIZE_; zb++)
 					{
-						//targetdata_all[xb][yb][zb][i] = targetdata[xb][yb][zb];
 						targetdata_all[i + zb*NCHANNELS + yb*NCHANNELS*_BLOCKSIZE_ + xb*NCHANNELS*_BLOCKSIZE_*_BLOCKSIZE_] = targetdata[xb][yb][zb];
-						//if (targetdata[xb][yb][zb]!=0.0)
-						//{
-						//	printf("val = %e\n", targetdata[xb][yb][zb]); 
-						//}
 					}
 			}
 			
@@ -293,8 +282,6 @@ int main(int argc, const char **argv)
 			offset[1] = 0;
 			offset[2] = 0;
 			offset[3] = 0;
-
-			//fprintf(stdout, "empty blockk( %d, %d, %d )...\n", x, y, z); 
 
 			H5Sselect_none(nullmemspace);
 			
@@ -357,11 +344,7 @@ int main(int argc, const char **argv)
 		fprintf(xmf, "       <DataItem Name=\"Spacing\" Dimensions=\"3\" NumberType=\"Double\" Precision=\"8\" Format=\"XML\">\n");
 #endif
 
-#if 1
 		fprintf(xmf, "        %e %e %e\n", 1./(Real)max(dims[0],max(dims[1],dims[2])),1./(Real)max(dims[0],max(dims[1],dims[2])),1./(Real)max(dims[0],max(dims[1],dims[2])));
-#else
-		fprintf(xmf, "        %e %e %e\n", grid.getH(), grid.getH(), grid.getH());
-#endif
 		fprintf(xmf, "       </DataItem>\n");
 		fprintf(xmf, "     </Geometry>\n");
 
@@ -376,15 +359,11 @@ int main(int argc, const char **argv)
 		fprintf(xmf, "       <DataItem Dimensions=\"%d %d %d %d\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">\n", (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3]);
 #endif
 
-#if 0
-		fprintf(xmf, "        %s:/data\n", h5file_fullname.c_str());
-#else
 		string str = h5file_fullname;
 		unsigned found = str.find_last_of("/");
 		str = str.substr(found+1);
 
 		fprintf(xmf, "        %s:/data\n", str.c_str());
-#endif
 
 		fprintf(xmf, "       </DataItem>\n");
 		fprintf(xmf, "     </Attribute>\n");
