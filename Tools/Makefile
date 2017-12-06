@@ -4,12 +4,12 @@ SHELL := /bin/bash
 # User options
 
 MPICC ?= mpic++
-config ?=release
-dir ?= default
-
 blocksize ?= 32
 hdf-incdir ?= /opt/hdf5_mpich/include
 hdf-libdir ?= /opt/hdf5_mpich/lib
+
+config ?=release
+dir ?= default
 
 #################
 # Fixed options
