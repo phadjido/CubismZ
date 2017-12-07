@@ -1,6 +1,5 @@
 # File       : Makefile
 # Created    : Wed Nov 29 2017 07:34:13 PM (+0100)
-# Author     : Fabian Wermelinger
 # Description: Build CubismZ tools
 # Copyright 2017 ETH Zurich. All Rights Reserved.
 

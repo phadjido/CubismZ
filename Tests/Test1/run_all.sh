@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # File       : run_all.sh
 # Created    : Thu Dec 07 2017 12:29:17 PM (+0100)
-# Author     : Fabian Wermelinger
 # Description: Batch run all test cases.  The output is stored in run_all.txt
 # Copyright 2017 ETH Zurich. All Rights Reserved.
 nproc=1
