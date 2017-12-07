@@ -38,7 +38,7 @@ protected:
 	ArgumentParser parser;
 	string inputfile_name, inputfile_dataset, outputfile_name;
 	int myrank;
-    
+
 	SerializerIO_WaveletCompression_MPI_SimpleBlocking<G, StreamerGridPointIterative> mywaveletdumper;
 
 	void _ic(G& grid)
@@ -108,7 +108,7 @@ protected:
 			NY,
 			NZ, NCHANNELS};
 
-		// global domain size as specified by the process grid, the block layout and the block size 
+		// global domain size as specified by the process grid, the block layout and the block size
 		hsize_t dims[4] = {
 			grid.getBlocksPerDimension(0)*_BLOCKSIZE_,
 			grid.getBlocksPerDimension(1)*_BLOCKSIZE_,
@@ -143,7 +143,7 @@ protected:
 #if 1
 		if (myrank == 0)
 		{
-			// Before reading any data, we perform a check that we have specified the correct and exact domain size 
+			// Before reading any data, we perform a check that we have specified the correct and exact domain size
 
 			//https://stackoverflow.com/questions/15786626/get-the-dimensions-of-a-hdf5-dataset
 			//If your data space is simple (i.e. not null or scalar), then you can get the number of dimensions using H5Sget_simple_extent_ndims:
@@ -160,7 +160,7 @@ protected:
 			for (int i = 0; i < ndims; i++)
 				if (hdims[i] != dims[i])
 				{
-					printf("The dataset size does not match the one specified by the user. Aborting... \n");  
+					printf("The dataset size does not match the one specified by the user. Aborting... \n");
 					MPI_Abort(MPI_COMM_WORLD, 1);
 				}
 		}
@@ -228,12 +228,12 @@ protected:
 		ypesize = parser("-ypesize").asInt(1);
 		zpesize = parser("-zpesize").asInt(1);
 	}
-    
+
 public:
 	const bool isroot;
-	
+
 	Test_IO_Compressed(const bool isroot, const int argc, const char ** argv) : isroot(isroot) , grid(NULL), parser(argc,argv) { }
-    
+
 
 	void setup()
 	{
@@ -285,7 +285,7 @@ public:
 
 	void vp(G& grid, const int step_id)
 	{
-		if (isroot) std::cout << "dumping MPI VP ...\n" ;
+		if (isroot) std::cout << "Creating MPI CZ dump...\n" ;
 
 		const string path = parser("-fpath").asString(".");
 		const int wtype_write = parser("-wtype_write").asInt(1);
@@ -318,7 +318,7 @@ public:
 		int nthreads;
 #ifdef _OPENMP
 		#pragma omp parallel
-		#pragma omp master 
+		#pragma omp master
 		nthreads = omp_get_num_threads();
 #else
 		nthreads = 1;
