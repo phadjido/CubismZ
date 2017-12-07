@@ -8,8 +8,6 @@ if [[ "$#" -eq 1 ]]; then
     nproc=$1
 fi
 
-fout='run_all.txt'
-
 mymsg()
 {
     echo ''
@@ -24,7 +22,7 @@ command -v mpirun >/dev/null 2>&1 || { echo >&2 "Can not find 'mpirun' command. 
 command -v bc >/dev/null 2>&1 || { echo >&2 "Can not find 'bc' command. Aborting."; exit 1; }
 
 # wavelets + zlib
-mymsg 'test_wavz.sh' >> $fout
-./test_wavz.sh $nproc >> $fout
+mymsg 'test_wavz.sh'
+./test_wavz.sh $nproc
 
 exit 0
