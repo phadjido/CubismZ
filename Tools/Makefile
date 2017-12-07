@@ -29,7 +29,7 @@ LIBS += -ldl
 
 ##################
 # Makefile rules
-
+.PHONY: .FORCE
 VPATH := ../../Cubism/source/ ../Compressor/source/ .
 
 
@@ -44,8 +44,10 @@ cz2hdf: cz2hdf.o WaveletCompressor.o
 cz2diff: cz2diff.o WaveletCompressor.o
 	$(MPICC) $(OPTFLAGS) $(extra) $^ -o $@ $(LIBS)
 
-%.o: %.cpp
-	$(MPICC) $(OPTFLAGS) $(CPPFLAGS) -c $^ -o $@
+%.o: %.cpp .FORCE
+	$(MPICC) $(OPTFLAGS) $(CPPFLAGS) -c $< -o $@
+
+.FORCE:
 
 install: all
 	mkdir -p bin/$(dir)
@@ -54,4 +56,4 @@ install: all
 
 clean:
 	rm -rf bin
-	rm -f *.o hdf2cz cz2hdf cz2diff 
+	rm -f *.o hdf2cz cz2hdf cz2diff
