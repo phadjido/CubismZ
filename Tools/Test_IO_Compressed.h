@@ -36,15 +36,17 @@ protected:
 	bool VERBOSITY;
 	G * grid;
 	ArgumentParser parser;
-	string inputfile_name, outputfile_name;
+	string inputfile_name, inputfile_dataset, outputfile_name;
 	int myrank;
     
 	SerializerIO_WaveletCompression_MPI_SimpleBlocking<G, StreamerGridPointIterative> mywaveletdumper;
 
 	void _ic(G& grid)
 	{
-		vector<BlockInfo> vInfo = grid.getResidentBlocksInfo();	//grid.getBlocksInfo();
+		vector<BlockInfo> vInfo = grid.getResidentBlocksInfo();
+#if VERBOSE
 		Real min_u = 1e8, max_u = -1e8;
+#endif
 
 		int myrank, mypeindex[3], pesize[3];
 		int periodic[3];
@@ -106,12 +108,11 @@ protected:
 			NY,
 			NZ, NCHANNELS};
 
-#if VERBOSE
+		// global domain size as specified by the process grid, the block layout and the block size 
 		hsize_t dims[4] = {
 			grid.getBlocksPerDimension(0)*_BLOCKSIZE_,
 			grid.getBlocksPerDimension(1)*_BLOCKSIZE_,
 			grid.getBlocksPerDimension(2)*_BLOCKSIZE_, NCHANNELS};
-#endif
 
 		hsize_t offset[4] = {
 			coords[0]*NX,
@@ -127,15 +128,47 @@ protected:
 
 		H5open();
 		fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-//		status = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+		/*status = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);*/
 		file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
 		status = H5Pclose(fapl_id);
 
-		dataset_id = H5Dopen2(file_id, "data", H5P_DEFAULT);
+		//dataset_id = H5Dopen2(file_id, "/data2", H5P_DEFAULT);
+		dataset_id = H5Dopen2(file_id, inputfile_dataset.c_str(), H5P_DEFAULT);
+
 		fapl_id = H5Pcreate(H5P_DATASET_XFER);
-//		H5Pset_dxpl_mpio(fapl_id, H5FD_MPIO_COLLECTIVE);
+		/*H5Pset_dxpl_mpio(fapl_id, H5FD_MPIO_COLLECTIVE);*/
 
 		fspace_id = H5Dget_space(dataset_id);
+
+#if 1
+		if (myrank == 0)
+		{
+			// Before reading any data, we perform a check that we have specified the correct and exact domain size 
+
+			//https://stackoverflow.com/questions/15786626/get-the-dimensions-of-a-hdf5-dataset
+			//If your data space is simple (i.e. not null or scalar), then you can get the number of dimensions using H5Sget_simple_extent_ndims:
+			const int ndims = H5Sget_simple_extent_ndims(fspace_id);
+
+			//and the size of each dimension using H5Sget_simple_extent_dims:
+			hsize_t hdims[ndims];
+			H5Sget_simple_extent_dims(fspace_id, hdims, NULL);
+
+			//The dimensions are now stored in hdims.
+			for (int i = 0; i < ndims; i++)
+				printf("hdims[%d] = %ld\n", i, hdims[i]);
+
+			for (int i = 0; i < ndims; i++)
+				if (hdims[i] != dims[i])
+				{
+					printf("The dataset size does not match the one specified by the user. Aborting... \n");  
+					MPI_Abort(MPI_COMM_WORLD, 1);
+				}
+		}
+
+		MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+
 		H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
 
 		mspace_id = H5Screate_simple(4, count, NULL);
@@ -165,9 +198,10 @@ protected:
 						Real val = ptr_input[channel];
 
 						b(ix, iy, iz).u = val;
+#if VERBOSE
 						if (val < min_u) min_u = val;
 						if (val > max_u) max_u = val;
-
+#endif
 					}
 		}
 
@@ -210,12 +244,13 @@ public:
 		BPDZ = parser("-bpdz").asInt(1);
 
 		step_id = parser("-stepid").asInt(0);
-
 		channel = parser("-channel").asInt(0);
 
 		MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
 		inputfile_name = parser("-simdata").asString("none");
+		inputfile_dataset = parser("-dataset").asString("/dataxx");
+
 		outputfile_name = parser("-outdata").asString("none");
 
 		if ((inputfile_name == "none")||(outputfile_name == "none"))
@@ -267,7 +302,7 @@ public:
 #endif
 #endif
 
-		double threshold = parser("-threshold").asDouble(1e-5);
+		double threshold = parser("-threshold").asDouble(0);
 		mywaveletdumper.verbose();
 		if (isroot) printf("setting threshold to %f\n", threshold);
 		mywaveletdumper.set_threshold(threshold);
@@ -279,7 +314,6 @@ public:
 		double t1 = MPI_Wtime();
 
 		if (isroot) std::cout << "done" << endl;
-//		if (isroot) std::cout << "elapsed time: " << t1-t0 << " seconds" << endl;
 
 		int nthreads;
 #ifdef _OPENMP
