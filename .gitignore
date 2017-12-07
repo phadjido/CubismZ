@@ -4,3 +4,5 @@
 *.swo
 *.o
 .DS_Store
+*.cz
+*.h5
