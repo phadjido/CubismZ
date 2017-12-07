@@ -436,7 +436,7 @@ public:
 
 					do
 					{
-						printf("shouldnt be here! 0x%x\n", c);
+						// printf("shouldnt be here! 0x%x\n", c);
 						//abort();
 						c = fgetc(file);
 					}
