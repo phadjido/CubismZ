@@ -43,4 +43,7 @@ mymsg 'test_fpzip.sh' >> $fout
 mymsg 'test_sz.sh' >> $fout
 ./test_sz.sh $nproc >> $fout
 
+rm -f tmp.cz
+rm -f ref.cz
+
 exit 0
