@@ -16,10 +16,10 @@ tools: thirdparty tools-only
 
 tools-only:
 	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default
-	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default dir=wavz_zlib wavz=1 zlib=1
-	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default dir=fpzip fpzip=1
-	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default dir=zfp zfp=1
-	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=default dir=sz sz=1
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=wavz_zlib wavz=1 zlib=1
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=fpzip fpzip=1
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=zfp zfp=1
+	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=sz sz=1
 
 thirdparty:
 	$(MAKE) -C ThirdParty/ CC=$(MPICC) cc=$(mpicc)
