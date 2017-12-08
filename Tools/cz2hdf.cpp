@@ -10,9 +10,9 @@
 #include <sstream>
 #include <mpi.h>
 #include <hdf5.h>
-//#include <H5FDmpio.h>
+#include <H5FDmpio.h>
 //#define _TRANSPOSE_DATA_
-//#define _COLLECTIVE_IO_
+#define _COLLECTIVE_IO_
 
 #ifdef _FLOAT_PRECISION_
 #define H5T_NATIVE_FP   H5T_NATIVE_FLOAT
@@ -97,26 +97,25 @@ int main(int argc, char **argv)
 
 	const double t0 = MPI_Wtime(); 
 
-	string h5file_fullname = h5file_name + ".h5";;
+	string h5file_fullname = h5file_name + ".h5";
 
 	int dim[3], period[3], reorder;
 	int coord[3], id;
 
 	/*  Set up file access property list with parallel I/O access */
 	plist_id = H5Pcreate(H5P_FILE_ACCESS);
-#if 0
+#if 1
 	H5Pset_fapl_mpio(plist_id, comm, info);
 #endif
 	/* Create a new file collectively and release property list identifier. */
-	file_id = H5Fcreate("xxxx", H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
-//	file_id = H5Fcreate(h5file_fullname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	file_id = H5Fcreate(h5file_fullname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
 	H5Pclose(plist_id);
 
 	int NBX = myreader[0]->xblocks();
 	int NBY = myreader[0]->yblocks();
 	int NBZ = myreader[0]->zblocks();
 	fprintf(stdout, "I found in total %dx%dx%d blocks.\n", NBX, NBY, NBZ);
-	exit(1);
+
 	int StartX, StartY, StartZ;
 	int EndX, EndY, EndZ;
 	

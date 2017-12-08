@@ -26,8 +26,8 @@ CPPFLAGS += -I../../Cubism/source/ -I../Compressor/source -I. -I../Compressor/re
 LIBS += -L../ThirdParty/build/lib
 LIBS += -ldl
 
-LIBS += -L/usr/local/opt/zlib/lib
-CPPFLAGS += -I/usr/local/opt/zlib/include
+#LIBS += -L/usr/local/opt/zlib/lib
+#CPPFLAGS += -I/usr/local/opt/zlib/include
 
 
 ##################

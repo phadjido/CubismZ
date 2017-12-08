@@ -37,4 +37,4 @@ fi
 
 mpirun -n 1 ../../Tools/bin/zfp/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata tmp.cz  -threshold $err
 
-mpirun -n $nrpoc ../../Tools/bin/zfp/cz2diff -simdata1 tmp.cz  -simdata2 ref.cz
+mpirun -n $nproc ../../Tools/bin/zfp/cz2diff -simdata1 tmp.cz  -simdata2 ref.cz

@@ -6,8 +6,8 @@
 MPICC = mpic++
 mpicc = mpicc
 blocksize ?= 32
-hdf-incdir ?= . #/opt/hdf5_mpich/include
-hdf-libdir ?= . #/opt/hdf5_mpich/lib
+hdf-incdir ?= /opt/hdf5_mpich/include
+hdf-libdir ?= /opt/hdf5_mpich/lib
 
 all: tools
 
