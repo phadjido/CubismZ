@@ -132,7 +132,6 @@ protected:
 		file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
 		status = H5Pclose(fapl_id);
 
-		//dataset_id = H5Dopen2(file_id, "/data2", H5P_DEFAULT);
 		dataset_id = H5Dopen2(file_id, inputfile_dataset.c_str(), H5P_DEFAULT);
 
 		fapl_id = H5Pcreate(H5P_DATASET_XFER);
