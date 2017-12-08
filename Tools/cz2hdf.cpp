@@ -10,9 +10,10 @@
 #include <sstream>
 #include <mpi.h>
 #include <hdf5.h>
-#include <H5FDmpio.h>
+//#include <H5FDmpio.h>
+//#define _PARALLEL_IO_
+//#define _COLLECTIVE_IO_
 //#define _TRANSPOSE_DATA_
-#define _COLLECTIVE_IO_
 
 #ifdef _FLOAT_PRECISION_
 #define H5T_NATIVE_FP   H5T_NATIVE_FLOAT
@@ -104,7 +105,7 @@ int main(int argc, char **argv)
 
 	/*  Set up file access property list with parallel I/O access */
 	plist_id = H5Pcreate(H5P_FILE_ACCESS);
-#if 1
+#if defined(_PARALLEL_IO_)
 	H5Pset_fapl_mpio(plist_id, comm, info);
 #endif
 	/* Create a new file collectively and release property list identifier. */
