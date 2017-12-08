@@ -1,13 +1,7 @@
-zlib = 0
-include ../../Makefile.config
+cc ?= mpicc
+CPPFLAGS=-O3
 
-
-ifeq "$(bgq)" "1"
-AR = /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-ar
-CPPFLAGS += -qpack_semantic=gnu
-else
 AR = ar
-endif
 ARFLAGS = rcs
 
 .PHONY: clean

@@ -6,12 +6,12 @@
 MPICC = mpic++
 mpicc = mpicc
 blocksize ?= 32
-hdf-incdir ?= /opt/hdf5_mpich/include
-hdf-libdir ?= /opt/hdf5_mpich/lib
+hdf-incdir ?= . #/opt/hdf5_mpich/include
+hdf-libdir ?= . #/opt/hdf5_mpich/lib
 
 all: tools
 
-tools: thirdparty tools-only
+tools: thirdparty-libs tools-only
 
 
 tools-only:
@@ -21,7 +21,7 @@ tools-only:
 	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=zfp zfp=1
 	$(MAKE) -C Tools/ install MPICC=$(MPICC) bs=$(blocksize) hdf-inc=$(hdf-incdir) hdf-lib=$(hdf-libdir) dir=sz sz=1
 
-thirdparty:
+thirdparty-libs:
 	$(MAKE) -C ThirdParty/ CC=$(MPICC) cc=$(mpicc)
 
 clean:

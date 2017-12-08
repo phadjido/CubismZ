@@ -104,20 +104,20 @@ protected:
 		const int eZ = _BLOCKSIZE_;
 
 		hsize_t count[4] = {
-			NX,
-			NY,
-			NZ, NCHANNELS};
+			(hsize_t)NX,
+			(hsize_t)NY,
+			(hsize_t)NZ, (hsize_t)NCHANNELS};
 
 		// global domain size as specified by the process grid, the block layout and the block size
 		hsize_t dims[4] = {
-			grid.getBlocksPerDimension(0)*_BLOCKSIZE_,
-			grid.getBlocksPerDimension(1)*_BLOCKSIZE_,
-			grid.getBlocksPerDimension(2)*_BLOCKSIZE_, NCHANNELS};
+			(hsize_t)grid.getBlocksPerDimension(0)*_BLOCKSIZE_,
+			(hsize_t)grid.getBlocksPerDimension(1)*_BLOCKSIZE_,
+			(hsize_t)grid.getBlocksPerDimension(2)*_BLOCKSIZE_, (hsize_t)NCHANNELS};
 
 		hsize_t offset[4] = {
-			coords[0]*NX,
-			coords[1]*NY,
-			coords[2]*NZ, 0};
+			(hsize_t)coords[0]*NX,
+			(hsize_t)coords[1]*NY,
+			(hsize_t)coords[2]*NZ, (hsize_t)0};
 
 #if VERBOSE
 		printf("count = [%d, %d, %d, %d]\n", count[0], count[1], count[2], count[3]);
