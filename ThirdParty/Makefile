@@ -1,6 +1,6 @@
 .PHONY: clean
 
-all: fpzip lzfour sz zfp
+all: fpzip lzfour sz1 zfp
 
 fpzip:
 	$(MAKE) -C fpzip-1.1.0/ CC=$(CC)
@@ -8,7 +8,7 @@ fpzip:
 lzfour:
 	$(MAKE) -C lz4/ CC=$(cc) cc=$(cc)
 
-sz:
+sz1:
 	$(MAKE) -C SZ/ CC=$(cc) cc=$(cc)
 
 zfp:

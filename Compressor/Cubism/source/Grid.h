@@ -80,7 +80,7 @@ public:
 		for(unsigned int ix=0; ix<NX; ix++)
 		{
 			const long long blockID = _encode(ix, iy, iz);
-			const int idx[3] = {ix, iy, iz};
+			const int idx[3] = {(int)ix, (int)iy, (int)iz};
 			const double origin[3] = {ix*h, iy*h, iz*h};
 
 			m_vInfo.push_back(BlockInfo(blockID, idx, origin, h, h/Block::sizeX, _linaccess(blockID)));
