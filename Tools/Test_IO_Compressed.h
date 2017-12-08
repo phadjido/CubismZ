@@ -249,7 +249,7 @@ public:
 		MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
 		inputfile_name = parser("-simdata").asString("none");
-		inputfile_dataset = parser("-dataset").asString("/dataxx");
+		inputfile_dataset = parser("-dataset").asString("/data");
 
 		outputfile_name = parser("-outdata").asString("none");
 

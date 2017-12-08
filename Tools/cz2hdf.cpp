@@ -25,11 +25,11 @@
 
 int main(int argc, char **argv)
 {
-	const double init_t0 = MPI_Wtime();
-
 	/* Initialize MPI */
         int provided;
         MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
+
+	const double init_t0 = MPI_Wtime();
 
 	/* MPI variables */
 	MPI_Comm comm  = MPI_COMM_WORLD;
