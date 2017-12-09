@@ -10,9 +10,9 @@
 #include <sstream>
 #include <mpi.h>
 #include <hdf5.h>
-//#include <H5FDmpio.h>
-//#define _PARALLEL_IO_
-//#define _COLLECTIVE_IO_
+#include <H5FDmpio.h>
+#define _PARALLEL_IO_
+#define _COLLECTIVE_IO_
 //#define _TRANSPOSE_DATA_
 
 #ifdef _FLOAT_PRECISION_
