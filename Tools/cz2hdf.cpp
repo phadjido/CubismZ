@@ -51,14 +51,14 @@ int main(int argc, char **argv)
 		argparser.mute();
 
 	string inputfile_name[3];
-	inputfile_name[0]= argparser("-simdata").asString("none");
-	inputfile_name[1] = argparser("-simdata2").asString("none");
-	inputfile_name[2] = argparser("-simdata3").asString("none");
+	inputfile_name[0]= argparser("-czfile").asString("none");
+	inputfile_name[1] = argparser("-czfile2").asString("none");
+	inputfile_name[2] = argparser("-czfile3").asString("none");
 	const string h5file_name = argparser("-h5file").asString("none");
 
 	if ((inputfile_name[0] == "none")||(h5file_name == "none"))
 	{
-		printf("usage: %s -simdata <filename> [-simdata2 <filename>] [simdata3 <filename>] -h5file <h5basefilename> [-swap] [-wtype <wtype>] [-xs <x0>] [-xe <x1>] [-ys <y0>] [-ye <y1>] [-zs <z0>] [-ze <z1>]\n", argv[0]);
+		printf("usage: %s -czfile <filename> [-wtype <wtype>] -h5file <h5basefilename>\n", argv[0]);
 		exit(1);
 	}
 
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 	const int Ze = argparser("-ze").asInt(-1);
 
 	const bool swapbytes = argparser.check("-swap");
-	const int wtype = argparser("-wtype").asInt(1);
+	const int wtype = argparser("-wtype").asInt(3);	// 3rd order average interpolating wavelets
 
 	/* HDF5 APIs definitions */
 	hid_t file_id, dset_id; /* file and dataset identifiers */

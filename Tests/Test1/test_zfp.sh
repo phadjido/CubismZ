@@ -36,6 +36,6 @@ then
 fi
 
 export OMP_NUM_THREADS=1
-mpirun -n 1 ../../Tools/bin/zfp/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata tmp.cz  -threshold $err
+mpirun -n 1 ../../Tools/bin/zfp/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -h5file $h5file -czfile tmp.cz -threshold $err
 
-mpirun -n $nproc ../../Tools/bin/zfp/cz2diff -simdata1 tmp.cz  -simdata2 ref.cz
+mpirun -n $nproc ../../Tools/bin/zfp/cz2diff -czfile1 tmp.cz  -czfile2 ref.cz

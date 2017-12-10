@@ -40,7 +40,7 @@ protected:
 	G * grid;
 	ArgumentParser parser;
 	string inputfile_name, inputfile_dataset, outputfile_name;
-	int myrank;
+	int myrank, size;
 
 	SerializerIO_WaveletCompression_MPI_SimpleBlocking<G, StreamerGridPointIterative> mywaveletdumper;
 
@@ -63,7 +63,9 @@ protected:
 		pesize[1] = YPESIZE;
 		pesize[2] = ZPESIZE;
 
-		assert(XPESIZE*YPESIZE*ZPESIZE == MPI::COMM_WORLD.Get_size());
+
+		MPI_Comm_size(MPI_COMM_WORLD, &size);
+		assert(XPESIZE*YPESIZE*ZPESIZE == size);
 
 		MPI_Cart_create(MPI_COMM_WORLD, 3, pesize, periodic, true, &cartcomm);
 		MPI_Comm_rank(cartcomm, &myrank);
@@ -181,7 +183,9 @@ protected:
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		// fill in the blocks
-		//#pragma omp parallel for
+#ifdef _OPENMP
+		#pragma omp parallel for
+#endif
 		for(int i=0; i<(int)vInfo.size(); i++)
 		{
 			BlockInfo info = vInfo[i];
@@ -252,14 +256,14 @@ public:
 
 		MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-		inputfile_name = parser("-simdata").asString("none");
+		inputfile_name = parser("-h5file").asString("none");
 		inputfile_dataset = parser("-dataset").asString("/data");
 
-		outputfile_name = parser("-outdata").asString("none");
+		outputfile_name = parser("-czfile").asString("none");
 
 		if ((inputfile_name == "none")||(outputfile_name == "none"))
 		{
-			printf("usage: %s -simdata <filename> -outdata <filename> [-swap] [-wtype_read <type1>] [-wtype_write <type2>]\n", "tool");
+			printf("usage: %s -h5file <filename1> -czfile <filename2> [-wtype <type>]\n", "cz2hdf");
 			exit(1);
 		}
 
@@ -292,7 +296,7 @@ public:
 		if (isroot) std::cout << "Creating MPI CZ dump...\n" ;
 
 		const string path = parser("-fpath").asString(".");
-		const int wtype_write = parser("-wtype_write").asInt(1);
+		const int wtype = parser("-wtype").asInt(3); //3rd order average interpolating wavelets
 
 		std::stringstream streamer;
 		streamer<<path;
@@ -310,7 +314,7 @@ public:
 		mywaveletdumper.verbose();
 		if (isroot) printf("setting threshold to %f\n", threshold);
 		mywaveletdumper.set_threshold(threshold);
-		mywaveletdumper.set_wtype_write(wtype_write);
+		mywaveletdumper.set_wtype_write(wtype);
 
 		MPI_Barrier(MPI_COMM_WORLD);
 		double t0 = MPI_Wtime();

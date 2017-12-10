@@ -55,17 +55,17 @@ int main(int argc, char **argv)
 	else
 		argparser.mute();
 
-	const string inputfile_name1 = argparser("-simdata1").asString("none");
-	const string inputfile_name2 = argparser("-simdata2").asString("none");
+	const string inputfile_name1 = argparser("-czfile1").asString("none");
+	const string inputfile_name2 = argparser("-czfile2").asString("none");
 
 	if ((inputfile_name1 == "none")||(inputfile_name2 == "none"))
 	{
-		printf("usage: %s -simdata1 <filename>  -simdata2 <filename> [-swap] [-wtype <wtype>]\n", argv[0]);
+		printf("usage: %s -czfile1 <filename1> -czfile2 <filename2> [-wtype <wtype>]\n", argv[0]);
 		exit(1);
 	}
 
 	const bool swapbytes = argparser.check("-swap");
-	const int wtype = argparser("-wtype").asInt(1);
+	const int wtype = argparser("-wtype").asInt(3);
 
 	Reader_WaveletCompressionMPI  myreader1(comm, inputfile_name1, swapbytes, wtype);
 	Reader_WaveletCompressionMPI_plain myreader2(comm, inputfile_name2, swapbytes, wtype);
@@ -79,12 +79,12 @@ int main(int argc, char **argv)
 	int NBX1 = myreader1.xblocks();
 	int NBY1 = myreader1.yblocks();
 	int NBZ1 = myreader1.zblocks();
-	if (isroot) fprintf(stdout, "[A] I found in total %dx%dx%d blocks.\n", NBX1, NBY1, NBZ1);
+	if (isroot) fprintf(stdout, "[czfile1] I found in total %dx%dx%d blocks.\n", NBX1, NBY1, NBZ1);
 
 	int NBX2 = myreader2.xblocks();
 	int NBY2 = myreader2.yblocks();
 	int NBZ2 = myreader2.zblocks();
-	if (isroot) fprintf(stdout, "[B] I found in total %dx%dx%d blocks.\n", NBX2, NBY2, NBZ2);
+	if (isroot) fprintf(stdout, "[czfile2] I found in total %dx%dx%d blocks.\n", NBX2, NBY2, NBZ2);
 
 	if ((NBX1 != NBX2) || (NBZ1 != NBZ2) ||(NBZ1 != NBZ2)) {
 		printf("Dimensions differ, exiting..\n");
