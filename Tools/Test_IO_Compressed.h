@@ -23,6 +23,9 @@
 #define HDF_REAL H5T_NATIVE_DOUBLE
 #endif
 
+//#define _PARALLEL_IO_
+//#define _COLLECTIVE_IO_
+
 typedef GridMPI < FluidGrid > G;
 
 class Test_IO_Compressed : public Simulation
@@ -68,7 +71,7 @@ protected:
 
 		// open HDF5
 		// read data block
-		// store in grid block
+		// store in grid blocks
 
 		int rank;
 		char filename[256];
@@ -128,14 +131,18 @@ protected:
 
 		H5open();
 		fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-		/*status = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);*/
+#if defined(_PARALLEL_IO_)
+		status = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+#endif
 		file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
 		status = H5Pclose(fapl_id);
 
 		dataset_id = H5Dopen2(file_id, inputfile_dataset.c_str(), H5P_DEFAULT);
 
 		fapl_id = H5Pcreate(H5P_DATASET_XFER);
-		/*H5Pset_dxpl_mpio(fapl_id, H5FD_MPIO_COLLECTIVE);*/
+#if defined(_COLLECTIVE_IO_)
+		H5Pset_dxpl_mpio(fapl_id, H5FD_MPIO_COLLECTIVE);
+#endif
 
 		fspace_id = H5Dget_space(dataset_id);
 

@@ -358,7 +358,6 @@ public:
 
     void write_runtime_environment() const
     {
-#if 0
         time_t rawtime;
         std::time(&rawtime);
         struct tm* timeinfo = std::localtime(&rawtime);
@@ -376,6 +375,7 @@ public:
         runtime << commentStart << " (This will write a serialized restart state. Set \"exitsave\" to false if not desired.)" << std::endl;
         runtime << commentStart << std::endl;
         runtime << commentStart << " !!! WARNING !!! EDITING THIS FILE CAN POTENTIALLY CRASH YOUR SIMULATION !!! WARNING !!!" << std::endl;
+#if 0
         for (typename std::map<std::string,Value>::const_iterator it = mapArguments.begin(); it != mapArguments.end(); ++it)
             runtime << it->first << '\t' << it->second << std::endl;
 #endif

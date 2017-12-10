@@ -409,18 +409,6 @@ class SynchronizerMPI
 										face_end[2] - face_start[2]
 									};
 
-								//	if (isroot)
-//									{
-//										printf("---CORNER ----------------->  index: %d %d %d\n", index[0], index[1], index[2]);
-//										printf("neighbor: %d %d %d\n", neighbor[0], neighbor[1], neighbor[2]);
-//										printf("face: %d %d\n", dface, s);
-//										printf("corner: %d %d %d\n", x, y, z);
-//										printf("facestart: %d %d %d\n", face_start[0], face_start[1], face_start[2]);
-//										printf("mystart: %d %d %d\n", start[0], start[1], start[2]);
-//										printf("s: %d %d %d\n",sregion[0], sregion[1], sregion[2]);
-//										printf("L: %d %d %d\n",L[0], L[1], L[2]);
-//										printf("neighbor p1, p2: %d %d\n", neighbor[dim_other1face], neighbor[dim_other2face]);
-//									}
 									assert(c2i.find(I3(origin[0] + neighbor[0], origin[1] + neighbor[1], origin[2] + neighbor[2]))!=c2i.end());
 									assert(sregion[0]>= 0);
 									assert(sregion[1]>= 0);
@@ -647,7 +635,6 @@ public:
 
 	SynchronizerMPI(const int synchID, StencilInfo stencil, std::vector<BlockInfo> globalinfos, MPI_Comm cartcomm, const int mybpd[3], const int blocksize[3]):
 	cube(mybpd[0], mybpd[1], mybpd[2]), synchID(synchID), stencil(stencil), globalinfos(globalinfos), cartcomm(cartcomm)
-//	synchID(synchID), stencil(stencil), globalinfos(globalinfos), cube(mybpd[0], mybpd[1], mybpd[2]), cartcomm(cartcomm)
 	{
 		int myrank;
         MPI_Comm_rank(cartcomm, &myrank);
@@ -740,7 +727,7 @@ public:
 				std::vector<MPI_Request> pending(NPENDINGSENDS);
 				std::copy(send.pending.begin(), send.pending.end(), pending.begin());
 #if 1
-                MPI_Waitall(NPENDINGSENDS, &pending.front(), MPI_STATUSES_IGNORE);
+				MPI_Waitall(NPENDINGSENDS, &pending.front(), MPI_STATUSES_IGNORE);
 #else
 				int done = false;
 				while (1)
@@ -918,221 +905,6 @@ public:
 		cube.make_dependencies(isroot);
 	}
 
- 	//peh
-	virtual void sync0(unsigned int gptfloats, MPI_Datatype MPIREAL, const int timestamp)
-	{
-
-		//0. wait for pending sends, couple of checks
-		//1. pack all stuff
-		//2. perform send/receive requests
-		//3. setup the dependency
-
-		//0.
-		{
-			const int NPENDINGSENDS = send.pending.size();
-			if (NPENDINGSENDS > 0)
-			{
-				std::vector<MPI_Request> pending(NPENDINGSENDS);
-				std::copy(send.pending.begin(), send.pending.end(), pending.begin());
-#if 1
-                MPI_Waitall(NPENDINGSENDS, &pending.front(), MPI_STATUSES_IGNORE);
-#else
-				int done = false;
-				while (1)
-				{
-					MPI_Testall(NPENDINGSENDS, &pending.front(), &done, MPI_STATUSES_IGNORE);
-					if (done) break;
-					pthread_yield();
-				};
-#endif
-
-				send.pending.clear();
-			}
-		}
-
-		assert(recv.pending.size() == 0);
-		assert(send.pending.size() == 0);
-
-		cube.prepare();
-
-		blockinfo_counter = globalinfos.size();
-		const int NC = stencil.selcomponents.size();
-
-		//1. pack
-		{
-			const int N = send_packinfos.size();
-
-			std::vector<int> selcomponents = stencil.selcomponents;
-			std::sort(selcomponents.begin(), selcomponents.end());
-
-            const bool contiguous = false;//true; //false; //true;//selcomponents.back()+1-selcomponents.front() == selcomponents.size();
-
-			if (!contiguous)
-			{
-#pragma omp parallel for schedule(runtime)
-				for(int i=0; i<N; ++i)
-				{
-					PackInfo info = send_packinfos[i];
-					pack(info.block, info.pack, gptfloats, &selcomponents.front(), NC, info.sx, info.sy, info.sz, info.ex, info.ey, info.ez);
-				}
-			}
-			else
-			{
-				const int selstart = selcomponents.front();
-				const int selend = selcomponents.back()+1;
-
-#pragma omp parallel for //schedule(runtime)
-				for(int i=0; i<N; ++i)
-				{
-					PackInfo info = send_packinfos[i];
-					pack_stripes(info.block, info.pack, gptfloats, selstart, selend, info.sx, info.sy, info.sz, info.ex, info.ey, info.ez);
-				}
-			}
-
-		}
-
-		// recvs
-		for (int pass = 0; pass <= 1; pass++)
-		//2. send requests
-		{
-			//faces
-			for(int d=0; d<3; ++d)
-			{
-				if (!_face_needed(d)) continue;
-
-				const int dim_other1 = (d+1)%3;
-				const int dim_other2 = (d+2)%3;
-
-				for(int s=0; s<2; ++s)
-				{
-					int neighbor_index[3];
-					neighbor_index[d] = (mypeindex[d] + 2*s-1 + pesize[d])%pesize[d];
-					neighbor_index[dim_other1] = mypeindex[dim_other1];
-					neighbor_index[dim_other2] = mypeindex[dim_other2];
-
-					if (_myself(neighbor_index)) continue;
-
-					if (pass == 0)
-					{
-						const int NFACEBLOCK_RECV = NC * recv_thickness[d][s] * blocksize[dim_other1] * blocksize[dim_other2];
-						const int NFACE_RECV = NFACEBLOCK_RECV * mybpd[dim_other1] * mybpd[dim_other2];
-
-						if (NFACE_RECV > 0)
-						{
-                            MPI_Request rc;
-							MPI_Irecv(recv.faces[d][s], NFACE_RECV, MPIREAL, _rank(neighbor_index), 6*timestamp + 2*d + s, cartcomm, &rc);
-							recv.pending.insert(rc);
-							cube.face(rc, d, s);
-						}
-					}
-					else
-					{
-						const int NFACEBLOCK_SEND = NC * send_thickness[d][s] * blocksize[dim_other1] * blocksize[dim_other2];
-						const int NFACE_SEND = NFACEBLOCK_SEND * mybpd[dim_other1] * mybpd[dim_other2];
-
-						if (NFACE_SEND > 0)
-                        {
-                            MPI_Request req;
-                            MPI_Isend(send.faces[d][s], NFACE_SEND, MPIREAL, _rank(neighbor_index), 6*timestamp + 2*d + 1-s, cartcomm, &req);
-                            send.pending.insert(req);
-                        }
-					}
-				}
-			}
-
-			if (stencil.tensorial)
-			{
-				//edges
-				for(int d=0; d<3; ++d)
-				{
-					const int dim_other1 = (d+1)%3;
-					const int dim_other2 = (d+2)%3;
-
-					for(int b=0; b<2; ++b)
-						for(int a=0; a<2; ++a)
-						{
-							const int NEDGEBLOCK_SEND = NC * blocksize[d] * send_thickness[dim_other2][b] * send_thickness[dim_other1][a];
-							const int NEDGEBLOCK_RECV = NC * blocksize[d] * recv_thickness[dim_other2][b] * recv_thickness[dim_other1][a];
-							const int NEDGE_SEND = NEDGEBLOCK_SEND * mybpd[d];
-							const int NEDGE_RECV = NEDGEBLOCK_RECV * mybpd[d];
-
-							int neighbor_index[3];
-							neighbor_index[d] = mypeindex[d];
-							neighbor_index[dim_other1] = (mypeindex[dim_other1] + 2*a-1 + pesize[dim_other1])%pesize[dim_other1];
-							neighbor_index[dim_other2] = (mypeindex[dim_other2] + 2*b-1 + pesize[dim_other2])%pesize[dim_other2];
-
-							if (_myself(neighbor_index)) continue;
-
-							if (pass == 0)
-							{
-								if (NEDGE_RECV > 0)
-								{
-                                    MPI_Request rc;
-									MPI_Irecv(recv.edges[d][b][a], NEDGE_RECV, MPIREAL, _rank(neighbor_index), 12*timestamp + 4*d + 2*b + a, cartcomm, &rc);
-
-									recv.pending.insert(rc);
-
-									cube.edge(rc, d, a, b);
-								}
-							}
-							else
-							{
-                                if (NEDGE_SEND > 0)
-                                {
-                                    MPI_Request req;
-                                    MPI_Isend(send.edges[d][b][a], NEDGE_SEND, MPIREAL, _rank(neighbor_index), 12*timestamp + 4*d + 2*(1-b) + (1-a), cartcomm, &req);
-                                    send.pending.insert(req);
-                                }
-							}
-						}
-				}
-
-				//corners
-				{
-					for(int z=0; z<2; ++z)
-						for(int y=0; y<2; ++y)
-							for(int x=0; x<2; ++x)
-								{
-									const int NCORNERBLOCK_SEND = NC * send_thickness[0][x]*send_thickness[1][y]*send_thickness[2][z];
-									const int NCORNERBLOCK_RECV = NC * recv_thickness[0][x]*recv_thickness[1][y]*recv_thickness[2][z];
-
-									int neighbor_index[3];
-									neighbor_index[0] = (mypeindex[0] + 2*x-1 + pesize[0])%pesize[0];
-									neighbor_index[1] = (mypeindex[1] + 2*y-1 + pesize[1])%pesize[1];
-									neighbor_index[2] = (mypeindex[2] + 2*z-1 + pesize[2])%pesize[2];
-
-									if (_myself(neighbor_index)) continue;
-
-									if (pass == 0)
-									{
-										if (NCORNERBLOCK_RECV)
-										{
-                                            MPI_Request rc;
-											MPI_Irecv(recv.corners[z][y][x], NCORNERBLOCK_RECV, MPIREAL, _rank(neighbor_index), 8*timestamp + 4*z + 2*y + x, cartcomm, &rc);
-
-											recv.pending.insert(rc);
-
-											cube.corner(rc, x, y, z);
-										}
-									}
-									else
-									{
-										if (NCORNERBLOCK_SEND)
-                                        {
-                                            MPI_Request req;
-											MPI_Isend(send.corners[z][y][x], NCORNERBLOCK_SEND, MPIREAL, _rank(neighbor_index), 8*timestamp + 4*(1-z) + 2*(1-y) + (1-x), cartcomm, &req);
-											send.pending.insert(req);
-                                        }
-									}
-								}
-				}
-			}
-		}
-
-		//3.
-		cube.make_dependencies(isroot);
-	}
-
 	std::vector<BlockInfo> avail_inner()
 	{
 		std::vector<BlockInfo> retval;
@@ -1197,12 +969,12 @@ public:
 		std::vector<MPI_Request> old = pending;
 
 #if 1
-        MPI_Waitall(NPENDING, &pending.front(), MPI_STATUSES_IGNORE);
+		MPI_Waitall(NPENDING, &pending.front(), MPI_STATUSES_IGNORE);
 #else
 		int done = false;
 		while (1)
 		{
-            MPI_Testall(NPENDING, &pending.front(), &done, MPI_STATUSES_IGNORE);
+			MPI_Testall(NPENDING, &pending.front(), &done, MPI_STATUSES_IGNORE);
 			if (done) break;
 			pthread_yield();
 		};

@@ -100,9 +100,6 @@ int main(int argc, char **argv)
 
 	string h5file_fullname = h5file_name + ".h5";
 
-	//int dim[3], period[3], reorder;
-	//int coord[3], id;
-
 	/*  Set up file access property list with parallel I/O access */
 	plist_id = H5Pcreate(H5P_FILE_ACCESS);
 #if defined(_PARALLEL_IO_)

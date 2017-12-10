@@ -36,6 +36,7 @@ then
     ./genref.sh
 fi
 
+export OMP_NUM_THREADS=1
 mpirun -n 1 ../../Tools/bin/wavz_zlib/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file -outdata tmp.cz  -threshold $err -wtype_write $wt
 
 mpirun -n $nproc ../../Tools/bin/wavz_zlib/cz2diff -simdata1 tmp.cz  -simdata2 ref.cz -wtype $wt

@@ -35,6 +35,7 @@ then
     ./genref.sh
 fi
 
+export OMP_NUM_THREADS=1
 mpirun -n 1 ../../Tools/bin/sz/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -simdata $h5file  -outdata tmp.cz  -threshold $err
 
 mpirun -n $nproc ../../Tools/bin/sz/cz2diff -simdata1 tmp.cz -simdata2 ref.cz

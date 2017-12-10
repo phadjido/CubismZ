@@ -16,6 +16,8 @@ nb=16	# number of blocks (per dimension) (total: nb^3) # $(echo "$ds/$bs" | bc)
 rm -f ref.cz	# remove any previous instance of the reference file ref.cz
 
 # 1x1x1 process grid with 16^3 blocks
+
+export OMP_NUM_THREADS=1
 mpirun -n 1 ../../Tools/bin/default/hdf2cz -xpesize 1 -ypesize 1 -zpesize 1 -bpdx 16 -bpdy 16 -bpdz 16 -simdata $h5file -outdata ref.cz
 
 # 2x2x2 process grid with 8^3 blocks on each process

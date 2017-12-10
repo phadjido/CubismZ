@@ -1,3 +1,13 @@
+/*
+ * myzfp.h
+ * CubismZ
+ *
+ *
+ */
+
+#ifndef _MYZFP_H_
+#define _MYZFP_H_ 1
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,8 +41,8 @@ zfp_compress_buffer(void* array, int nx, int ny, int nz, double tolerance, int i
   zfp = zfp_stream_open(NULL);
 
   /* set compression mode and parameters via one of three functions */
-/*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
-/*  zfp_stream_set_precision(zfp, precision, type); */
+  /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
+  /*  zfp_stream_set_precision(zfp, precision, type); */
   zfp_stream_set_accuracy(zfp, tolerance, type);
 
   /* allocate buffer for compressed data */
@@ -62,7 +72,7 @@ zfp_compress_buffer(void* array, int nx, int ny, int nz, double tolerance, int i
   zfp_stream_close(zfp);
   stream_close(stream);
   free(buffer);
-/*  free(array);*/
+  /*  free(array);*/
 
   return status;
 }
@@ -93,8 +103,8 @@ zfp_decompress_buffer(void* array, int nx, int ny, int nz, double tolerance, int
   zfp = zfp_stream_open(NULL);
 
   /* set compression mode and parameters via one of three functions */
-/*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
-/*  zfp_stream_set_precision(zfp, precision, type); */
+  /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
+  /*  zfp_stream_set_precision(zfp, precision, type); */
   zfp_stream_set_accuracy(zfp, tolerance, type);
 
   /* allocate buffer for compressed data */
@@ -125,7 +135,9 @@ zfp_decompress_buffer(void* array, int nx, int ny, int nz, double tolerance, int
   zfp_stream_close(zfp);
   stream_close(stream);
   free(buffer);
-/*  free(array);*/
+  /*  free(array);*/
 
   return status;
 }
+
+#endif

@@ -41,10 +41,8 @@ int main(int argc, char **argv)
 
         /* MPI variables */
         MPI_Comm comm  = MPI_COMM_WORLD;
-        //MPI_Info info  = MPI_INFO_NULL;
 
         int mpi_rank, mpi_size;
-
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
         MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
@@ -77,9 +75,6 @@ int main(int argc, char **argv)
 	const double init_t1 = MPI_Wtime();
 
 	const double t0 = MPI_Wtime();
-
-	//int dim[3], period[3], reorder;
-	//int coord[3], id;
 
 	int NBX1 = myreader1.xblocks();
 	int NBY1 = myreader1.yblocks();
@@ -157,7 +152,7 @@ int main(int argc, char **argv)
 						}
 						e_1 += err;
 						e_2 += err*err;
-						n++;	// number id
+						n++;
 					}
 
 		}
@@ -175,7 +170,7 @@ int main(int argc, char **argv)
 		fflush(0);
 	}
 
-	// MPI_Reduce for all these
+	// MPI_Reduce for all of the following
 	if (!mpi_rank) {
 		MPI_Reduce(MPI_IN_PLACE, &mindata, 	1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 		MPI_Reduce(MPI_IN_PLACE, &maxdata, 	1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
@@ -224,7 +219,6 @@ int main(int argc, char **argv)
 		long nall = n;
 		double l1 = e_1 / nall;
 		const long double mse = e_2 / nall;
-		//double l2 = sqrt(e_2) / nall;
 
 		double uncompressed_footprint = sizeof(Real) * nall;
 		double compressed_footprint = uncompressed_footprint;
@@ -245,11 +239,11 @@ int main(int argc, char **argv)
 		printf("compression-rate: %.2f rel-linf-error: %e rel-mean-error: %e\n",
 			uncompressed_footprint / compressed_footprint, linf, l1);
 
-		//https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
 #if VERBOSE
 		printf("mindata = %f\n", mindata);
 		printf("maxdata = %f\n", maxdata);
 #endif
+		//https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
 		double psnr = 20 * log10((maxdata - mindata) / (2 * sqrt(mse)));
 
 		printf("RE : %12s %12s %12s %12s %12s %12s %12s %12s\n", "CR", "rel(e_inf)", "rel(e_1)", "mean(e_1)", "rel(e_2)", "mean(e_2)", "BPS", "PSNR");
