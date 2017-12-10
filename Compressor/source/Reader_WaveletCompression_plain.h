@@ -172,7 +172,7 @@ protected:
 
 public:
 
-	Reader_WaveletCompression_plain(const string path, bool doswapping, int wtype): NBLOCKS(-1), global_header_displacement(-1), path(path), doswapping(doswapping), wtype(wtype) { }
+	Reader_WaveletCompression_plain(const string path, bool doswapping, int wtype): path(path), doswapping(doswapping), wtype(wtype), global_header_displacement(-1), NBLOCKS(-1){ }
 
 	virtual void load_file()
 	{
@@ -359,7 +359,7 @@ public:
 
 				assert(string("==============START-BINARY-LUT==============\n") == string(buf));
 
-				bool done = false;
+				//bool done = false;
 
 				size_t base = miniheader_bytes;
 
@@ -490,7 +490,6 @@ public:
 
 	void load_block(int ix, int iy, int iz, Real MYBLOCK[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_])
 	{
-		//printf("trying to load <%s>\n", path.c_str());
 		FILE * f = fopen(path.c_str(), "rb");
 
 		assert(f);
@@ -528,7 +527,6 @@ public:
 			nbytes = swapint(nbytes);
 			readbytes += sizeof(int);
 			assert(readbytes <= decompressedbytes);
-			//printf("decompressing %d bytes...\n", nbytes);
 			WaveletCompressor compressor;
 
 			{ // swapping

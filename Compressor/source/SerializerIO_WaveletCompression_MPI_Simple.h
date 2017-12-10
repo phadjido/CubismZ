@@ -568,7 +568,7 @@ protected:
 
 			if (allmydata.size() == 0)
 			{
-				const size_t speculated_compression_rate = 10;
+				//const size_t speculated_compression_rate = 10;
 				allmydata.resize(NBLOCKS * sizeof(Real) * NPTS + 4*1024*1024);
 			}
 
@@ -742,7 +742,7 @@ protected:
 				fgets(buf, sizeof(buf), file);
 				assert(string("==============START-BINARY-LUT==============\n") == string(buf));
 
-				bool done = false;
+				//bool done = false;
 
 				size_t base = miniheader_bytes;
 
@@ -909,10 +909,10 @@ public:
 	void verbose() { verbosity = true; }
 
 	SerializerIO_WaveletCompression_MPI_SimpleBlocking():
+	written_bytes(0), pending_writes(0),
 	threshold(0), halffloat(false), verbosity(false),
 	workload_total(omp_get_max_threads()), workload_fwt(omp_get_max_threads()), workload_encode(omp_get_max_threads()),
-	workbuffer(omp_get_max_threads()),
-	written_bytes(0), pending_writes(0)
+	workbuffer(omp_get_max_threads())
 	{
 		wtype_write = 1;	// peh
 		wtype_read = 1;		// peh

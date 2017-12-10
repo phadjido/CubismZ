@@ -100,8 +100,8 @@ int main(int argc, char **argv)
 
 	string h5file_fullname = h5file_name + ".h5";
 
-	int dim[3], period[3], reorder;
-	int coord[3], id;
+	//int dim[3], period[3], reorder;
+	//int coord[3], id;
 
 	/*  Set up file access property list with parallel I/O access */
 	plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -227,6 +227,7 @@ int main(int argc, char **argv)
 			for (int i = 0; i < NCHANNELS; i++)
 			{
 			double zratio = myreader[i]->load_block2(x, y, z, targetdata);
+			(void)zratio;
 #if defined(VERBOSE)
 			fprintf(stdout, "compression ratio was %.2lf\n", zratio); 
 #endif

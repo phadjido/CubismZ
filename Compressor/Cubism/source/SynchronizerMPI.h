@@ -40,8 +40,8 @@ class SynchronizerMPI
 	struct SubpackInfo { Real * block, * pack; int sx, sy, sz, ex, ey, ez; int x0, y0, z0, xpacklenght, ypacklenght; };
 
 	DependencyCubeMPI<MPI_Request> cube;
-	bool isroot;
 	const int synchID;
+	bool isroot;
 	int send_thickness[3][2], recv_thickness[3][2];
 	int blockinfo_counter;
 	StencilInfo stencil;
@@ -52,7 +52,7 @@ class SynchronizerMPI
 
 	std::vector<BlockInfo> globalinfos;
 
-    std::map<Region, std::vector<BlockInfo> > region2infos;
+	std::map<Region, std::vector<BlockInfo> > region2infos;
 
 	//?static?
 	MPI_Comm cartcomm;
@@ -646,7 +646,8 @@ class SynchronizerMPI
 public:
 
 	SynchronizerMPI(const int synchID, StencilInfo stencil, std::vector<BlockInfo> globalinfos, MPI_Comm cartcomm, const int mybpd[3], const int blocksize[3]):
-	synchID(synchID), stencil(stencil), globalinfos(globalinfos), cube(mybpd[0], mybpd[1], mybpd[2]), cartcomm(cartcomm)
+	cube(mybpd[0], mybpd[1], mybpd[2]), synchID(synchID), stencil(stencil), globalinfos(globalinfos), cartcomm(cartcomm)
+//	synchID(synchID), stencil(stencil), globalinfos(globalinfos), cube(mybpd[0], mybpd[1], mybpd[2]), cartcomm(cartcomm)
 	{
 		int myrank;
         MPI_Comm_rank(cartcomm, &myrank);
@@ -917,10 +918,9 @@ public:
 		cube.make_dependencies(isroot);
 	}
 
-    //peh
+ 	//peh
 	virtual void sync0(unsigned int gptfloats, MPI_Datatype MPIREAL, const int timestamp)
 	{
-		double t0, t1;
 
 		//0. wait for pending sends, couple of checks
 		//1. pack all stuff
@@ -960,9 +960,6 @@ public:
 
 		//1. pack
 		{
-			double t0, t1;
-
-
 			const int N = send_packinfos.size();
 
 			std::vector<int> selcomponents = stencil.selcomponents;

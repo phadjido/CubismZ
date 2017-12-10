@@ -139,7 +139,6 @@ protected:
 
 		fspace_id = H5Dget_space(dataset_id);
 
-#if 1
 		if (myrank == 0)
 		{
 			// Before reading any data, we perform a check that we have specified the correct and exact domain size
@@ -154,7 +153,7 @@ protected:
 
 			//The dimensions are now stored in hdims.
 			for (int i = 0; i < ndims; i++)
-				printf("hdims[%d] = %ld\n", i, hdims[i]);
+				printf("hdims[%d] = %llu\n", i, hdims[i]);
 
 			for (int i = 0; i < ndims; i++)
 				if (hdims[i] != dims[i])
@@ -165,7 +164,6 @@ protected:
 		}
 
 		MPI_Barrier(MPI_COMM_WORLD);
-#endif
 
 
 		H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
@@ -231,7 +229,7 @@ protected:
 public:
 	const bool isroot;
 
-	Test_IO_Compressed(const bool isroot, const int argc, const char ** argv) : isroot(isroot) , grid(NULL), parser(argc,argv) { }
+	Test_IO_Compressed(const bool isroot, const int argc, const char ** argv): grid(NULL), parser(argc,argv), isroot(isroot) { }
 
 
 	void setup()

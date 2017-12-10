@@ -103,9 +103,8 @@ public:
 	{
 		int compressedbytes = 0;
 
+#if defined(_USE_ZLIB_)
 		const size_t ninputbytes = WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(threshold, float16, wtype);
-
-#if defined(_USE_ZLIB_) || defined(_USE_ZSTD_)
 		z_stream datastream = { 0 };
 		datastream.total_in = datastream.total_out = 0;
 		datastream.avail_in = ninputbytes;
@@ -123,6 +122,7 @@ public:
 
 		deflateEnd( &datastream );
 #elif defined(_USE_LZ4)
+		const size_t ninputbytes = WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(threshold, float16, wtype);
 		compressedbytes = LZ4_compress((char*) WaveletCompressorGeneric<DATASIZE1D, DataType>::compressed_data(), (char *)bufzlib, ninputbytes);
 		if (compressedbytes < 0)
 		{
@@ -138,9 +138,8 @@ public:
 	{
 		int compressedbytes = 0;
 
+#if defined(_USE_ZLIB_)
 		const size_t ninputbytes = WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(threshold, float16, swap, wtype);
-
-#if defined(_USE_ZLIB_) || defined(_USE_ZSTD_)
 		z_stream datastream = { 0 };
 		datastream.total_in = datastream.total_out = 0;
 		datastream.avail_in = ninputbytes;
@@ -158,6 +157,7 @@ public:
 
 		deflateEnd( &datastream );
 #elif defined(_USE_LZ4)
+		const size_t ninputbytes = WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(threshold, float16, swap, wtype);
 		compressedbytes = LZ4_compress((char*) WaveletCompressorGeneric<DATASIZE1D, DataType>::compressed_data(), (char *)bufzlib, ninputbytes);
 		if (compressedbytes < 0)
 		{
@@ -171,9 +171,9 @@ public:
 
 	void decompress(const bool float16, size_t ninputbytes, int wtype)
 	{
+#if defined(_USE_ZLIB_)
 		int decompressedbytes = 0;
 
-#if defined(_USE_ZLIB_)
 		z_stream datastream = { 0 };
 		datastream.total_in = datastream.total_out = 0;
 		datastream.avail_in = ninputbytes;
@@ -195,6 +195,8 @@ public:
 
 		WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(float16, decompressedbytes, wtype);
 #elif defined(_USE_LZ4)
+		int decompressedbytes = 0;
+
                 decompressedbytes = LZ4_uncompress_unknownOutputSize((char *)bufzlib, (char*) WaveletCompressorGeneric<DATASIZE1D, DataType>::compressed_data(),
 									ninputbytes, WaveletCompressorGeneric<DATASIZE1D, DataType>::BUFMAXSIZE);
 		if (decompressedbytes < 0)

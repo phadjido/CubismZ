@@ -144,7 +144,7 @@ public:
 		return TGrid::getBlocksInfo();
 	}
 
-	virtual bool avail(int ix, int iy=0, int iz=0) const
+	virtual bool avail(unsigned int ix, unsigned int iy=0, unsigned int iz=0) const
 	{
 		//return true;
 		const int originX = mypeindex[0]*mybpd[0];

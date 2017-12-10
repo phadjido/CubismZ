@@ -8,12 +8,13 @@
 #ifndef _COMPRESSIONENCODERS_H_
 #define _COMPRESSIONENCODERS_H_ 1
 
+#if defined(_USE_LZ4_)
 #ifdef _OPENMP
 #include <omp.h>
 #else
 static int omp_get_num_threads(void) { return 1; }
 #endif
-
+#endif
 
 #include <zlib.h>	// always needed
 
@@ -189,7 +190,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 
 #elif defined(_USE_LZ4_)
 
-	#define ZBUFSIZE (4*1024*1024)	/* fix this */
+	#define ZBUFSIZE (4*1024*1024)	/* hardcoded */
 
 #ifdef _OPENMP
 	#define MAXBUFFERS	12	/* MAX NUMBER OF THREADS */

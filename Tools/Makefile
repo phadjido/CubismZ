@@ -5,10 +5,10 @@ SHELL := /bin/bash
 
 MPICC ?= mpic++
 blocksize ?= 32
-hdf-incdir ?= . #/opt/hdf5_mpich/include
-hdf-libdir ?= . #/opt/hdf5_mpich/lib
+hdf-incdir ?= /Users/phadjido/usr/hdf5/include #. #/opt/hdf5_mpich/include
+hdf-libdir ?= /Users/phadjido/usr/hdf5/lib #. #/opt/hdf5_mpich/lib
 
-config ?=release
+config ?=debug
 dir ?= default
 
 #################

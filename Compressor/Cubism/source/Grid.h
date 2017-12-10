@@ -23,8 +23,8 @@ class Grid
 
 protected:
 
+	const unsigned int NX, NY, NZ, N;
 	const double maxextent;
-	const unsigned int N, NX, NY, NZ;
 
 	void _dealloc()
 	{

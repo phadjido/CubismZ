@@ -222,7 +222,13 @@ protected:
 
 public:
 
-	Reader_WaveletCompression(const string path, bool doswapping, int wtype): NBLOCKS(-1), global_header_displacement(-1), path(path), doswapping(doswapping), wtype(wtype) { }
+	Reader_WaveletCompression(const string path, bool doswapping, int wtype): path(path), doswapping(doswapping), wtype(wtype), global_header_displacement(-1), NBLOCKS(-1){ }
+
+	~Reader_WaveletCompression()
+	{
+		if (data != NULL) free(data);
+		data = NULL;
+	}
 
 	void print_times()
 	{
@@ -416,7 +422,7 @@ public:
 
 				assert(string("==============START-BINARY-LUT==============\n") == string(buf));
 
-				bool done = false;
+				//bool done = false;
 
 				size_t base = miniheader_bytes;
 
@@ -692,9 +698,9 @@ public:
 			size_t zfp_decompressedbytes;
 			int is_float = 1;
 			int status = zfp_decompress_buffer(MYBLOCK, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)compressor.compressed_data(), nbytes, &zfp_decompressedbytes);
-			if ((zfp_decompressedbytes < 0)||(zfp_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			if ((status < 0)||(zfp_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
-				printf("ZFP DECOMPRESSION FAILURE:  %d!!\n", zfp_decompressedbytes);
+				printf("ZFP DECOMPRESSION FAILURE:  %ld!!\n", zfp_decompressedbytes);
 				abort();
 			}
 
@@ -749,7 +755,7 @@ public:
 		assert(start < global_header_displacement);
 		assert(start + compressedchunk.extent <= global_header_displacement);
 
-		int ready;
+		int ready = 0;
 		unsigned char *decompressedchunk = lru_cache.fetch_buffer(start, &ready);
 
 		unsigned char *compressedbuf;
@@ -764,7 +770,7 @@ public:
 		unsigned char *waveletbuf = decompressedchunk;
 
 		t0 = MPI_Wtime();
-		size_t decompressedbytes;
+		size_t decompressedbytes = 0;
 		if (!ready)
 			decompressedbytes = zdecompress(compressedbuf, compressedchunk.extent, &waveletbuf[0], 4*1024*1024);
 
@@ -772,7 +778,7 @@ public:
 		t_decode += (t1-t0);
 
 		if (!ready)
-		bytes_decode += compressedchunk.extent;
+			bytes_decode += compressedchunk.extent;
 
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)
@@ -835,9 +841,9 @@ public:
 			size_t zfp_decompressedbytes;
 			int is_float = 1;
 			int status = zfp_decompress_buffer(MYBLOCK, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)compressor.compressed_data(), nbytes, &zfp_decompressedbytes);
-			if ((zfp_decompressedbytes < 0)||(zfp_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
+			if ((status < 0)||(zfp_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
-				printf("ZFP DECOMPRESSION FAILURE:  %d!!\n", zfp_decompressedbytes);
+				printf("ZFP DECOMPRESSION FAILURE:  %ld!!\n", zfp_decompressedbytes);
 				abort();
 			}
 
@@ -880,6 +886,10 @@ public:
 	Reader_WaveletCompression(path,swapbytes,wtype), comm(comm)
 	{
 
+	}
+
+	~Reader_WaveletCompressionMPI()
+	{
 	}
 
 	virtual void load_file()

@@ -141,7 +141,7 @@ public:
 		return _existKey(key,mapArguments);
 	}
 
-	CommandlineParser(const int argc, const char ** argv) : mapArguments(), iArgC(argc), vArgV(argv), bStrictMode(false), bVerbose(true)
+	CommandlineParser(const int argc, const char ** argv) : iArgC(argc), vArgV(argv), bStrictMode(false), bVerbose(true), mapArguments()
 	{
 		for (int i=1; i<argc; i++)
 			if (argv[i][0] == '-')
@@ -358,6 +358,7 @@ public:
 
     void write_runtime_environment() const
     {
+#if 0
         time_t rawtime;
         std::time(&rawtime);
         struct tm* timeinfo = std::localtime(&rawtime);
@@ -377,6 +378,7 @@ public:
         runtime << commentStart << " !!! WARNING !!! EDITING THIS FILE CAN POTENTIALLY CRASH YOUR SIMULATION !!! WARNING !!!" << std::endl;
         for (typename std::map<std::string,Value>::const_iterator it = mapArguments.begin(); it != mapArguments.end(); ++it)
             runtime << it->first << '\t' << it->second << std::endl;
+#endif
     }
 
     void read_runtime_environment()

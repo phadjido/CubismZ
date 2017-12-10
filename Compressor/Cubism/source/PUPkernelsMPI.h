@@ -92,7 +92,6 @@ inline void pack_stripes_x(const Real * const srcbase, Real * const dst,
 	}
 }
 
-// #include "QPXEMU.h"
 #ifdef __bgq__
 #include <builtins.h>
 #define memcpy2(a,b,c)	__bcopy((b),(a),(c))
@@ -100,6 +99,7 @@ inline void pack_stripes_x(const Real * const srcbase, Real * const dst,
 #define memcpy2(a,b,c)	memcpy((a),(b),(c))
 #endif
 
+#if 0
 inline void pack_stripes_unroll0(const Real * const srcbase, Real * const dst,
 					   const unsigned int gptfloats,
 					   const int selstart, const int selend,
@@ -235,6 +235,9 @@ inline void pack_stripesxx(const Real * const srcbase, Real * const dst,
 		}
 	}
 }
+
+#endif
+
 
 inline void pack_stripes(const Real * const srcbase, Real * const dst,
 					   const unsigned int gptfloats,

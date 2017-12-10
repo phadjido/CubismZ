@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 
         /* MPI variables */
         MPI_Comm comm  = MPI_COMM_WORLD;
-        MPI_Info info  = MPI_INFO_NULL;
+        //MPI_Info info  = MPI_INFO_NULL;
 
         int mpi_rank, mpi_size;
 
@@ -78,8 +78,8 @@ int main(int argc, char **argv)
 
 	const double t0 = MPI_Wtime();
 
-	int dim[3], period[3], reorder;
-	int coord[3], id;
+	//int dim[3], period[3], reorder;
+	//int coord[3], id;
 
 	int NBX1 = myreader1.xblocks();
 	int NBY1 = myreader1.yblocks();
@@ -128,6 +128,7 @@ int main(int argc, char **argv)
 #endif
 			double zratio1 = myreader1.load_block2(x, y, z, targetdata1);
 			double zratio2 = myreader2.load_block2(x, y, z, targetdata2);
+			(void)zratio1; (void)zratio2;	// avoid warnings
 
 			for (int zb = 0; zb < _BLOCKSIZE_; zb++)
 				for (int yb = 0; yb < _BLOCKSIZE_; yb++)
@@ -223,7 +224,7 @@ int main(int argc, char **argv)
 		long nall = n;
 		double l1 = e_1 / nall;
 		const long double mse = e_2 / nall;
-		double l2 = sqrt(e_2) / nall;
+		//double l2 = sqrt(e_2) / nall;
 
 		double uncompressed_footprint = sizeof(Real) * nall;
 		double compressed_footprint = uncompressed_footprint;
