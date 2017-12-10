@@ -28,6 +28,7 @@ namespace WaveletsOnInterval
 		if (wtype == 1) return "InterpWavelet4thOrder";
 		if (wtype == 2) return "LiftedInterpWavelet4thOrder";
 		if (wtype == 3) return "AverageInterpWavelet3rdOrder";
+		return "None";
 	}
 	
 	inline const char * ChosenWavelets_GetName(int wtype) { return _name(wtype); } 

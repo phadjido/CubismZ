@@ -635,10 +635,10 @@ protected:
 
 			if (isroot)
 			{
-				printf("Time distribution: %+5s:%.0f%% %+5s:%.0f%% %+5s:%.0f%% %+5s:%.0f%%\n",
-					   "FWT", tavgfwt / toverall * 100,
-					   "ENC", tavgenc / toverall * 100,
-					   "IO", tavgio / toverall * 100,
+				printf("Time distribution: %5s:%.0f%% %5s:%.0f%% %5s:%.0f%% %5s:%.0f%%\n",
+					   "FWT  ", tavgfwt / toverall * 100,
+					   "ENC  ", tavgenc / toverall * 100,
+					   "IO   ", tavgio / toverall * 100,
 					   "Other",  (tavgcompr - tavgfwt - tavgenc)/ toverall * 100);
 			}
 		}
