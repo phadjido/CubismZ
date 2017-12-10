@@ -315,7 +315,7 @@ visualization using a capable tool such as ParaView, for example.
 [linkanl]:https://collab.cels.anl.gov/display/ESR/SZ "https://collab.cels.anl.gov/display/ESR/SZ"
 [linkzlib]:https://zlib.net/ "https://zlib.net/"
 [linklz4]:https://lz4.github.io/lz4/ "https://lz4.github.io/lz4/"
-[datadl]:https://polybox.ethz.ch/index.php/s/iXwQQGIWvdfx9s1 "https://polybox.ethz.ch/index.php/s/iXwQQGIWvdfx9s1"
+[datadl]:https://polybox.ethz.ch/index.php/s/iXwQQGIWvdfx9s1/download "https://polybox.ethz.ch/index.php/s/iXwQQGIWvdfx9s1/download"
 [gcclink]:https://gcc.gnu.org/ "https://gcc.gnu.org/"
 [intellink]:https://software.intel.com/en-us/c-compilers "https://software.intel.com/en-us/c-compilers"
 [clanglink]:http://www.llvm.org/ "http://www.llvm.org/"
