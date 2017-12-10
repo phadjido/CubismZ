@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 	hsize_t dims[4]; /* dataset dimensions */
 	hsize_t	count[4];	  /* hyperslab selection parameters */
 	hsize_t	offset[4];
-	id_t	plist_id; /* property list identifier */
+	hid_t	plist_id; /* property list identifier */
 	herr_t	status;
 
 	Reader_WaveletCompressionMPI *myreader[NCHANNELS];
