@@ -3,258 +3,74 @@
 RUNNING: genref.sh
 ###############################################################################
 
-////////////////////////////////////////////////////////////
-////////////      TEST IO Compressed MPI     ///////////////
-////////////////////////////////////////////////////////////
-dumping MPI VP ...
-setting threshold to 0.000010
-SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization 0.992831 seconds
-SerializerIO_WaveletCompression_MPI_Simple.h: _to_file 4.972593 seconds
-Channel 0: 524306.14 kB, wavelet-threshold: 1.0e-05, compr. rate: 1.00
-TLP Compr      min:1.575e-01 s avg:1.575e-01 s max:1.575e-01 s imb:0%
-TLP FWT+decim  min:9.228e-02 s avg:9.228e-02 s max:9.228e-02 s imb:0%
-TLP Encoding   min:5.400e-05 s avg:5.400e-05 s max:5.400e-05 s imb:0%
-TLP FileIO     min:4.973e+00 s avg:4.973e+00 s max:4.973e+00 s imb:0%
-Time distribution:   FWT:2%   ENC:0%    IO:97% Other:1%
-done
-threads: 1 elapsed time: 5.96573 seconds
-Finishing...
+Channel 0: 524306.14 kB, wavelet-threshold: 0.0e+00, compr. rate: 1.00
+TLP Compr      min:1.499e+00 s avg:1.499e+00 s max:1.499e+00 s imb:0%
+TLP FWT+decim  min:1.424e+00 s avg:1.424e+00 s max:1.424e+00 s imb:0%
+TLP Encoding   min:3.600e-05 s avg:3.600e-05 s max:3.600e-05 s imb:0%
+TLP FileIO     min:9.115e-01 s avg:9.115e-01 s max:9.115e-01 s imb:0%
+Time distribution: FWT  :59% ENC  :0% IO   :38% Other:3%
+threads: 1 elapsed time: 6.27943 seconds
 
 ###############################################################################
 RUNNING: test_wavz.sh
 ###############################################################################
 
-////////////////////////////////////////////////////////////
-////////////      TEST IO Compressed MPI     ///////////////
-////////////////////////////////////////////////////////////
-dumping MPI VP ...
-setting threshold to 2.000000
-SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization 3.430475 seconds
-SerializerIO_WaveletCompression_MPI_Simple.h: _to_file 0.054333 seconds
-Channel 0: 1013.64 kB, wavelet-threshold: 2.0e+00, compr. rate: 517.23
-TLP Compr      min:2.326e+00 s avg:2.326e+00 s max:2.326e+00 s imb:0%
-TLP FWT+decim  min:2.201e+00 s avg:2.201e+00 s max:2.201e+00 s imb:0%
-TLP Encoding   min:6.300e-05 s avg:6.300e-05 s max:6.300e-05 s imb:0%
-TLP FileIO     min:5.360e-02 s avg:5.360e-02 s max:5.360e-02 s imb:0%
-Time distribution:   FWT:92%   ENC:0%    IO:2% Other:5%
-done
-threads: 1 elapsed time: 3.48707 seconds
-Finishing...
-simdata1 is tmp.cz
-simdata2 is ref.cz
-wtype is 3
-
-==============START-ASCI-HEADER==============
-Endianess: <little>
-sizeofReal: <4>
-sizeofsize_t: <8>
-sizeofBlockMetadata: <20>
-sizeofHeaderLUT: <12>
-sizeofCompressedBlock: <20>
-Blocksize: <32>
-Blocks: 16 x 16 x 16
-Extent: <1.000000> x <1.000000> x <1.000000>
-SubdomainBlocks: <16 x 16 x 16>
-HalfFloat: <no>
-Wavelets: <AverageInterpWavelet3rdOrder>
-WaveletThreshold: <2.000000>
-Encoder: <zlib>
-==============END ASCI-HEADER==============
-
-shouldnt be here! 0xffffffff
-the header data is taking 0.08 MB
-
-==============START-ASCI-HEADER==============
-Endianess: <little>
-sizeofReal: <4>
-sizeofsize_t: <8>
-sizeofBlockMetadata: <20>
-sizeofHeaderLUT: <12>
-sizeofCompressedBlock: <20>
-Blocksize: <32>
-Blocks: 16 x 16 x 16
-Extent: <1.000000> x <1.000000> x <1.000000>
-SubdomainBlocks: <16 x 16 x 16>
-HalfFloat: <no>
-Wavelets: <none>
-WaveletThreshold: <0.000010>
-Encoder: <none>
-==============END ASCI-HEADER==============
-
-shouldnt be here! 0xffffffff
-the header data is taking 0.08 MB
-[A] I found in total 16x16x16 blocks.
-[B] I found in total 16x16x16 blocks.
-Init time = 0.044 seconds
-Elapsed time = 7.382 seconds
-compression-rate: 479.19 rel-linf-error: 5.435772e+01 rel-mean-error: 2.968278e-01
+Channel 0: 8324.78 kB, wavelet-threshold: 1.0e-02, compr. rate: 62.98
+TLP Compr      min:1.109e+01 s avg:1.109e+01 s max:1.109e+01 s imb:0%
+TLP FWT+decim  min:9.996e+00 s avg:9.996e+00 s max:9.996e+00 s imb:0%
+TLP Encoding   min:5.020e-04 s avg:5.020e-04 s max:5.020e-04 s imb:0%
+TLP FileIO     min:1.515e-02 s avg:1.515e-02 s max:1.515e-02 s imb:0%
+Time distribution: FWT  :90% ENC  :0% IO   :0% Other:10%
+threads: 1 elapsed time: 14.9762 seconds
+Elapsed time = 79.195 seconds
+compression-rate: 62.38 rel-linf-error: 3.419876e-01 rel-mean-error: 4.182551e-03
 RE :           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
-RES:       479.19 9.001368e-02 1.944084e-03 2.968278e-01 3.787627e-03 5.092799e-05       0.0668      53.6302
+RES:        62.38 9.692282e-04 4.814984e-05 4.182551e-03 7.738861e-05 5.897150e-07       0.5130      87.5615
 
 ###############################################################################
 RUNNING: test_zfp.sh
 ###############################################################################
 
-////////////////////////////////////////////////////////////
-////////////      TEST IO Compressed MPI     ///////////////
-////////////////////////////////////////////////////////////
-dumping MPI VP ...
-setting threshold to 2.000000
-SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization 4.398553 seconds
-SerializerIO_WaveletCompression_MPI_Simple.h: _to_file 0.073251 seconds
-Channel 0: 17876.45 kB, wavelet-threshold: 2.0e+00, compr. rate: 29.33
-TLP Compr      min:3.645e+00 s avg:3.645e+00 s max:3.645e+00 s imb:0%
-TLP FWT+decim  min:3.638e+00 s avg:3.638e+00 s max:3.638e+00 s imb:0%
-TLP Encoding   min:6.000e-06 s avg:6.000e-06 s max:6.000e-06 s imb:0%
-TLP FileIO     min:7.325e-02 s avg:7.325e-02 s max:7.325e-02 s imb:0%
-Time distribution:   FWT:98%   ENC:0%    IO:2% Other:0%
-done
-threads: 1 elapsed time: 4.47322 seconds
-Finishing...
+Channel 0: 16929.52 kB, wavelet-threshold: 5.0e-01, compr. rate: 30.97
+TLP Compr      min:5.456e+00 s avg:5.456e+00 s max:5.456e+00 s imb:0%
+TLP FWT+decim  min:5.447e+00 s avg:5.447e+00 s max:5.447e+00 s imb:0%
+TLP Encoding   min:1.900e-05 s avg:1.900e-05 s max:1.900e-05 s imb:0%
+TLP FileIO     min:4.289e-02 s avg:4.289e-02 s max:4.289e-02 s imb:0%
+Time distribution: FWT  :99% ENC  :0% IO   :1% Other:0%
+threads: 1 elapsed time: 9.52422 seconds
+Elapsed time = 70.035 seconds
+compression-rate: 30.82 rel-linf-error: 1.254272e-01 rel-mean-error: 5.775685e-03
+RE :           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
+RES:        30.82 3.554738e-04 6.649012e-05 5.775685e-03 8.788109e-05 6.696695e-07       1.0382      86.4572
 
 ###############################################################################
 RUNNING: test_fpzip.sh
 ###############################################################################
 
-////////////////////////////////////////////////////////////
-////////////      TEST IO Compressed MPI     ///////////////
-////////////////////////////////////////////////////////////
-dumping MPI VP ...
-setting threshold to 0.000000
-SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization 8.181874 seconds
-SerializerIO_WaveletCompression_MPI_Simple.h: _to_file 1.844341 seconds
-Channel 0: 221458.36 kB, wavelet-threshold: 0.0e+00, compr. rate: 2.37
-TLP Compr      min:7.421e+00 s avg:7.421e+00 s max:7.421e+00 s imb:0%
-TLP FWT+decim  min:7.371e+00 s avg:7.371e+00 s max:7.371e+00 s imb:0%
-TLP Encoding   min:1.100e-05 s avg:1.100e-05 s max:1.100e-05 s imb:0%
-TLP FileIO     min:1.844e+00 s avg:1.844e+00 s max:1.844e+00 s imb:0%
-Time distribution:   FWT:80%   ENC:0%    IO:20% Other:1%
-done
-threads: 1 elapsed time: 10.1688 seconds
-Finishing...
-simdata1 is tmp.cz
-simdata2 is ref.cz
-wtype is 
-
-==============START-ASCI-HEADER==============
-Endianess: <little>
-sizeofReal: <4>
-sizeofsize_t: <8>
-sizeofBlockMetadata: <20>
-sizeofHeaderLUT: <12>
-sizeofCompressedBlock: <20>
-Blocksize: <32>
-Blocks: 16 x 16 x 16
-Extent: <1.000000> x <1.000000> x <1.000000>
-SubdomainBlocks: <16 x 16 x 16>
-HalfFloat: <no>
-Wavelets: <fpzip>
-WaveletThreshold: <0.000000>
-Encoder: <none>
-==============END ASCI-HEADER==============
-
-shouldnt be here! 0xffffffff
-the header data is taking 0.08 MB
-
-==============START-ASCI-HEADER==============
-Endianess: <little>
-sizeofReal: <4>
-sizeofsize_t: <8>
-sizeofBlockMetadata: <20>
-sizeofHeaderLUT: <12>
-sizeofCompressedBlock: <20>
-Blocksize: <32>
-Blocks: 16 x 16 x 16
-Extent: <1.000000> x <1.000000> x <1.000000>
-SubdomainBlocks: <16 x 16 x 16>
-HalfFloat: <no>
-Wavelets: <none>
-WaveletThreshold: <0.000010>
-Encoder: <none>
-==============END ASCI-HEADER==============
-
-shouldnt be here! 0xffffffff
-the header data is taking 0.08 MB
-[A] I found in total 16x16x16 blocks.
-[B] I found in total 16x16x16 blocks.
-Init time = 0.305 seconds
-Elapsed time = 32.927 seconds
-compression-rate: 2.37 rel-linf-error: 0.000000e+00 rel-mean-error: 0.000000e+00
+Channel 0: 41586.64 kB, wavelet-threshold: 2.2e+01, compr. rate: 12.61
+TLP Compr      min:6.278e+00 s avg:6.278e+00 s max:6.278e+00 s imb:0%
+TLP FWT+decim  min:6.266e+00 s avg:6.266e+00 s max:6.266e+00 s imb:0%
+TLP Encoding   min:1.700e-05 s avg:1.700e-05 s max:1.700e-05 s imb:0%
+TLP FileIO     min:9.935e-02 s avg:9.935e-02 s max:9.935e-02 s imb:0%
+Time distribution: FWT  :98% ENC  :0% IO   :2% Other:0%
+threads: 1 elapsed time: 10.3532 seconds
+Elapsed time = 78.747 seconds
+compression-rate: 12.58 rel-linf-error: 3.121948e-02 rel-mean-error: 4.016025e-03
 RE :           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
-RES:         2.37 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00 0.000000e+00      13.5217          inf
+RES:        12.58 8.847923e-05 4.623277e-05 4.016025e-03 5.336729e-05 4.066682e-07       2.5432      90.7896
 
 ###############################################################################
 RUNNING: test_sz.sh
 ###############################################################################
 
-////////////////////////////////////////////////////////////
-////////////      TEST IO Compressed MPI     ///////////////
-////////////////////////////////////////////////////////////
-dumping MPI VP ...
-[SZ] Reading SZ configuration file (sz.config) ...
-setting threshold to 2.000000
-SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization 11.352045 seconds
-SerializerIO_WaveletCompression_MPI_Simple.h: _to_file 0.017373 seconds
-Channel 0: 14073.13 kB, wavelet-threshold: 2.0e+00, compr. rate: 37.25
-TLP Compr      min:9.941e+00 s avg:9.941e+00 s max:9.941e+00 s imb:0%
-TLP FWT+decim  min:9.935e+00 s avg:9.935e+00 s max:9.935e+00 s imb:0%
-TLP Encoding   min:5.000e-06 s avg:5.000e-06 s max:5.000e-06 s imb:0%
-TLP FileIO     min:1.737e-02 s avg:1.737e-02 s max:1.737e-02 s imb:0%
-Time distribution:   FWT:100%   ENC:0%    IO:0% Other:0%
-done
-threads: 1 elapsed time: 11.3704 seconds
-Finishing...
-sz.config...
-[SZ] Reading SZ configuration file (sz.config) ...
-sz.config...
-[SZ] Reading SZ configuration file (sz.config) ...
-simdata1 is tmp.cz
-simdata2 is ref.cz
-wtype is 
-
-==============START-ASCI-HEADER==============
-Endianess: <little>
-sizeofReal: <4>
-sizeofsize_t: <8>
-sizeofBlockMetadata: <20>
-sizeofHeaderLUT: <12>
-sizeofCompressedBlock: <20>
-Blocksize: <32>
-Blocks: 16 x 16 x 16
-Extent: <1.000000> x <1.000000> x <1.000000>
-SubdomainBlocks: <16 x 16 x 16>
-HalfFloat: <no>
-Wavelets: <sz>
-WaveletThreshold: <2.000000>
-Encoder: <none>
-==============END ASCI-HEADER==============
-
-shouldnt be here! 0xffffffff
-the header data is taking 0.08 MB
-
-==============START-ASCI-HEADER==============
-Endianess: <little>
-sizeofReal: <4>
-sizeofsize_t: <8>
-sizeofBlockMetadata: <20>
-sizeofHeaderLUT: <12>
-sizeofCompressedBlock: <20>
-Blocksize: <32>
-Blocks: 16 x 16 x 16
-Extent: <1.000000> x <1.000000> x <1.000000>
-SubdomainBlocks: <16 x 16 x 16>
-HalfFloat: <no>
-Wavelets: <none>
-WaveletThreshold: <0.000010>
-Encoder: <none>
-==============END ASCI-HEADER==============
-
-shouldnt be here! 0xffffffff
-the header data is taking 0.08 MB
-[A] I found in total 16x16x16 blocks.
-[B] I found in total 16x16x16 blocks.
-Init time = 0.031 seconds
-Elapsed time = 10.110 seconds
-compression-rate: 37.04 rel-linf-error: 2.000000e+00 rel-mean-error: 9.991666e-01
+Channel 0: 30636.43 kB, wavelet-threshold: 1.0e-02, compr. rate: 17.11
+TLP Compr      min:1.732e+01 s avg:1.732e+01 s max:1.732e+01 s imb:0%
+TLP FWT+decim  min:1.731e+01 s avg:1.731e+01 s max:1.731e+01 s imb:0%
+TLP Encoding   min:6.000e-06 s avg:6.000e-06 s max:6.000e-06 s imb:0%
+TLP FileIO     min:7.048e-02 s avg:7.048e-02 s max:7.048e-02 s imb:0%
+Time distribution: FWT  :100% ENC  :0% IO   :0% Other:0%
+threads: 1 elapsed time: 21.4494 seconds
+Elapsed time = 82.166 seconds
+compression-rate: 17.07 rel-linf-error: 9.998322e-03 rel-mean-error: 4.998948e-03
 RE :           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
-RES:        37.04 3.311901e-03 6.544077e-03 9.991666e-01 7.407713e-03 9.960324e-05       0.8639      47.8038
+RES:        17.07 2.833627e-05 5.754826e-05 4.998948e-03 6.538619e-05 4.982544e-07       1.8748      89.0253
