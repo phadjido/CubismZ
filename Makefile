@@ -3,8 +3,8 @@
 # Description: Build CubismZ tools
 # Copyright 2017 ETH Zurich. All Rights Reserved.
 
-MPICC = mpic++
-mpicc = mpicc
+MPICC ?= mpic++
+mpicc ?= mpicc
 blocksize ?= 32
 hdf-incdir ?= /opt/hdf5_mpich/include
 hdf-libdir ?= /opt/hdf5_mpich/lib

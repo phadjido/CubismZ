@@ -565,8 +565,7 @@ public:
 
 		assert(!feof(f));
 
-		//static vector<unsigned char> waveletbuf(2 << 21); // 21: 4MB, 22: 8MB, 28: 512MB
-		static vector<unsigned char> waveletbuf(2 << 28);
+		static vector<unsigned char> waveletbuf(2 << 22); // 21: 4MB, 22: 8MB, 28: 512MB
 		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 
 		int readbytes = 0;
@@ -632,7 +631,7 @@ public:
 		assert(!feof(f));
 
 		size_t zz_bytes = compressedbuf.size();
-		static vector<unsigned char> waveletbuf(2 << 21); // 21: 4MB, 22: 8MB, 28: 512MB
+		static vector<unsigned char> waveletbuf(2 << 22); // 21: 4MB, 22: 8MB, 28: 512MB
 		const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)
@@ -903,7 +902,7 @@ public:
 			MPI_Bcast(&threshold, sizeof(threshold), MPI_CHAR, 0, comm);
 		}
 
-#if 1
+#if 0
 		t_decode = t_wavelet = 0;
 
 		struct stat st;
