@@ -7,7 +7,7 @@
 #
 set -x #echo on
 
-h5file=../Data/data_005000-p.h5
+h5file=../Data/small.h5
 
 nproc=1
 if [ "$#" -eq 1 ]
@@ -17,14 +17,14 @@ fi
 
 if [ -z "$2" ]
 then
-	echo "setting err=0.01"
-	err=0.01
+	echo "setting err=0.00005"
+	err=0.00005
 else
 	err=$2
 fi
 
 bs=32
-ds=512
+ds=128
 nb=$(echo "$ds/$bs" | bc)
 wt=3
 rm -f tmp.cz

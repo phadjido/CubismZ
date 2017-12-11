@@ -7,7 +7,7 @@
 #
 set -x #echo on
 
-h5file=../Data/data_005000-p.h5
+h5file=../Data/small.h5
 
 nproc=1
 if [ ! -z ${1+x} ]
@@ -17,14 +17,14 @@ fi
 
 if [ -z ${1+x} ]
 then
-	echo "setting bits=22"
-	bits=22
+	echo "setting bits=20"
+	bits=20
 else
 	bits=$1; shift
 fi
 
 bs=32
-ds=512
+ds=128
 nb=$(echo "$ds/$bs" | bc)
 
 rm -f tmp.cz

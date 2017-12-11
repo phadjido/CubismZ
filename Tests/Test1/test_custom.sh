@@ -7,7 +7,7 @@
 #
 set -x #echo on
 
-h5file=../Data/data_005000-p.h5
+h5file=../Data/small.h5
 
 mypath="$1"; shift
 thresh=$1; shift
@@ -18,7 +18,7 @@ then
 fi
 
 bs=32
-ds=512
+ds=128
 nb=$(echo "$ds/$bs" | bc)
 
 rm -f tmp.cz
