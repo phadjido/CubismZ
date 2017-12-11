@@ -332,7 +332,7 @@ public:
 		nthreads = 1;
 #endif
 
-		if (isroot) std::cout << "threads: " << nthreads << " elapsed time: " << t1-t0 << " seconds" << endl;
+		if (isroot) std::cout << "Threads: " << nthreads << " Elapsed time: " << t1-t0 << " seconds" << endl;
 	}
 
 	void dispose()

@@ -319,9 +319,6 @@ protected:
 						float_zero_bits((unsigned int *)&mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)], _ZEROBITS_);
 #endif
 
-#if defined(_USE_SHUFFLE_)
-					shuffle((char *)mysoabuffer, nbytes, sizeof(Real));
-#endif
 					memcpy(mybuf.compressedbuffer + mybytes, mysoabuffer, sizeof(unsigned char) * nbytes);
 #endif
 					mybytes += nbytes;
@@ -613,7 +610,9 @@ protected:
 		vector<float> workload_file(1, timer.stop());
 		///
 		double io_t1 = MPI_Wtime();
+#if VERBOSE
 		printf("SerializerIO_WaveletCompression_MPI_Simple.h: _to_file %f seconds\n", io_t1-io_t0); 
+#endif
 
 		//just a report now
 		if (verbosity)
@@ -633,6 +632,7 @@ protected:
 			const float tavgio =_profile_report("FileIO", workload_file, mycomm, isroot);
 			const float toverall = tavgio + tavgcompr;
 
+#if VERBOSE
 			if (isroot)
 			{
 				printf("Time distribution: %5s:%.0f%% %5s:%.0f%% %5s:%.0f%% %5s:%.0f%%\n",
@@ -641,6 +641,7 @@ protected:
 					   "IO   ", tavgio / toverall * 100,
 					   "Other",  (tavgcompr - tavgfwt - tavgenc)/ toverall * 100);
 			}
+#endif
 		}
 	}
 
@@ -941,44 +942,3 @@ public:
 		}
 	}
 };
-
-
-#if 0
-template<typename GridType, typename IterativeStreamer>
-class SerializerIO_WaveletCompression_MPI_Simple : public SerializerIO_WaveletCompression_MPI_SimpleBlocking<GridType, IterativeStreamer>
-{
-	size_t nofcalls;
-	vector<MPI_Request> pending_requests;
-	MPI_File myopenfile;
-
-	void _wait_all_quiet()
-	{
-		//wait for pending requests
-		assert(pending_requests.size() > 0); 
-		MPI_Waitall(pending_requests.size(), &pending_requests.front(), MPI_STATUSES_IGNORE);
-		pending_requests.clear();
-
-		//close the split collective io
-		MPI_Status status;
-		MPI_File_write_ordered_end(myopenfile, &this->allmydata.front(), &status);
-
-		//e buonanotte
-		MPI_File_close(&myopenfile);
-	}
-
-public:
-	SerializerIO_WaveletCompression_MPI_Simple():
-	SerializerIO_WaveletCompression_MPI_SimpleBlocking<GridType, IterativeStreamer>(),
-	nofcalls(0)
-	{
-	}
-
-	void force_close() { _wait_all_quiet(); }
-
-	~SerializerIO_WaveletCompression_MPI_Simple()
-	{
-		if (nofcalls)
-			_wait_all_quiet();
-	}
-};
-#endif
