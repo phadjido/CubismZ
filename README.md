@@ -154,8 +154,12 @@ hdf2cz -bpdx <nbx> -bpdy <nby> -bpdz <nbz> -h5file <hdf5 file> -czfile <cz file>
 
 - The HDF5 file consists of `nbx * nby * nbz` 3D blocks
 - The input HDF5 file is compressed and stored to `<cz file>`
-- The threshold specifies how lossy the compression will be TODO: need to
-  specify the range of threshold (?)
+- The threshold specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage. 
+  - todo: need to specify the range of threshold (?)
+  - Wavelets: wavelets coefficients with absolute value smaller than the threshold are decimated (range: [0, +inf) 
+  - FPZIP: number of useful bits of the floating point numbers (range: up to 32/64)
+  - ZFP: relative error 
+  - SZ: relateive error
 - The wavelet type can optionally be specified using the `-wtype` option.
   The following options / wavelet types are supported
   - 1: 4th order average interpolating wavelets
@@ -193,38 +197,23 @@ cz2diff -czfile1 <cz file1> [-wtype <wt>] -czfile2 <cz reference file2>
 
 ## Example: Fluid dynamics data
 
-#### Dataset
+#### Demo dataset
 
 The software release includes a set of basic tests to demonstrate the
-capabilities of the CubismZ compression techniques.  The test data consists of
-the 3D pressure field of a cloud cavitation collapse simulation.  The initial
-configuration is composed of 70 air bubbles (dispersed phase, non-condensible
-gas) submerged in liquid water (continuous phase) and is discretized in a cubic
-domain with `512 * 512 * 512` cells.  Note that the simulation is
-under-resolved.  Nevertheless, the degree of variation in the quantity of
-interest (3D pressure field) is sufficient to test the compression algorithms.
-The snapshot of the test data is taken at iteration 5000.  A visualization of
-the gas volume fraction as well as the pressure in a plane through the cloud
-center for this iteration is shown below.
+capabilities of the CubismZ compression techniques. The demo dataset (`small.h5`) 
+consists of the spherical bubble located at the center of the cubic domain
+and discretized with `128 * 128 * 128` cells. 
+The HDF5 file (8MB) is available in the `CubismZ/Tests/Data` folder.  
+A visualization of the single bubble is depicted below
 
-![](.images/pressure_alpha2_5000.png)
-
-Additionally, the mean pressure over all iteration steps is shown in the next
-figure.  Plus/minus one standard deviation is indicated by the shaded region.
-
-![](.images/mean_pressure.png)
-
-The pressure test data at iteration 5000 can be downloaded at the following
-link (287MB):
-
-[data_005000.tar][datadl]
+![](.images/single_bubble.png)
 
 
 #### Compression performance tests
 
 The compression performance tests are located in `CubismZ/Tests/Test1`.  The test
-scripts require that the simulation HDF5 data `data_005000-p.h5` has been
-[downloaded][datadl] and is located in the `CubismZ/Tests/Data` directory.  The
+scripts require that the simulation HDF5 data `demo.h5`, which is located in 
+the `CubismZ/Tests/Data` directory.  The
 complete test chain can be run by executing `CubismZ/Tests/Test1/run_all.sh`.  The
 script requires that the [configured compilation](#configured-compilation) has
 been performed previously.  The `run_all.sh` script generates a `run_all.txt`
@@ -311,7 +300,6 @@ where
 
 * `<n processors>`: Number of MPI processes to be used.  Optional, defaults to 1.
 
-
 #### Visual assessment for lossy compressors
 
 An example of compression and decompression cycle is provided in `CubismZ/Tests/Test2`.
@@ -326,8 +314,37 @@ tool with wavelets and ZLIB compression substages.  The compressed data is then
 converted back to HDF5 using the `cz2hdf` tool and can be used for
 visualization using a capable tool such as ParaView, for example.
 
+#### Cloud caviation collapse dataset
 
-## Quick Testing
+The software release includes an additional dataset that can be optionally used 
+for testing the compression capabilities of CubismZ.  The test data consists of
+the 3D pressure field of a cloud cavitation collapse simulation.  The initial
+configuration is composed of 70 air bubbles (dispersed phase, non-condensible
+gas) submerged in liquid water (continuous phase) and is discretized in a cubic
+domain with `512 * 512 * 512` cells.  Note that the simulation is
+under-resolved.  Nevertheless, the degree of variation in the quantity of
+interest (3D pressure field) is sufficient to test the compression algorithms.
+The snapshot of the test data is taken at iteration 5000.  A visualization of
+the gas volume fraction as well as the pressure in a plane through the cloud
+center for this iteration is shown below.
+
+![](.images/pressure_alpha2_5000.png)
+
+Additionally, the mean pressure over all iteration steps is shown in the next
+figure.  Plus/minus one standard deviation is indicated by the shaded region.
+
+![](.images/mean_pressure.png)
+
+The pressure test data at iteration 5000 can be downloaded at the following
+link (512MB):
+
+[data_005000-p.h5][datadl]
+
+The file must be placed in the `CubismZ\Tests\Data` directory. 
+The corresponding tests are located in the `CubismZ\Tests\Test1_cav` and 
+`CubismZ\Tests\Test2_cav` directories. 
+
+## Quick testing
 
 #### Configure 
 
@@ -339,12 +356,25 @@ visualization using a capable tool such as ParaView, for example.
 
 - Issue `make`. This will
   - configure and build the third-party libraries and install them in the `CubismZ/ThirdParty/build` directory. 
-  - build the CubismZ tools (hdf2cz, cz2hdf, cz2diff) for each of the basic configurations and put the executable into the corresponding subdirectories of the `CubimZ/Tools/bin` directory. 
+  - build the CubismZ tools (`hdf2cz`, `cz2hdf`, `cz2diff`) for each of the basic configurations and put the executable into the corresponding subdirectories of the `CubimZ/Tools/bin` directory. 
 
-#### Download the example dataset
+#### Run the demo tests
 
-#### Run the tests
+- Enter the `CubismZ\Tests\Test1` directory and execute the script `run_all.sh`. 
+- Enter the `CubismZ\Tests\Test2` directory and execute the script `run_all.sh`. 
 
+Notes:
+- For `Test1`, the generated `run_all.txt` file contains the output of the compressor test configurations. For the default single-process and single-threaded setup, 
+the reported compression ratios and PSNR values must be identical with those
+reported in the reference output file `cselab_ref_run_all.txt` file. 
+- The `run_all.sh` script uses the `mpirun` command to launch the executable.
+Some systems might offer a different command for launching MPI applications (e.g. srun for SLURM).
+  
+#### Run the cavitation data tests (optional)
+
+- Download the cavitation dataset into the `CubismZ\Tests\Test1` directory.
+- Enter the `CubismZ\Tests\Test1_cav` directory and execute the script `run_all.sh`. 
+- Enter the `CubismZ\Tests\Test2_cav` directory and execute the script `run_allsh`. 
 
 
 [linklab]:http://www.cse-lab.ethz.ch "http://www.cse-lab.ethz.ch"

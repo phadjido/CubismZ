@@ -7,7 +7,7 @@
 #
 set -x #echo on
 
-h5file=../Data/small.h5
+h5file=../Data/demo.h5
 
 nproc=1
 if [ ! -z ${1+x} ]

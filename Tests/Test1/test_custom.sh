@@ -7,7 +7,7 @@
 #
 set -x #echo on
 
-h5file=../Data/small.h5
+h5file=../Data/demo.h5
 
 mypath="$1"; shift
 thresh=$1; shift
