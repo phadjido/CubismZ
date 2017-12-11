@@ -626,13 +626,13 @@ protected:
 				   channel, aggregate_written_bytes/1024.,
 				   threshold, NPTS * sizeof(Real) * NBLOCKS * comm_size / (float) aggregate_written_bytes);
 
+#if VERBOSE
 			const float tavgcompr = _profile_report("Compr", workload_total, mycomm, isroot);
 			const float tavgfwt =_profile_report("FWT+decim", workload_fwt, mycomm, isroot);
 			const float tavgenc =_profile_report("Encoding", workload_encode, mycomm, isroot);
 			const float tavgio =_profile_report("FileIO", workload_file, mycomm, isroot);
 			const float toverall = tavgio + tavgcompr;
 
-#if VERBOSE
 			if (isroot)
 			{
 				printf("Time distribution: %5s:%.0f%% %5s:%.0f%% %5s:%.0f%% %5s:%.0f%%\n",

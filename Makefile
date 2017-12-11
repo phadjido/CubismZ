@@ -8,7 +8,7 @@ mpicc ?= mpicc
 blocksize ?= 32
 #hdf-incdir ?= /opt/hdf5_mpich/include
 #hdf-libdir ?= /opt/hdf5_mpich/lib
-hdf-incdir ?= /Users/phadjido/usr//hdf5/include
+hdf-incdir ?= /Users/phadjido/usr/hdf5/include
 hdf-libdir ?= /Users/phadjido/usr/hdf5/lib
 
 all: tools

@@ -3,74 +3,44 @@
 RUNNING: genref.sh
 ###############################################################################
 
-Channel 0: 524306.14 kB, wavelet-threshold: 0.0e+00, compr. rate: 1.00
-TLP Compr      min:1.499e+00 s avg:1.499e+00 s max:1.499e+00 s imb:0%
-TLP FWT+decim  min:1.424e+00 s avg:1.424e+00 s max:1.424e+00 s imb:0%
-TLP Encoding   min:3.600e-05 s avg:3.600e-05 s max:3.600e-05 s imb:0%
-TLP FileIO     min:9.115e-01 s avg:9.115e-01 s max:9.115e-01 s imb:0%
-Time distribution: FWT  :59% ENC  :0% IO   :38% Other:3%
-threads: 1 elapsed time: 6.27943 seconds
+Channel 0: 8192.29 kB, wavelet-threshold: 0.0e+00, compr. rate: 1.00
 
 ###############################################################################
 RUNNING: test_wavz.sh
 ###############################################################################
 
-Channel 0: 8324.78 kB, wavelet-threshold: 1.0e-02, compr. rate: 62.98
-TLP Compr      min:1.109e+01 s avg:1.109e+01 s max:1.109e+01 s imb:0%
-TLP FWT+decim  min:9.996e+00 s avg:9.996e+00 s max:9.996e+00 s imb:0%
-TLP Encoding   min:5.020e-04 s avg:5.020e-04 s max:5.020e-04 s imb:0%
-TLP FileIO     min:1.515e-02 s avg:1.515e-02 s max:1.515e-02 s imb:0%
-Time distribution: FWT  :90% ENC  :0% IO   :0% Other:10%
-threads: 1 elapsed time: 14.9762 seconds
-Elapsed time = 79.195 seconds
-compression-rate: 62.38 rel-linf-error: 3.419876e-01 rel-mean-error: 4.182551e-03
+Channel 0: 30.24 kB, wavelet-threshold: 5.0e-05, compr. rate: 270.91
+Elapsed time = 1.217 seconds
+compression-rate: 256.23 rel-linf-error: 7.494688e-04 rel-mean-error: 3.972721e-05
 RE :           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
-RES:        62.38 9.692282e-04 4.814984e-05 4.182551e-03 7.738861e-05 5.897150e-07       0.5130      87.5615
+RES:       256.23 8.722263e-04 8.271610e-05 3.972721e-05 1.046102e-04 3.611734e-08       0.1249      78.2226
 
 ###############################################################################
 RUNNING: test_zfp.sh
 ###############################################################################
 
-Channel 0: 16929.52 kB, wavelet-threshold: 5.0e-01, compr. rate: 30.97
-TLP Compr      min:5.456e+00 s avg:5.456e+00 s max:5.456e+00 s imb:0%
-TLP FWT+decim  min:5.447e+00 s avg:5.447e+00 s max:5.447e+00 s imb:0%
-TLP Encoding   min:1.900e-05 s avg:1.900e-05 s max:1.900e-05 s imb:0%
-TLP FileIO     min:4.289e-02 s avg:4.289e-02 s max:4.289e-02 s imb:0%
-Time distribution: FWT  :99% ENC  :0% IO   :1% Other:0%
-threads: 1 elapsed time: 9.52422 seconds
-Elapsed time = 70.035 seconds
-compression-rate: 30.82 rel-linf-error: 1.254272e-01 rel-mean-error: 5.775685e-03
+Channel 0: 312.66 kB, wavelet-threshold: 5.0e-03, compr. rate: 26.20
+Elapsed time = 1.127 seconds
+compression-rate: 26.06 rel-linf-error: 5.413033e-04 rel-mean-error: 5.775139e-05
 RE :           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
-RES:        30.82 3.554738e-04 6.649012e-05 5.775685e-03 8.788109e-05 6.696695e-07       1.0382      86.4572
+RES:        26.06 6.299648e-04 1.202443e-04 5.775139e-05 1.477075e-04 5.099695e-08       1.2280      75.2260
 
 ###############################################################################
 RUNNING: test_fpzip.sh
 ###############################################################################
 
-Channel 0: 41586.64 kB, wavelet-threshold: 2.2e+01, compr. rate: 12.61
-TLP Compr      min:6.278e+00 s avg:6.278e+00 s max:6.278e+00 s imb:0%
-TLP FWT+decim  min:6.266e+00 s avg:6.266e+00 s max:6.266e+00 s imb:0%
-TLP Encoding   min:1.700e-05 s avg:1.700e-05 s max:1.700e-05 s imb:0%
-TLP FileIO     min:9.935e-02 s avg:9.935e-02 s max:9.935e-02 s imb:0%
-Time distribution: FWT  :98% ENC  :0% IO   :2% Other:0%
-threads: 1 elapsed time: 10.3532 seconds
-Elapsed time = 78.747 seconds
-compression-rate: 12.58 rel-linf-error: 3.121948e-02 rel-mean-error: 4.016025e-03
+Channel 0: 604.05 kB, wavelet-threshold: 2.0e+01, compr. rate: 13.56
+Elapsed time = 1.245 seconds
+compression-rate: 13.52 rel-linf-error: 2.440810e-04 rel-mean-error: 8.861987e-05
 RE :           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
-RES:        12.58 8.847923e-05 4.623277e-05 4.016025e-03 5.336729e-05 4.066682e-07       2.5432      90.7896
+RES:        13.52 2.840597e-04 1.845156e-04 8.861987e-05 2.183393e-04 7.538306e-08       2.3662      71.8315
 
 ###############################################################################
 RUNNING: test_sz.sh
 ###############################################################################
 
-Channel 0: 30636.43 kB, wavelet-threshold: 1.0e-02, compr. rate: 17.11
-TLP Compr      min:1.732e+01 s avg:1.732e+01 s max:1.732e+01 s imb:0%
-TLP FWT+decim  min:1.731e+01 s avg:1.731e+01 s max:1.731e+01 s imb:0%
-TLP Encoding   min:6.000e-06 s avg:6.000e-06 s max:6.000e-06 s imb:0%
-TLP FileIO     min:7.048e-02 s avg:7.048e-02 s max:7.048e-02 s imb:0%
-Time distribution: FWT  :100% ENC  :0% IO   :0% Other:0%
-threads: 1 elapsed time: 21.4494 seconds
-Elapsed time = 82.166 seconds
-compression-rate: 17.07 rel-linf-error: 9.998322e-03 rel-mean-error: 4.998948e-03
+Channel 0: 466.10 kB, wavelet-threshold: 1.0e-04, compr. rate: 17.58
+Elapsed time = 1.246 seconds
+compression-rate: 17.51 rel-linf-error: 9.998679e-05 rel-mean-error: 4.991162e-05
 RE :           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
-RES:        17.07 2.833627e-05 5.754826e-05 4.998948e-03 6.538619e-05 4.982544e-07       1.8748      89.0253
+RES:        17.51 1.163639e-04 1.039211e-04 4.991162e-05 1.153952e-04 3.984093e-08       1.8274      77.3703

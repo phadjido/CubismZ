@@ -246,7 +246,7 @@ int main(int argc, char **argv)
 		//https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
 		double psnr = 20 * log10((maxdata - mindata) / (2 * sqrt(mse)));
 
-		printf("RE : %12s %12s %12s %12s %12s %12s %12s %12s\n", "CR", "rel(e_inf)", "rel(e_1)", "mean(e_1)", "rel(e_2)", "mean(e_2)", "BPS", "PSNR");
+		printf("RES: %12s %12s %12s %12s %12s %12s %12s %12s\n", "CR", "rel(e_inf)", "rel(e_1)", "mean(e_1)", "rel(e_2)", "mean(e_2)", "BPS", "PSNR");
 		printf("RES: %12.2f %.6e %.6e %.6e %.6e %.6e %12.04f %12.04f\n",
 			uncompressed_footprint / compressed_footprint,	// compression-rate
 			e_inf/n_inf,					// rel(e_inf)
