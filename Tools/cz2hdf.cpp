@@ -13,7 +13,7 @@
 #include <H5FDmpio.h>
 #define _PARALLEL_IO_
 #define _COLLECTIVE_IO_
-//#define _TRANSPOSE_DATA_
+#define _TRANSPOSE_DATA_
 
 #ifdef _FLOAT_PRECISION_
 #define H5T_NATIVE_FP   H5T_NATIVE_FLOAT
@@ -90,13 +90,13 @@ int main(int argc, char **argv)
 
 	for (int i = 0; i < NCHANNELS; i++)
 		myreader[i] =  new Reader_WaveletCompressionMPI (comm, inputfile_name[i], swapbytes, wtype);
-	
+
 	for (int i = 0; i < NCHANNELS; i++)
 		myreader[i]->load_file();
 
 	const double init_t1 = MPI_Wtime();
 
-	const double t0 = MPI_Wtime(); 
+	const double t0 = MPI_Wtime();
 
 	string h5file_fullname = h5file_name + ".h5";
 
@@ -116,12 +116,12 @@ int main(int argc, char **argv)
 
 	int StartX, StartY, StartZ;
 	int EndX, EndY, EndZ;
-	
+
 	if (Xs == -1)
 		StartX = 0;
 	else
 		StartX = Xs;
-	
+
 	if (Xe == -1)
 		EndX = NBX-1;
 	else
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 		StartY = 0;
 	else
 		StartY = Ys;
-	
+
 	if (Ye == -1)
 		EndY = NBY-1;
 	else
@@ -141,14 +141,14 @@ int main(int argc, char **argv)
 		StartZ = 0;
 	else
 		StartZ = Zs;
-	
+
 	if (Ze == -1)
 		EndZ = NBZ-1;
 	else
 		EndZ = Ze;
 
-	fprintf(stdout, "ROI = [%d,%d]x[%d,%d]x[%d,%d]\n", StartX, EndX, StartY, EndY, StartZ, EndZ);	
-	
+	fprintf(stdout, "ROI = [%d,%d]x[%d,%d]x[%d,%d]\n", StartX, EndX, StartY, EndY, StartZ, EndZ);
+
 	int NX = (EndX-StartX+1)*_BLOCKSIZE_;
 	int NY = (EndY-StartY+1)*_BLOCKSIZE_;
 	int NZ = (EndZ-StartZ+1)*_BLOCKSIZE_;
@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 	plist_id = H5Pcreate(H5P_DATASET_XFER);
 #if defined(_COLLECTIVE_IO_)
 	H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
-#endif	
+#endif
 
 	static Real *targetdata_all;
 	targetdata_all = (Real *)malloc(_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_*NCHANNELS*sizeof(Real));
@@ -199,9 +199,9 @@ int main(int argc, char **argv)
 #endif
 
 	const int nblocks = NBX*NBY*NBZ;
-	const int b_end = ((nblocks + (mpi_size - 1))/ mpi_size) * mpi_size; 
+	const int b_end = ((nblocks + (mpi_size - 1))/ mpi_size) * mpi_size;
 
-	for (int b = mpi_rank; b < b_end; b += mpi_size)	
+	for (int b = mpi_rank; b < b_end; b += mpi_size)
 	{
 #if defined(_TRANSPOSE_DATA_)
 		int x = b / (NBY * NBZ);
@@ -212,11 +212,11 @@ int main(int argc, char **argv)
 		int y = (b / NBX) % NBY;
 		int x = b % NBX;
 #endif
-		int in_roi = (StartX <= x) && (x <= EndX) && (StartY <= y) && (y <= EndY) && (StartZ <= z) && (z <= EndZ);  
+		int in_roi = (StartX <= x) && (x <= EndX) && (StartY <= y) && (y <= EndY) && (StartZ <= z) && (z <= EndZ);
 		if ((b < nblocks) && (in_roi))
 		{
 #if defined(VERBOSE)
-			fprintf(stdout, "loading block( %d, %d, %d )...\n", x, y, z); 
+			fprintf(stdout, "loading block( %d, %d, %d )...\n", x, y, z);
 #endif
 
 			memset(targetdata_all, 0, NCHANNELS*_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_*sizeof(Real));
@@ -226,7 +226,7 @@ int main(int argc, char **argv)
 			double zratio = myreader[i]->load_block2(x, y, z, targetdata);
 			(void)zratio;
 #if defined(VERBOSE)
-			fprintf(stdout, "compression ratio was %.2lf\n", zratio); 
+			fprintf(stdout, "compression ratio was %.2lf\n", zratio);
 #endif
 
 			for (int xb = 0; xb < _BLOCKSIZE_; xb++)
@@ -236,14 +236,14 @@ int main(int argc, char **argv)
 						targetdata_all[i + zb*NCHANNELS + yb*NCHANNELS*_BLOCKSIZE_ + xb*NCHANNELS*_BLOCKSIZE_*_BLOCKSIZE_] = targetdata[xb][yb][zb];
 					}
 			}
-			
+
 #if defined(_TRANSPOSE_DATA_)
 			for (int i = 0; i < NCHANNELS; i++)
 			{
 			for (int xb = 0; xb < _BLOCKSIZE_; xb++)
 				for (int yb = 0; yb < _BLOCKSIZE_; yb++)
 					for (int zb = 0; zb < _BLOCKSIZE_; zb++) {
-						storedata[i + xb*NCHANNELS + yb*NCHANNELS*_BLOCKSIZE_ + zb*NCHANNELS*_BLOCKSIZE_*_BLOCKSIZE_] = 
+						storedata[i + xb*NCHANNELS + yb*NCHANNELS*_BLOCKSIZE_ + zb*NCHANNELS*_BLOCKSIZE_*_BLOCKSIZE_] =
 						targetdata_all[i + zb*NCHANNELS + yb*NCHANNELS*_BLOCKSIZE_ + xb*NCHANNELS*_BLOCKSIZE_*_BLOCKSIZE_];
 
 					}
@@ -279,18 +279,18 @@ int main(int argc, char **argv)
 			offset[3] = 0;
 
 			H5Sselect_none(nullmemspace);
-			
+
 			filespace = H5Dget_space(dset_id);
 			H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL);
 			H5Sselect_none(filespace);
-			
+
 			status = H5Dwrite(dset_id, H5T_NATIVE_FP, nullmemspace, filespace, plist_id, NULL);
 
 		}
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	const double t1 = MPI_Wtime(); 
+	const double t1 = MPI_Wtime();
 
 	if (!mpi_rank)
 	{
@@ -298,7 +298,7 @@ int main(int argc, char **argv)
 		fprintf(stdout, "Elapsed time = %.3lf seconds\n", t1-t0);
 		fflush(0);
 	}
-	
+
 
 	/* Close/release resources */
 	for (int channel = 0; channel < NCHANNELS; channel++)
@@ -369,7 +369,7 @@ int main(int argc, char **argv)
 		fprintf(xmf, "</Xdmf>\n");
 		fclose(xmf);
 	}
-	
+
 	MPI_Finalize();
 
 	return 0;
