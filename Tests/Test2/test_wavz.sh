@@ -7,7 +7,7 @@
 #
 set -x #echo on
 
-h5file=../Data/small.h5
+h5file=../Data/demo.h5
 
 nproc=1
 if [ "$#" -eq 1 ]
@@ -34,5 +34,5 @@ mpirun -n 1 ../../Tools/bin/wavz_zlib/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim 
 # decompress and convert back to HDF5 (cz2hdf must have been compiled with the same options)
 mpirun -n $nproc ../../Tools/bin/wavz_zlib/cz2hdf -czfile compressed.cz -wtype $wt -h5file out1 
 
-# visualize with Paraview
+# visualize with Paraview (contour plot)
 # paraview out1.xmf

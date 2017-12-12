@@ -155,7 +155,6 @@ hdf2cz -bpdx <nbx> -bpdy <nby> -bpdz <nbz> -h5file <hdf5 file> -czfile <cz file>
 - The HDF5 file consists of `nbx * nby * nbz` 3D blocks
 - The input HDF5 file is compressed and stored to `<cz file>`
 - The threshold specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage. 
-  - todo: need to specify the range of threshold (?)
   - Wavelets: wavelets coefficients with absolute value smaller than the threshold are decimated (range: [0, +inf) 
   - FPZIP: number of useful bits of the floating point numbers (range: up to 32/64)
   - ZFP: relative error 
@@ -200,13 +199,13 @@ cz2diff -czfile1 <cz file1> [-wtype <wt>] -czfile2 <cz reference file2>
 #### Demo dataset
 
 The software release includes a set of basic tests to demonstrate the
-capabilities of the CubismZ compression techniques. The demo dataset (`small.h5`) 
+capabilities of the CubismZ compression techniques. The demo dataset (`demo.h5`) 
 consists of the spherical bubble located at the center of the cubic domain
 and discretized with `128 * 128 * 128` cells. 
-The HDF5 file (8MB) is available in the `CubismZ/Tests/Data` folder.  
-A visualization of the single bubble is depicted below
+The HDF5 file (8MB) is available in the `CubismZ/Tests/Data` directory.
+A visualization of the single bubble is depicted below.
 
-![](.images/single_bubble.png)
+![](.images/demo.png)
 
 
 #### Compression performance tests
@@ -364,11 +363,11 @@ The corresponding tests are located in the `CubismZ\Tests\Test1_cav` and
 - Enter the `CubismZ\Tests\Test2` directory and execute the script `run_all.sh`. 
 
 Notes:
-- For `Test1`, the generated `run_all.txt` file contains the output of the compressor test configurations. For the default single-process and single-threaded setup, 
-the reported compression ratios and PSNR values must be identical with those
-reported in the reference output file `cselab_ref_run_all.txt` file. 
+
+- For `Test1`, the generated `run_all.txt` file contains the output for the main configurations of the compression tools.
+- For the default single-process (`mpirun -n 1`) and single-threaded (OMP_NUM_THREADS=1) setup, the reported compression ratios and PSNR values (lines prepended with `RES:`) must be identical with those reported in the reference output file `cselab_ref_run_all.txt` file.
 - The `run_all.sh` script uses the `mpirun` command to launch the executable.
-Some systems might offer a different command for launching MPI applications (e.g. srun for SLURM).
+Some systems might offer a different command for launching MPI applications (e.g. `srun` for SLURM).
   
 #### Run the cavitation data tests (optional)
 
