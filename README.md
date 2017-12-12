@@ -339,9 +339,9 @@ link (512MB):
 
 [data_005000-p.h5][datadl]
 
-The file must be placed in the `CubismZ\Tests\Data` directory. 
-The corresponding tests are located in the `CubismZ\Tests\Test1_cav` and 
-`CubismZ\Tests\Test2_cav` directories. 
+The file must be placed in the `CubismZ/Tests/Data` directory. 
+The corresponding tests are located in the `CubismZ/Tests/Test1_cav` and 
+`CubismZ/Tests/Test2_cav` directories. 
 
 ## Quick testing
 
@@ -359,21 +359,21 @@ The corresponding tests are located in the `CubismZ\Tests\Test1_cav` and
 
 #### Run the demo tests
 
-- Enter the `CubismZ\Tests\Test1` directory and execute the script `run_all.sh`. 
-- Enter the `CubismZ\Tests\Test2` directory and execute the script `run_all.sh`. 
+- Enter the `CubismZ/Tests/Test1` directory and execute the script `run_all.sh`. 
+- Enter the `CubismZ/Tests/Test2` directory and execute the script `run_all.sh`. 
 
 Notes:
 
 - For `Test1`, the generated `run_all.txt` file contains the output for the main configurations of the compression tools.
-- For the default single-process (`mpirun -n 1`) and single-threaded (OMP_NUM_THREADS=1) setup, the reported compression ratios and PSNR values (lines prepended with `RES:`) must be identical with those reported in the reference output file `cselab_ref_run_all.txt` file.
+- For the default single-process (`mpirun -n 1`) and single-threaded (`OMP_NUM_THREADS=1`) setup, the reported compression ratios and PSNR values (lines prepended with `RES:`) must be identical with those reported in the reference output file `cselab_ref_run_all.txt` file.
 - The `run_all.sh` script uses the `mpirun` command to launch the executable.
 Some systems might offer a different command for launching MPI applications (e.g. `srun` for SLURM).
   
 #### Run the cavitation data tests (optional)
 
-- Download the cavitation dataset into the `CubismZ\Tests\Test1` directory.
-- Enter the `CubismZ\Tests\Test1_cav` directory and execute the script `run_all.sh`. 
-- Enter the `CubismZ\Tests\Test2_cav` directory and execute the script `run_allsh`. 
+- Download the cavitation dataset into the `CubismZ/Tests/Test1` directory.
+- Enter the `CubismZ/Tests/Test1_cav` directory and execute the script `run_all.sh`. 
+- Enter the `CubismZ/Tests/Test2_cav` directory and execute the script `run_all.sh`. 
 
 
 [linklab]:http://www.cse-lab.ethz.ch "http://www.cse-lab.ethz.ch"
