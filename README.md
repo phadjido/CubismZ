@@ -154,14 +154,14 @@ hdf2cz -bpdx <nbx> -bpdy <nby> -bpdz <nbz> -h5file <hdf5 file> -czfile <cz file>
 
 - The HDF5 file consists of `nbx * nby * nbz` 3D blocks
 - The input HDF5 file is compressed and stored to `<cz file>`
-- The threshold specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage. 
-  - Wavelets: wavelets coefficients with absolute value smaller than the threshold are decimated (range: [0, +inf) 
-  - FPZIP: number of useful bits of the floating point numbers (range: up to 32/64)
-  - ZFP: relative error 
-  - SZ: relateive error
+- The threshold specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage of CubismZ. More specically:
+  - Wavelets: wavelets coefficients with *absolute value* smaller than the threshold are decimated.
+  - FPZIP: `threshold` denotes the number of useful bits of the floating point numbers (e.g. it must be equal to 32 for full accuracy of single precision datasets)
+  - ZFP: `threshold` specifies to the *absolute error* tolerance for fixed-accuracy mode.
+  - SZ: the (de)compression errors is limited to be within an *absolute error* defined by `threshold`
 - The wavelet type can optionally be specified using the `-wtype` option.
   The following options / wavelet types are supported
-  - 1: 4th order average interpolating wavelets
+  - 1: 4th order interpolating wavelets
   - 2: 4th order lifted interpolating wavelets
   - 3: 3rd order average interpolating wavelets (default)
 
@@ -211,9 +211,9 @@ A visualization of the single bubble is depicted below.
 #### Compression performance tests
 
 The compression performance tests are located in `CubismZ/Tests/Test1`.  The test
-scripts require that the simulation HDF5 data `demo.h5`, which is located in 
-the `CubismZ/Tests/Data` directory.  The
-complete test chain can be run by executing `CubismZ/Tests/Test1/run_all.sh`.  The
+scripts require the simulation HDF5 data `demo.h5`, which is located in `CubismZ/Tests/Data`.
+
+The complete test chain can be run by executing `CubismZ/Tests/Test1/run_all.sh`.  The
 script requires that the [configured compilation](#configured-compilation) has
 been performed previously.  The `run_all.sh` script generates a `run_all.txt`
 file with the output of the compressor test configurations.
@@ -345,35 +345,39 @@ The corresponding tests are located in the `CubismZ\Tests\Test1_cav` and
 
 ## Quick testing
 
-#### Configure 
+#### 1. Make sure that all the Check that prerequisite libraries
+
+- MPI (`mpic++` & `mpicc`), Parallel HDF5 library (`-lhdf5`) , ZLIB (`-lz`) 
+
+#### 2. Configure the software
 
 - Edit `CubismZ/Makefile` and set the following options 
    - `MPICC`, `mpicc`: MPI-aware C++ and C compiler, respectively
    - `hdf-incdir`, `hdf-libdir`: location of the parallel HDF5 library 
 
-#### Compile
+#### 3. Build the tools
 
 - Issue `make`. This will
   - configure and build the third-party libraries and install them in the `CubismZ/ThirdParty/build` directory. 
   - build the CubismZ tools (`hdf2cz`, `cz2hdf`, `cz2diff`) for each of the basic configurations and put the executable into the corresponding subdirectories of the `CubimZ/Tools/bin` directory. 
 
-#### Run the demo tests
+#### 4. Run the demo tests
 
 - Enter the `CubismZ\Tests\Test1` directory and execute the script `run_all.sh`. 
 - Enter the `CubismZ\Tests\Test2` directory and execute the script `run_all.sh`. 
 
-Notes:
+#####Notes:
 
 - For `Test1`, the generated `run_all.txt` file contains the output for the main configurations of the compression tools.
 - For the default single-process (`mpirun -n 1`) and single-threaded (OMP_NUM_THREADS=1) setup, the reported compression ratios and PSNR values (lines prepended with `RES:`) must be identical with those reported in the reference output file `cselab_ref_run_all.txt` file.
 - The `run_all.sh` script uses the `mpirun` command to launch the executable.
 Some systems might offer a different command for launching MPI applications (e.g. `srun` for SLURM).
   
-#### Run the cavitation data tests (optional)
+#### 5. Run the cavitation data tests (optional)
 
 - Download the cavitation dataset into the `CubismZ\Tests\Test1` directory.
 - Enter the `CubismZ\Tests\Test1_cav` directory and execute the script `run_all.sh`. 
-- Enter the `CubismZ\Tests\Test2_cav` directory and execute the script `run_allsh`. 
+- Enter the `CubismZ\Tests\Test2_cav` directory and execute the script `run_all.sh`. 
 
 
 [linklab]:http://www.cse-lab.ethz.ch "http://www.cse-lab.ethz.ch"
@@ -381,7 +385,7 @@ Some systems might offer a different command for launching MPI applications (e.g
 [linkanl]:https://collab.cels.anl.gov/display/ESR/SZ "https://collab.cels.anl.gov/display/ESR/SZ"
 [linkzlib]:https://zlib.net/ "https://zlib.net/"
 [linklz4]:https://lz4.github.io/lz4/ "https://lz4.github.io/lz4/"
-[datadl]:https://polybox.ethz.ch/index.php/s/a3454aSFG5qDe9a/download "https://polybox.ethz.ch/index.php/s/a3454aSFG5qDe9a/download"
+[datadl]:https://polybox.ethz.ch/index.php/s/xhsAsjItqEGTFkA/download "https://polybox.ethz.ch/index.php/s/xhsAsjItqEGTFkA/download"
 [gcclink]:https://gcc.gnu.org/ "https://gcc.gnu.org/"
 [intellink]:https://software.intel.com/en-us/c-compilers "https://software.intel.com/en-us/c-compilers"
 [clanglink]:http://www.llvm.org/ "http://www.llvm.org/"
