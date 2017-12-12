@@ -14,8 +14,8 @@ sz1:
 zfp:
 	$(MAKE) -C zfp-0.5.0/ CC=$(CC) cc=$(cc)
 
-zlib:
-	$(MAKE) -C zlib/ CC=$(cc) cc=$(cc)
+zlibrary:
+	$(MAKE) -C zlib/ 
 
 clean:
 	rm -rf build

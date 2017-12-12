@@ -347,7 +347,8 @@ The corresponding tests are located in the `CubismZ/Tests/Test1_cav` and
 
 #### 1. Make sure that all the Check that prerequisite libraries
 
-- MPI (`mpic++` & `mpicc`), Parallel HDF5 library (`-lhdf5`) , ZLIB (`-lz`) 
+- MPI (`mpic++` & `mpicc`), Parallel HDF5 library (`-lhdf5`)
+- ZLIB (`-lz`): if this is not available, go to the `CubismZ/ThirdPatry` library and build the local copy of ZLIB by typing `make zlibrary`  
 
 #### 2. Configure the software
 
