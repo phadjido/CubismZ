@@ -1,10 +1,10 @@
 MAKEFLAGS += --no-print-directory
 
 all: static
-	mkdir -p ../build/include/zfp
-	mkdir -p ../build/lib
-	cp inc/*.h ../build/include/zfp
-	cp lib/* ../build/lib
+	mkdir -p ../../build/include/zfp
+	mkdir -p ../../build/lib
+	cp inc/*.h ../../build/include/zfp
+	cp lib/* ../../build/lib
 
 static:
 	@cd src; $(MAKE) static cc=$(cc)
