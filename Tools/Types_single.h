@@ -54,7 +54,7 @@ struct FluidBlock
 	typedef FluidElement ElementType;
 	typedef FluidElement element_type;
 
-	FluidElement __attribute__((__aligned__(_ALIGNBYTES_))) data[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
+	FluidElement data[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_];
 
 	void clear_data()
 	{

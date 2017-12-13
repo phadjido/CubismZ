@@ -187,7 +187,7 @@ namespace WaveletsOnInterval
 	};
 	
 	template<int BS>
-	struct __attribute__((__aligned__(_ALIGNBYTES_))) FullTransform : FullTransformEngine<BS, BS, BS, BS>
+	struct FullTransform : FullTransformEngine<BS, BS, BS, BS>
 	{
 		FwtAp  data[BS][BS][BS];
 		
