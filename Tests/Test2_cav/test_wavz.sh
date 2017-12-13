@@ -29,10 +29,10 @@ nb=$(echo "$ds/$bs" | bc)
 wt=3
 rm -f tmp.cz
 
-mpirun -n 1 ../../Tools/bin/wavz_zlib/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -h5file $h5file -czfile compressed.cz -threshold $err -wtype $wt
+mpirun -n 1 ../../Tools/bin/wavz_zlib/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -h5file $h5file -czfile tmp.cz -threshold $err -wtype $wt
 
 # decompress and convert back to HDF5 (cz2hdf must have been compiled with the same options)
-mpirun -n $nproc ../../Tools/bin/wavz_zlib/cz2hdf -czfile compressed.cz -wtype $wt -h5file out1 
+mpirun -n $nproc ../../Tools/bin/wavz_zlib/cz2hdf -czfile tmp.cz -wtype $wt -h5file out 
 
 # visualize with Paraview
-# paraview out1.xmf
+# paraview out.xmf

@@ -330,7 +330,7 @@ kbd {
 
 <h1 id="toc_0">CubismZ: A Parallel Data Compression Framework for Large Scale 3D Scientific Data</h1>
 
-<h2 id="toc_1">Design</h2>
+<h2 id="toc_1">Software design</h2>
 
 <p>CubismZ performs two compression stages on the input dataset.  The first stage
 makes use of (lossy) floating point compression algorithms.  In the second
@@ -359,17 +359,104 @@ the first stage.  A more detailed description can be found in the paper.</p>
 
 <p>Before lossless compression, data (byte) shuffling and bit zeroing can be optionally applied to the output of the wavelet-based compression scheme.</p>
 
-<h2 id="toc_4">Compilation</h2>
-
-<h4 id="toc_5">External software dependencies</h4>
+<h4 id="toc_4">External software dependencies</h4>
 
 <ul>
 <li>MPI library (Tested platforms: MPICH, OpenMPI, MVAPICH2)</li>
 <li>Parallel HDF5 (Compatible with one of the above MPI libraries)<br></li>
-<li>ZLIB compression library</li>
 </ul>
 
-<h4 id="toc_6">Configured compilation</h4>
+<h2 id="toc_5">Code layout</h2>
+
+<ul>
+<li><p><strong>Compressor:</strong> source code of CubismZ</p>
+
+<ul>
+<li><strong><em>Cubism:</em></strong> a library for uniform block-structured grids</li>
+<li><strong><em>source:</em></strong> parallel framework and 3D wavelet-based compression</li>
+</ul></li>
+<li><p><strong>ThirdParty:</strong> External software libraries </p>
+
+<ul>
+<li><strong><em>build:</em></strong> where the third-party libraries are installed</li>
+<li><strong><em>fpzip:</em></strong> FPZIP (v 1.1.0) floating point compressor</li>
+<li><strong><em>lz4:</em></strong> LZ4 compression library</li>
+<li><strong><em>sz:</em></strong> SZ (v 1.4.11) floating point compressor</li>
+<li><strong><em>zfp:</em></strong> ZFP (v 0.5.0) floating point compressor</li>
+<li><strong><em>zlib:</em></strong> ZLIB (v 1.2.11) compression library</li>
+</ul></li>
+<li><p><strong><em>Tools:</em></strong> source code for the CubismZ tools (<code>hdf2cz</code>, <code>cz2hdf</code>, <code>cz2diff</code>)</p>
+
+<ul>
+<li><strong><em>bin/dir:</em></strong> where the above tools are installed, according to their compile-time configuration</li>
+<li><strong><em>dir:</em></strong> <em>default</em>, <em>wavz_zlib</em>, <em>fpzip</em>, <em>zfp</em>, <em>sz</em> </li>
+</ul></li>
+<li><p><strong>Tests</strong> source code for the CubismZ tools (<code>hdf2cz</code>, <code>cz2hdf</code>, <code>cz2diff</code>)</p>
+
+<ul>
+<li><strong>Data:</strong> HDF5 files (demo.h5 (8 MB) and data_005000-p.h5 (512 MB))</li>
+<li><strong>Test1:</strong> location of the first demo test </li>
+<li><strong>Test2:</strong> location of the second demo test </li>
+<li><strong>Test1_cav:</strong> as before but for the larger dataset</li>
+<li><strong>Test2_cav:</strong> as before but for the larger dataset </li>
+</ul></li>
+</ul>
+
+<h2 id="toc_6">Quick start</h2>
+
+<h4 id="toc_7">1. Make sure that the prerequisite libraries are available</h4>
+
+<ul>
+<li>MPI library</li>
+<li>Parallel HDF5 library </li>
+</ul>
+
+<h4 id="toc_8">2. Configure the software</h4>
+
+<ul>
+<li>Edit <code>CubismZ/Makefile</code> and set the following options 
+
+<ul>
+<li><code>MPICC</code>, <code>mpicc</code>: MPI-aware C++ and C compiler, respectively</li>
+<li><code>hdf-incdir</code>, <code>hdf-libdir</code>, <code>hdf-library</code>: location and name of the parallel HDF5 library </li>
+</ul></li>
+</ul>
+
+<h4 id="toc_9">3. Build the CubismZ tools</h4>
+
+<ul>
+<li>Issue <code>make</code> within the <code>CubismZ</code> directory. This will
+
+<ul>
+<li>configure and build the third-party libraries and install them into the <code>CubismZ/ThirdParty/build</code> directory. </li>
+<li>build the CubismZ tools (<code>hdf2cz</code>, <code>cz2hdf</code>, <code>cz2diff</code>) for each of the basic configurations and put the executable into the corresponding subdirectories of the <code>CubimZ/Tools/bin</code> directory. </li>
+</ul></li>
+</ul>
+
+<h4 id="toc_10">4. Run the demo tests</h4>
+
+<ul>
+<li><p>Enter the <code>Tests/Test1</code> directory and execute the script <code>./run_all.sh</code>. </p>
+
+<ul>
+<li>The generated <code>run_all.txt</code> file contains the output for the main configurations of the compression tools, running them 
+on a single core (<code>mpirun -n 1</code> and <code>OMP_NUM_THREADS=1</code>).</li>
+<li>The reported compression ratios and PSNR values must coincide with those reported in the reference output file <code>cselab_ref_run_all.txt</code>.</li>
+<li>The <code>run_all.sh</code> script uses the <code>mpirun</code> command to launch the executable.
+Some systems might offer a different command for launching MPI applications (e.g. <code>srun</code> for SLURM).</li>
+</ul></li>
+<li><p>Enter the <code>Tests/Test2</code> directory and execute the script <code>./run_all.sh</code>. </p>
+
+<ul>
+<li>This test uses the wavelet-based scheme to first compress the <code>demo.h5</code> HDF5 file and then decompress the output compressed file 
+(<code>tmp.cz</code>) and converts it back to the HDF5 format (<code>out.h5</code> and <code>out.xmf</code>). </li>
+<li>The two HDF5 files must have the same file size and if visualized with Paraview they depict almost identical images.</li>
+</ul></li>
+</ul>
+
+<h2 id="toc_11">Detailed compilation instructions</h2>
+
+<h3 id="toc_12">Configured compilation</h3>
 
 <p>The default set of executables required to reproduce the included test cases
 can be generated by invoking <code>make</code> in the root directory.</p>
@@ -389,9 +476,9 @@ The path to the HDF5 <code>include</code> and <code>lib</code> directories can b
 further details.</p>
 
 <p>Successful execution of the build chain generates a set of executables in the <code>CubismZ/Tools/bin</code> directory.
- The configuration for these binaries is as follows:</p>
+The configuration for these binaries is as follows:</p>
 
-<h5 id="toc_7">No compression (default)</h5>
+<h5 id="toc_13">No compression (default)</h5>
 
 <p>Conversion to the CZ format without data compression.  No special flags are
 required for this build at compile time.  This target can be built individually
@@ -400,7 +487,7 @@ inside the <code>CubismZ/Tools</code> directory with:
 make
 </code></p>
 
-<h5 id="toc_8">Wavelets and ZLIB</h5>
+<h5 id="toc_14">Wavelets and ZLIB</h5>
 
 <p>Generates a build using the CubismZ wavelet compression scheme for the first
 compression stage (floating point compression) and applies <a href="https://zlib.net/" title="https://zlib.net/">ZLIB</a> in
@@ -410,7 +497,7 @@ the second compression stage.  This target can be built individually inside the
 make wavz=1 zlib=1
 </code></p>
 
-<h5 id="toc_9">ZFP</h5>
+<h5 id="toc_15">ZFP</h5>
 
 <p>Generates a build using the <a href="https://computation.llnl.gov/projects/floating-point-compression" title="https://computation.llnl.gov/projects/floating-point-compression">ZFP</a> floating point compressor for the
 first compression stage.  No further compression is applied for the second
@@ -420,7 +507,7 @@ with:
 make zfp=1
 </code></p>
 
-<h5 id="toc_10">FPZIP</h5>
+<h5 id="toc_16">FPZIP</h5>
 
 <p>Generates a build using the <a href="https://computation.llnl.gov/projects/floating-point-compression" title="https://computation.llnl.gov/projects/floating-point-compression">FPZIP</a> floating point compressor for the
 first compression stage.  No further compression is applied for the second
@@ -430,7 +517,7 @@ with:
 make fpzip=1
 </code></p>
 
-<h5 id="toc_11">SZ</h5>
+<h5 id="toc_17">SZ</h5>
 
 <p>Generates a build using the <a href="https://collab.cels.anl.gov/display/ESR/SZ" title="https://collab.cels.anl.gov/display/ESR/SZ">SZ</a> floating point compressor for the
 first compression stage.  No further compression is applied for the second
@@ -440,7 +527,7 @@ with:
 make sz=1
 </code></p>
 
-<h4 id="toc_12">Custom compilation</h4>
+<h3 id="toc_18">Custom compilation</h3>
 
 <p>Custom user defined configurations are possible as well.  Any of the
 combinations described in the <a href="#design">design</a> section are possible.  Custom
@@ -453,11 +540,11 @@ must be executed from the <em>root directory</em>.  Custom builds can then be
 generated by using the <code>CubismZ/Tools/Makefile</code>.  Assuming the working directory is
 <code>CubismZ/Tools</code>, example custom builds can be generated with:</p>
 
-<h5 id="toc_13">Wavelets, shuffling and ZLIB</h5>
+<h5 id="toc_19">Wavelets, shuffling and ZLIB</h5>
 
 <div><pre><code class="language-none">make install dir=mycustom1 wavz=1 shuffle3=1 zlib=1</code></pre></div>
 
-<h5 id="toc_14">Wavelets and LZ4</h5>
+<h5 id="toc_20">Wavelets and LZ4</h5>
 
 <div><pre><code class="language-none">make install dir=mycustom2 wavz=1 lz4=1</code></pre></div>
 
@@ -465,16 +552,16 @@ generated by using the <code>CubismZ/Tools/Makefile</code>.  Assuming the workin
 HDF5 library paths.  See the <a href="#configured-compilation">configured compilation</a>
 section for more details.</p>
 
-<h4 id="toc_15">Blocksize</h4>
+<h5 id="toc_21">Blocksize</h5>
 
 <p>The block dimension can be specified at compile time.  The default value is
 <code>blocksize=32</code>, which translates to cubic blocks with <code>32 * 32 * 32</code> data
 elements.  The <code>blocksize</code> argument can be passed to the make command.  Its
 value must be a power of two.</p>
 
-<h2 id="toc_16">Runtime arguments of CubismZ tools for HDF5 datasets:</h2>
+<h2 id="toc_22">Runtime arguments of CubismZ tools for HDF5 datasets</h2>
 
-<h4 id="toc_17">The <code>hdf2cz</code> tool</h4>
+<h3 id="toc_23">1. The <code>hdf2cz</code> tool</h3>
 
 <p>Compression of HDF5 files to CZ format.
 <code>
@@ -484,25 +571,29 @@ hdf2cz -bpdx &lt;nbx&gt; -bpdy &lt;nby&gt; -bpdz &lt;nbz&gt; -h5file &lt;hdf5 fi
 <ul>
 <li>The HDF5 file consists of <code>nbx * nby * nbz</code> 3D blocks</li>
 <li>The input HDF5 file is compressed and stored to <code>&lt;cz file&gt;</code></li>
-<li>The threshold specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage of CubismZ. More specically:
+<li>The <code>threshold</code> parameter specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage of CubismZ. More specically:
 
 <ul>
-<li>Wavelets: wavelets coefficients with <em>absolute value</em> smaller than the threshold are decimated.</li>
-<li>FPZIP: <code>threshold</code> denotes the number of useful bits of the floating point numbers (e.g. it must be equal to 32 for full accuracy of single precision datasets)</li>
-<li>ZFP: <code>threshold</code> specifies to the <em>absolute error</em> tolerance for fixed-accuracy mode.</li>
-<li>SZ: the (de)compression errors is limited to be within an <em>absolute error</em> defined by <code>threshold</code></li>
+<li><strong>Wavelets</strong>: wavelets coefficients with <em>absolute value</em> smaller than the threshold are decimated.</li>
+<li><strong>FPZIP</strong>: <code>threshold</code> denotes the number of useful bits of the floating point numbers (e.g. it must be equal to 32 for full accuracy of single precision datasets)</li>
+<li><strong>ZFP</strong>: <code>threshold</code> specifies to the <em>absolute error</em> tolerance for fixed-accuracy mode.</li>
+<li><strong>SZ</strong>: the (de)compression errors is limited to be within an <em>absolute error</em> defined by <code>threshold</code></li>
 </ul></li>
 <li>The wavelet type can optionally be specified using the <code>-wtype</code> option.
-The following options / wavelet types are supported
+The following options for wavelet types are supported
 
 <ul>
-<li>1: 4th order interpolating wavelets</li>
-<li>2: 4th order lifted interpolating wavelets</li>
-<li>3: 3rd order average interpolating wavelets (default)</li>
+<li><strong>1</strong>: 4th order interpolating wavelets</li>
+<li><strong>2</strong>: 4th order lifted interpolating wavelets</li>
+<li><strong>3</strong>: 3rd order average interpolating wavelets (default)</li>
 </ul></li>
 </ul>
 
-<h4 id="toc_18">The <code>ch2hdf</code> tool</h4>
+<h5 id="toc_24">MPI-enabled data compression</h5>
+
+<div><pre><code class="language-none">hdf2cz  [-xpesize &lt;npx&gt; -ypesize &lt;npy&gt; -zpesize &lt;npz&gt;] -bpdx &lt;nbx&gt; -bpdy &lt;nby&gt; -bpdz &lt;nbz&gt; </code></pre></div>
+
+<h3 id="toc_25">2. The <code>ch2hdf</code> tool</h3>
 
 <p>Decompression of CZ files and conversion to HDF5 format
 <code>
@@ -518,7 +609,7 @@ more information.</li>
 used in the compressed file.</li>
 </ul>
 
-<h4 id="toc_19">The <code>cz2diff</code> tool</h4>
+<h3 id="toc_26">3. The <code>cz2diff</code> tool</h3>
 
 <p>Decompress and compare two CZ files
 <code>
@@ -532,9 +623,9 @@ by the default configuration of the <code>hdf2cz</code> tool, i.e., without any
 <li>Useful for quality assessment of the compression</li>
 </ul>
 
-<h2 id="toc_20">Example: Fluid dynamics data</h2>
+<h2 id="toc_27">Example: Fluid dynamics data</h2>
 
-<h4 id="toc_21">Demo dataset</h4>
+<h4 id="toc_28">Demo dataset</h4>
 
 <p>The software release includes a set of basic tests to demonstrate the
 capabilities of the CubismZ compression techniques. The demo dataset (<code>demo.h5</code>) 
@@ -545,7 +636,7 @@ A visualization of the single bubble is depicted below.</p>
 
 <p><img src=".images/demo.png" alt=""></p>
 
-<h4 id="toc_22">Compression performance tests</h4>
+<h4 id="toc_29">Compression performance tests</h4>
 
 <p>The compression performance tests are located in <code>CubismZ/Tests/Test1</code>.  The test
 scripts require the simulation HDF5 data <code>demo.h5</code>, which is located in <code>CubismZ/Tests/Data</code>.</p>
@@ -614,7 +705,7 @@ the standard output or into the file <code>run_all.txt</code> if the batch scrip
 The PSNR value is computed based on the reference CZ file generated with the
 <code>genref.sh</code> script.</p>
 
-<h5 id="toc_23">Testing custom builds</h5>
+<h5 id="toc_30">Testing custom builds</h5>
 
 <p>Custom builds can be tested against the reference using the <code>test_custom.sh</code>
 script.  The execution syntax for this script is:
@@ -633,7 +724,7 @@ point compressor (substage1 compressor).</p></li>
 <li><p><code>&lt;n processors&gt;</code>: Number of MPI processes to be used.  Optional, defaults to 1.</p></li>
 </ul>
 
-<h4 id="toc_24">Visual assessment for lossy compressors</h4>
+<h4 id="toc_31">Visual assessment for lossy compressors</h4>
 
 <p>An example of compression and decompression cycle is provided in <code>CubismZ/Tests/Test2</code>.
 The <code>run_all.sh</code> script can be executed to run the test chain.
@@ -647,7 +738,7 @@ tool with wavelets and ZLIB compression substages.  The compressed data is then
 converted back to HDF5 using the <code>cz2hdf</code> tool and can be used for
 visualization using a capable tool such as ParaView, for example.</p>
 
-<h4 id="toc_25">Cloud caviation collapse dataset</h4>
+<h4 id="toc_32">Cloud caviation collapse dataset</h4>
 
 <p>The software release includes an additional dataset that can be optionally used 
 for testing the compression capabilities of CubismZ.  The test data consists of
@@ -677,54 +768,7 @@ link (512MB):</p>
 The corresponding tests are located in the <code>CubismZ/Tests/Test1_cav</code> and 
 <code>CubismZ/Tests/Test2_cav</code> directories. </p>
 
-<h2 id="toc_26">Quick testing</h2>
-
-<h4 id="toc_27">1. Make sure that all the Check that prerequisite libraries</h4>
-
-<ul>
-<li>MPI (<code>mpic++</code> &amp; <code>mpicc</code>), Parallel HDF5 library (<code>-lhdf5</code>)</li>
-<li>ZLIB (<code>-lz</code>): if this is not available, go to the <code>CubismZ/ThirdPatry</code> library and build the local copy of ZLIB by typing <code>make zlibrary</code><br></li>
-</ul>
-
-<h4 id="toc_28">2. Configure the software</h4>
-
-<ul>
-<li>Edit <code>CubismZ/Makefile</code> and set the following options 
-
-<ul>
-<li><code>MPICC</code>, <code>mpicc</code>: MPI-aware C++ and C compiler, respectively</li>
-<li><code>hdf-incdir</code>, <code>hdf-libdir</code>: location of the parallel HDF5 library </li>
-</ul></li>
-</ul>
-
-<h4 id="toc_29">3. Build the tools</h4>
-
-<ul>
-<li>Issue <code>make</code>. This will
-
-<ul>
-<li>configure and build the third-party libraries and install them in the <code>CubismZ/ThirdParty/build</code> directory. </li>
-<li>build the CubismZ tools (<code>hdf2cz</code>, <code>cz2hdf</code>, <code>cz2diff</code>) for each of the basic configurations and put the executable into the corresponding subdirectories of the <code>CubimZ/Tools/bin</code> directory. </li>
-</ul></li>
-</ul>
-
-<h4 id="toc_30">4. Run the demo tests</h4>
-
-<ul>
-<li>Enter the <code>CubismZ/Tests/Test1</code> directory and execute the script <code>run_all.sh</code>. </li>
-<li>Enter the <code>CubismZ/Tests/Test2</code> directory and execute the script <code>run_all.sh</code>. </li>
-</ul>
-
-<h5 id="toc_31">Notes:</h5>
-
-<ul>
-<li>For <code>Test1</code>, the generated <code>run_all.txt</code> file contains the output for the main configurations of the compression tools.</li>
-<li>For the default single-process (<code>mpirun -n 1</code>) and single-threaded (<code>OMP_NUM_THREADS=1</code>) setup, the reported compression ratios and PSNR values (lines prepended with <code>RES:</code>) must be identical with those reported in the reference output file <code>cselab_ref_run_all.txt</code> file.</li>
-<li>The <code>run_all.sh</code> script uses the <code>mpirun</code> command to launch the executable.
-Some systems might offer a different command for launching MPI applications (e.g. <code>srun</code> for SLURM).</li>
-</ul>
-
-<h4 id="toc_32">5. Run the cavitation data tests (optional)</h4>
+<h4 id="toc_33">5. Run the cavitation data tests (optional)</h4>
 
 <ul>
 <li>Download the cavitation dataset into the <code>CubismZ/Tests/Test1</code> directory.</li>
