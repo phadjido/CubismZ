@@ -27,7 +27,7 @@ cz2diff: cz2diff.o WaveletCompressor.o
 	$(MPICC) $(extra) $^ -o $@ $(CUBISMZLIBS)
 
 %.o: %.cpp .FORCE
-	$(MPICC) $(CUBISMZFLAGS) $(extra) -c $< -o $@
+	$(MPICC) $(CUBISMZFLAGS) -c $< -o $@
 
 .FORCE:
 
