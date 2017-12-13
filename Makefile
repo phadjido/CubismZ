@@ -10,11 +10,11 @@ MPICC ?= mpicc
 config ?= release
 #hdf-incdir ?= /opt/hdf5_mpich/include
 #hdf-libdir ?= /opt/hdf5_mpich/lib
-# hdf-inc ?= /Users/phadjido/usr/hdf5/include
-# hdf-lib ?= /Users/phadjido/usr/hdf5/lib
-#hdf-inc ?= /Users/fabs/local/hdf5/build-parallel/include
-#hdf-lib ?= /Users/fabs/local/hdf5/build-parallel/lib
-hdf-libraries ?= -lhdf5
+# hdf-incdir ?= /Users/phadjido/usr/hdf5/include
+# hdf-libdir ?= /Users/phadjido/usr/hdf5/lib
+#hdf-incdir ?= /Users/fabs/local/hdf5/build-parallel/include
+#hdf-libdir ?= /Users/fabs/local/hdf5/build-parallel/lib
+hdf-libs ?= -lhdf5
 
 # general software configuration options
 bs ?= 32
