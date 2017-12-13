@@ -80,7 +80,7 @@ Before lossless compression, data (byte) shuffling and bit zeroing can be option
   1. configure and build the third-party libraries and install them into the `CubismZ/ThirdParty/build` directory. 
   2. build the CubismZ tools (`hdf2cz`, `cz2hdf`, `cz2diff`) for each of the basic configurations and put the executable into the corresponding subdirectories of the `CubimZ/Tools/bin` directory. 
 
-#### 4. Run the demo tests
+#### 4. Execute the demo tests
 
 - Enter the `Tests/Test1` directory and execute the script `./run_all.sh`. 
 
@@ -176,14 +176,23 @@ make sz=1
 ### Blocksize
 
 The block dimension can be specified at compile time.  The default value is
-`bs=32`, which translates to cubic blocks with `32 * 32 * 32` data
+`blocksize=32`, which translates to cubic blocks with `32 * 32 * 32` data
 elements.  Its value must be a power of two.
+
+### Precision
+
+CubismZ tools can be compiled for compression of single and double precision datasets.
+The precision can be specified at compile time.  The default value is
+`precision=float` (single). Scientific datasets of doubles can be compressed
+if CubismZ tools have been compiled with `precision=double`. 
+
+The `CubismZ/Test/Data/demo_dp.h5` file is a double precision version of the demo dataset.
 
 
 ### Custom compilation
 
 Custom user defined configurations are possible as well.  Any of the
-combinations described in the [design](#design) section are possible.  Custom
+combinations described in the [design](#software-design) section are possible.  Custom
 builds are generated with the `tools-custom` rule defined in the
 `CubismZ/Makefile`.  The following illustrates two examples how to compile a
 custom build.  The `dir=` option sets the name of the directory in `Tools/bin`.
@@ -213,7 +222,7 @@ Compression of HDF5 files to CZ format.
 hdf2cz -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>] [-bpdx <nbx>] [-bpdy <nby>] [-bpdz <nbz>] [-nprocx <npx>] [-nprocy <npy>] [-nprocz <npz>]
 ```
 
-####Description of program parameters
+####Description of program arguments
 - `-h5file <hdf5 file>`: the input HDF5 file to compress 
 - `-czfile <cz file>`: the name of the output compressed file
 - `-threshold <e>`: specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage of CubismZ. More specifically:
@@ -221,7 +230,7 @@ hdf2cz -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>] [-bpdx
   - **FPZIP**: denotes the number of useful bits of the floating point numbers (e.g. it must be equal to 32 for full accuracy of single precision datasets).
   - **ZFP**: specifies to the *absolute error* tolerance for fixed-accuracy mode.
   - **SZ**: the (de)compression error is limited to be within an *absolute error* defined by the specificed value.
-- `wtype <wt>`: wavelet type used by the corresponding compression scheme. The following options for wavelet types are supported
+- `wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). The following options for wavelet types are supported:
   - **1**: 4th order interpolating wavelets
   - **2**: 4th order lifted interpolating wavelets
   - **3**: 3rd order average interpolating wavelets (default)
@@ -233,34 +242,41 @@ hdf2cz -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>] [-bpdx
 - The HDF5 file consists of `(npx * nbx) * (npy * nby) * (npz * nbz)` cubic blocks.
 - Each MPI process has a local subgrid of `nbx * nby * nbz)` blocks. 
 - According to the default compilation options default, each cubic block contains 32^2 floats.
-- The total number of processes specified for the cartesian grid (`npx * npy * npz`) must be equal to the number of processes created by the `mpirun` launcher. 
-
+- The total number of processes specified for the cartesian grid (`npx * npy * npz`) must be equal to the number of processes created by the `mpirun` launcher.
 
 ### 2. The `ch2hdf` tool
 
 Decompression of CZ files and conversion to HDF5 format
 ```
-cz2hdf -czfile <cz file> -h5file <h5 basefilename> [-wtype <wt>]
+cz2hdf -czfile <cz file> -h5file <basename> [-wtype <wt>]
 ```
 
-- The output file can be visualized with ParaView
-- Compile time options (`blocksize`, compression scheme) must agree with those
-  used for the compression phase.  See the [blocksize](#blocksize) section for
+#### Description of program arguments
+- `-czfile <cz file>`: the input compressed file in CZ format
+- `-h5file <basename>`: the basename of the output HDF5 file and the correspond xmf file.
+   The output file `<basename>.h5` can be visualized with ParaView.
+- `wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). 
+
+###### Notes
+- The optional argument specified by `wtype` must agree with the type of wavelets used in the compressed file.
+- Compile time options (`blocksize`, `precision`, compression scheme) must agree with those
+  used for the compression phase.  See the [blocksize](#blocksize) and [precision](#precision) sections for
   more information.
-- The optional parameter specified by `wtype` must agree with the type of wavelets
-  used in the compressed file.
 
 
 ### 3. The `cz2diff` tool
 
 Decompress and compare two CZ files
 ```
-cz2diff -czfile1 <cz file1> [-wtype <wt>] -czfile2 <cz reference file2>
+cz2diff -czfile1 <cz file> [-wtype <wt>] -czfile2 <cz reference file>
 ```
 
-- The second CZ file is used as the reference dataset and must have been generated
-  by the default configuration of the `hdf2cz` tool, i.e., without any
-  [compression method enabled](#no-compression-default)
+#### Description of program arguments
+- `czfile1 <cz file1>`: compressed CZ file 
+- `czfile2 <cz reference file>`: reference CZ file, generated by the default configuration of the `hdf2cz` tool, i.e., without any [compression method enabled](#no-compression-default)
+- `wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). 
+
+###### Notes
 - Useful for quality assessment of the compression
 
 
@@ -308,9 +324,9 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
    ```
    ./test_wavz.sh [<n processors> [<error threshold>]]
    ```
-   Parameter in square brackets are optional. `<n processors>` sets the number
+   Parameters in square brackets are optional. `<n processors>` sets the number
    of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the wavelet compressor.  The default is 0.01.
+   parameter is specific to the wavelet compressor.
 
 3. `test_zfp.sh`: Runs the [ZFP](#zfp) compressor.  If no reference file
    exists, the script will generate it automatically.  The test can be run
@@ -318,9 +334,9 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
    ```
    ./test_zfp.sh [<n processors> [<error threshold>]]
    ```
-   Parameter in square brackets are optional. `<n processors>` sets the number
+   Parameters in square brackets are optional. `<n processors>` sets the number
    of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the ZFP compressor.  The default is 0.5.
+   parameter is specific to the ZFP compressor.
 
 4. `test_fpzip.sh`: Runs the [FPZIP](#fpzip) compressor.  If no reference file
    exists, the script will generate it automatically.  The test can be run
@@ -328,9 +344,9 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
    ```
    ./test_fpzip.sh [<n processors> [<n bits>]]
    ```
-   Parameter in square brackets are optional. `<n processors>` sets the number
+   Parameters in square brackets are optional. `<n processors>` sets the number
    of MPI processes.  Defaults to 1 if not specified.  The `<n bits>`
-   parameter is specific to the FPZIP compressor.  The default is 22.
+   parameter is specific to the FPZIP compressor.
 
 5. `test_sz.sh`: Runs the [SZ](#sz) compressor.  If no reference file exists,
    the script will generate it automatically.  The test can be run individually
@@ -338,9 +354,9 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
    ```
    ./test_sz.sh [<n processors> [<error threshold>]]
    ```
-   Parameter in square brackets are optional. `<n processors>` sets the number
+   Parameters in square brackets are optional. `<n processors>` sets the number
    of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the SZ compressor.  The default is 0.01.  The SZ
+   parameter is specific to the SZ compressor. The SZ
    compressor can be further configured using the provided
    `CubismZ/Tests/Test1/sz.config` file.
 
@@ -349,7 +365,8 @@ the standard output or into the file `run_all.txt` if the batch script is used.
 The PSNR value is computed based on the reference CZ file generated with the
 `genref.sh` script.
 
-
+The default error threshold in each script has been adjusted so that the resulting PSNR is in the range of 75 to 78 dB. 
+ 
 ##### Testing custom builds
 
 Custom builds can be tested against the reference using the `test_custom.sh`
@@ -390,12 +407,11 @@ for testing the compression capabilities of CubismZ.  The test data consists of
 the 3D pressure field of a cloud cavitation collapse simulation.  The initial
 configuration is composed of 70 air bubbles (dispersed phase, non-condensible
 gas) submerged in liquid water (continuous phase) and is discretized in a cubic
-domain with `512 * 512 * 512` cells.  Note that the simulation is
-under-resolved.  Nevertheless, the degree of variation in the quantity of
-interest (3D pressure field) is sufficient to test the compression algorithms.
-The snapshot of the test data is taken at iteration 5000.  A visualization of
-the gas volume fraction as well as the pressure in a plane through the cloud
-center for this iteration is shown below.
+domain with `512 * 512 * 512` cells (single precision floating point numbers).
+Note that the simulation is under-resolved.  Nevertheless, the degree of variation
+in the quantity of interest (3D pressure field) is sufficient to test the compression algorithms. The snapshot of the test data is taken at iteration 5000.
+A visualization of the gas volume fraction as well as the pressure in a plane through
+the cloud center for this iteration is shown below.
 
 ![](.images/pressure_alpha2_5000.png)
 
@@ -404,21 +420,11 @@ figure.  Plus/minus one standard deviation is indicated by the shaded region.
 
 ![](.images/mean_pressure.png)
 
-The pressure test data at iteration 5000 can be downloaded at the following
-link (512MB):
+The pressure test data (`data_005000-p.h5`) at iteration 5000 can be found in the `CubismZ/Tests/Data` directory. The corresponding tests are located in the `CubismZ/Tests/Test1_cav` and `CubismZ/Tests/Test2_cav` directories. 
 
-[data_005000-p.h5][datadl]
+##### Running the cavitation data tests
 
-The file must be placed in the `CubismZ/Tests/Data` directory. 
-The corresponding tests are located in the `CubismZ/Tests/Test1_cav` and 
-`CubismZ/Tests/Test2_cav` directories. 
-
-  
-#### 5. Run the cavitation data tests (optional)
-
-- Download the cavitation dataset into the `CubismZ/Tests/Test1` directory.
-- Enter the `CubismZ/Tests/Test1_cav` directory and execute the script `run_all.sh`. 
-- Enter the `CubismZ/Tests/Test2_cav` directory and execute the script `run_all.sh`. 
+- Execute the script `run_all.sh` in the `CubismZ/Tests/Test1_cav` and `CubismZ/Tests/Test2_cav` directories, following the steps for the demo tests.  
 
 
 [linklab]:http://www.cse-lab.ethz.ch "http://www.cse-lab.ethz.ch"
@@ -426,7 +432,7 @@ The corresponding tests are located in the `CubismZ/Tests/Test1_cav` and
 [linkanl]:https://collab.cels.anl.gov/display/ESR/SZ "https://collab.cels.anl.gov/display/ESR/SZ"
 [linkzlib]:https://zlib.net/ "https://zlib.net/"
 [linklz4]:https://lz4.github.io/lz4/ "https://lz4.github.io/lz4/"
-[datadl]:https://polybox.ethz.ch/index.php/s/xhsAsjItqEGTFkA/download "https://polybox.ethz.ch/index.php/s/xhsAsjItqEGTFkA/download"
 [gcclink]:https://gcc.gnu.org/ "https://gcc.gnu.org/"
 [intellink]:https://software.intel.com/en-us/c-compilers "https://software.intel.com/en-us/c-compilers"
 [clanglink]:http://www.llvm.org/ "http://www.llvm.org/"
+<!---->

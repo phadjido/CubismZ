@@ -17,8 +17,8 @@ fi
 
 if [ -z ${1+x} ]
 then
-	echo "setting bits=20"
-	bits=20
+	echo "setting bits=21"
+	bits=21
 else
 	bits=$1; shift
 fi

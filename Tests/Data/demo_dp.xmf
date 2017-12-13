@@ -15,7 +15,7 @@
      </Geometry>
      <Attribute Name="data" AttributeType="Scalar" Center="Node">
        <DataItem Dimensions="128 128 128 1" NumberType="Float" Precision="8" Format="HDF">
-        small_dp.h5:/data
+        demo_dp.h5:/data
        </DataItem>
      </Attribute>
    </Grid>

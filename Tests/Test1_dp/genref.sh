@@ -7,7 +7,7 @@
 #
 set -x #echo on
 
-h5file=../Data/demo.h5
+h5file=../Data/demo_dp.h5
 
 bs=32	# block size (per dimension) (total: bs^3)
 ds=128	# domain size (per dimension) (total: ds^3)

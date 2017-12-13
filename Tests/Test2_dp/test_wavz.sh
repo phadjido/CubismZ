@@ -7,7 +7,7 @@
 #
 set -x #echo on
 
-h5file=../Data/small_dp.h5
+h5file=../Data/demo_dp.h5
 
 nproc=1
 if [ "$#" -eq 1 ]
