@@ -261,9 +261,9 @@ public:
 
 		outputfile_name = parser("-czfile").asString("none");
 
-		if ((inputfile_name == "none")||(outputfile_name == "none"))
+		if (parser.exist("-help") || ((inputfile_name == "none")||(outputfile_name == "none")))
 		{
-			printf("usage: %s -h5file <filename1> -czfile <filename2> [-wtype <type>]\n", "cz2hdf");
+            printf("Usage: %s -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>] [-bpdx <nbx>] [-bpdy <nby>] [-bpdz <nbz>] [-nprocx <npx>] [-nprocy <npy>] [-nprocz <npz>]\n", "hdf2cz");
 			exit(1);
 		}
 
@@ -281,13 +281,16 @@ public:
 			printf("////////////////////////////////////////////////////////////\n");
 		}
 
+        parser.loud();
+        if (!isroot)
+            parser.mute();
+
 		grid = new G(NPROCX, NPROCY, NPROCZ, BPDX, BPDY, BPDZ);
 
 		assert(grid != NULL);
 
 		_ic(*grid);
 		vp(*grid, step_id);
-
 	}
 
 

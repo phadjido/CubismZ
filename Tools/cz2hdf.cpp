@@ -45,22 +45,22 @@ int main(int argc, char **argv)
 
 	ArgumentParser argparser(argc, (const char **)argv);
 
-	if (isroot)
-		argparser.loud();
-	else
-		argparser.mute();
-
 	string inputfile_name[3];
 	inputfile_name[0]= argparser("-czfile").asString("none");
 	inputfile_name[1] = argparser("-czfile2").asString("none");
 	inputfile_name[2] = argparser("-czfile3").asString("none");
 	const string h5file_name = argparser("-h5file").asString("none");
 
-	if ((inputfile_name[0] == "none")||(h5file_name == "none"))
+	if (argparser.exist("-help") || ((inputfile_name[0] == "none")||(h5file_name == "none")))
 	{
-		printf("usage: %s -czfile <filename> [-wtype <wtype>] -h5file <h5basefilename>\n", argv[0]);
+        printf("Usage: %s -czfile <cz file> -h5file <h5 basefilename> [-wtype <wt>]\n", argv[0]);
 		exit(1);
 	}
+
+	if (isroot)
+		argparser.loud();
+	else
+		argparser.mute();
 
 	int NCHANNELS = 1;
 	if ((inputfile_name[1] != "none")) NCHANNELS++;

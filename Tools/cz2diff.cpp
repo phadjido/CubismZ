@@ -32,37 +32,37 @@ int main(int argc, char **argv)
 #if defined(_USE_SZ_)
 	printf("sz.config...\n");
 	SZ_Init((char *)"sz.config");
-#ifdef _OPENMP 
+#ifdef _OPENMP
 	omp_set_num_threads(1);
 #endif
 #endif
 
-	const double init_t0 = MPI_Wtime();
+    const double init_t0 = MPI_Wtime();
 
-        /* MPI variables */
-        MPI_Comm comm  = MPI_COMM_WORLD;
+    /* MPI variables */
+    MPI_Comm comm  = MPI_COMM_WORLD;
 
-        int mpi_rank, mpi_size;
-        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-        MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    int mpi_rank, mpi_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-        const bool isroot = !mpi_rank;
+    const bool isroot = !mpi_rank;
 
-        ArgumentParser argparser(argc, (const char **)argv);
+    ArgumentParser argparser(argc, (const char **)argv);
+
+	const string inputfile_name1 = argparser("-czfile1").asString("none");
+	const string inputfile_name2 = argparser("-czfile2").asString("none");
+
+	if (argparser.exist("-help") || ((inputfile_name1 == "none")||(inputfile_name2 == "none")))
+	{
+        printf("Usage: %s -czfile1 <cz file1> [-wtype <wt>] -czfile2 <cz reference file2>\n", argv[0]);
+		exit(1);
+	}
 
 	if (isroot)
 		argparser.loud();
 	else
 		argparser.mute();
-
-	const string inputfile_name1 = argparser("-czfile1").asString("none");
-	const string inputfile_name2 = argparser("-czfile2").asString("none");
-
-	if ((inputfile_name1 == "none")||(inputfile_name2 == "none"))
-	{
-		printf("usage: %s -czfile1 <filename1> -czfile2 <filename2> [-wtype <wtype>]\n", argv[0]);
-		exit(1);
-	}
 
 	const bool swapbytes = argparser.check("-swap");
 	const int wtype = argparser("-wtype").asInt(3);
