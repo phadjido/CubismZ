@@ -3,6 +3,7 @@ SHELL := /bin/bash
 #################
 # Default options
 dir ?= default
+needs_lz ?= 1
 
 # options for the first compression stage (floating point)
 wavz ?= 0

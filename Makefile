@@ -10,17 +10,16 @@ MPICC ?= mpicc
 config ?= release
 #hdf-incdir ?= /opt/hdf5_mpich/include
 #hdf-libdir ?= /opt/hdf5_mpich/lib
-# hdf-incdir ?= /Users/phadjido/usr/hdf5/include
-# hdf-libdir ?= /Users/phadjido/usr/hdf5/lib
-hdf-incdir ?= /Users/fabs/local/hdf5/build-parallel/include
-hdf-libdir ?= /Users/fabs/local/hdf5/build-parallel/lib
+hdf-incdir ?= /Users/phadjido/usr/hdf5/include
+hdf-libdir ?= /Users/phadjido/usr/hdf5/lib
+#hdf-incdir ?= /Users/fabs/local/hdf5/build-parallel/include
+#hdf-libdir ?= /Users/fabs/local/hdf5/build-parallel/lib
 hdf-libs ?= -lhdf5
 
 # general software configuration options
-bs ?= 32
-ap ?= float
+blocksize ?= 32
+precision ?= float
 omp ?= 1
-needs_lz ?= 1
 
 # options for the first compression stage (floating point)
 # wavz                     (to enable wavz=1)
