@@ -3,16 +3,16 @@
 all: fpzip lzfour sz zfp zlib
 
 fpzip:
-	$(MAKE) -C fpzip/ CC=$(MPICC)
+	$(MAKE) -C fpzip/ CC=$(MPICXX)
 
 lzfour:
-	$(MAKE) -C lz4/ CC=$(mpicc) cc=$(mpicc)
+	$(MAKE) -C lz4/ CC=$(MPICC) cc=$(MPICC)
 
 sz:
-	$(MAKE) -C SZ/ CC=$(mpicc) cc=$(mpicc)
+	$(MAKE) -C SZ/ CC=$(MPICC) cc=$(MPICC)
 
 zfp:
-	$(MAKE) -C zfp/ CC=$(MPICC) cc=$(mpicc)
+	$(MAKE) -C zfp/ CC=$(MPICXX) cc=$(MPICC)
 
 zlib:
 	$(MAKE) -C zlib/

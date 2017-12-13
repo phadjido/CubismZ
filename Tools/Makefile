@@ -99,16 +99,16 @@ VPATH := ../../Cubism/source/ ../Compressor/source/ .
 all: hdf2cz cz2hdf cz2diff
 
 hdf2cz: hdf2cz.o WaveletCompressor.o
-	$(MPICC) $(extra) $^ -o $@ $(CUBISMZLIBS)
+	$(MPICXX) $(extra) $^ -o $@ $(CUBISMZLIBS)
 
 cz2hdf: cz2hdf.o WaveletCompressor.o
-	$(MPICC) $(extra) $^ -o $@ $(CUBISMZLIBS)
+	$(MPICXX) $(extra) $^ -o $@ $(CUBISMZLIBS)
 
 cz2diff: cz2diff.o WaveletCompressor.o
-	$(MPICC) $(extra) $^ -o $@ $(CUBISMZLIBS)
+	$(MPICXX) $(extra) $^ -o $@ $(CUBISMZLIBS)
 
 %.o: %.cpp .FORCE
-	$(MPICC) $(CUBISMZFLAGS) -c $< -o $@
+	$(MPICXX) $(CUBISMZFLAGS) -c $< -o $@
 
 .FORCE:
 

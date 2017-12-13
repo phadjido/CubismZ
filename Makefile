@@ -5,15 +5,15 @@
 
 ###############################################################################
 # User options
-MPICC ?= mpic++
-mpicc ?= mpicc
+MPICXX ?= mpic++
+MPICC ?= mpicc
 config ?= release
 #hdf-incdir ?= /opt/hdf5_mpich/include
 #hdf-libdir ?= /opt/hdf5_mpich/lib
 # hdf-inc ?= /Users/phadjido/usr/hdf5/include
 # hdf-lib ?= /Users/phadjido/usr/hdf5/lib
-hdf-inc ?= /Users/fabs/local/hdf5/build-parallel/include
-hdf-lib ?= /Users/fabs/local/hdf5/build-parallel/lib
+#hdf-inc ?= /Users/fabs/local/hdf5/build-parallel/include
+#hdf-lib ?= /Users/fabs/local/hdf5/build-parallel/lib
 hdf-libraries ?= -lhdf5
 
 # general software configuration options

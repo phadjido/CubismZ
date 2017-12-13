@@ -15,7 +15,7 @@ liblz4.a: lz4.o
 	$(AR) $(ARFLAGS) liblz4.a lz4.o
 
 lz4.o: lz4.c lz4.h
-	$(mpicc) $(CPPFLAGS) -c lz4.c
+	$(MPICC) $(CPPFLAGS) -c lz4.c
 
 clean:
 	rm -f *.o *.a

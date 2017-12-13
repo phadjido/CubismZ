@@ -3,7 +3,11 @@
 
 ## Software design
 
-CubismZ performs two compression stages on the input dataset.  The first stage
+CubismZ is a parallel framework for compression of 3D floating point datasets. 
+It uses a block-structured layout, dividing the input dataset into a 3D grid of cubic blocks.
+The grid can be evenly distributed among MPI processes, which are also organized into a 3D process grid. 
+
+CubismZ performs two compression stages on the input 3D datasets.  The first stage
 makes use of (lossy) floating point compression algorithms.  In the second
 stage, general-purpose lossless methods are applied to the compressed data of
 the first stage.  A more detailed description can be found in the paper.
@@ -204,26 +208,36 @@ value must be a power of two.
 
 Compression of HDF5 files to CZ format.
 ```
-hdf2cz -bpdx <nbx> -bpdy <nby> -bpdz <nbz> -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>]
+hdf2cz -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>] [-bpdx <nbx>] [-bpdy <nby>] [-bpdz <nbz>] [-xpesize <npx>] [-ypesize <npy>] [-zpesize <npz>]
 ```
 
-- The HDF5 file consists of `nbx * nby * nbz` 3D blocks
-- The input HDF5 file is compressed and stored to `<cz file>`
-- The `threshold` parameter specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage of CubismZ. More specically:
+####Description of program parameters
+- `-h5file <hdf5 file>`: the input HDF5 file to compress 
+- `-czfile <cz file>`: the name of the output compressed file
+- `-threshold <e>`: specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage of CubismZ. More specifically:
   - **Wavelets**: wavelets coefficients with *absolute value* smaller than the threshold are decimated.
-  - **FPZIP**: `threshold` denotes the number of useful bits of the floating point numbers (e.g. it must be equal to 32 for full accuracy of single precision datasets)
-  - **ZFP**: `threshold` specifies to the *absolute error* tolerance for fixed-accuracy mode.
-  - **SZ**: the (de)compression errors is limited to be within an *absolute error* defined by `threshold`
-- The wavelet type can optionally be specified using the `-wtype` option.
-  The following options for wavelet types are supported
+  - **FPZIP**: denotes the number of useful bits of the floating point numbers (e.g. it must be equal to 32 for full accuracy of single precision datasets).
+  - **ZFP**: specifies to the *absolute error* tolerance for fixed-accuracy mode.
+  - **SZ**: the (de)compression error is limited to be within an *absolute error* defined by the specificed value.
+- `wtype <wt>`: wavelet type used by the corresponding compression scheme. The following options for wavelet types are supported
   - **1**: 4th order interpolating wavelets
   - **2**: 4th order lifted interpolating wavelets
   - **3**: 3rd order average interpolating wavelets (default)
 
+- `-bpdx`, `-bdpy`, `-bdpz`: number of 3D blocks per dimension (*x*, *y* and *z*). The HDF5 file consists of `nbx * nby * nbz` 3D blocks. Their default value is 1.
+
+- `-bpdx <nbx>`, `-bdpy <nby`, `-bdpz <nbz>`: number of 3D blocks per dimension (*x*, *y* and *z*). The HDF5 file consists of `nbx * nby * nbz` 3D blocks. Their default value is 1.
+
+- `-xpesize <npx>`, `-ypesize <npy>`, `-zpesize <npz>`: number of MPI processes 
 
 ##### MPI-enabled data compression 
+
+The `hdf2cz` tool 
+Compression of HDF5 files to CZ format.
+
+
 ```
-hdf2cz  [-xpesize <npx> -ypesize <npy> -zpesize <npz>] -bpdx <nbx> -bpdy <nby> -bpdz <nbz> 
+hdf2cz  [-xpesize <npx>] [-ypesize <npy>] [-zpesize <npz>] 
 ```
 
 
