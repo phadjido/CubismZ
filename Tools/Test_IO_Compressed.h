@@ -33,7 +33,7 @@ class Test_IO_Compressed : public Simulation
 protected:
 
 	int BPDX, BPDY, BPDZ;
-	int XPESIZE, YPESIZE, ZPESIZE;
+	int NPROCX, NPROCY, NPROCZ;
 	int channel;
 	int step_id;
 	bool VERBOSITY;
@@ -59,13 +59,13 @@ protected:
 		periodic[1] = 1;
 		periodic[2] = 1;
 
-		pesize[0] = XPESIZE;
-		pesize[1] = YPESIZE;
-		pesize[2] = ZPESIZE;
+		pesize[0] = NPROCX;
+		pesize[1] = NPROCY;
+		pesize[2] = NPROCZ;
 
 
 		MPI_Comm_size(MPI_COMM_WORLD, &size);
-		assert(XPESIZE*YPESIZE*ZPESIZE == size);
+		assert(NPROCX*NPROCY*NPROCZ == size);
 
 		MPI_Cart_create(MPI_COMM_WORLD, 3, pesize, periodic, true, &cartcomm);
 		MPI_Comm_rank(cartcomm, &myrank);
@@ -230,11 +230,11 @@ protected:
 	}
 
 
-	void _setup_mpi_constants(int& xpesize, int& ypesize, int& zpesize)
+	void _setup_mpi_constants(int& nprocx, int& nprocy, int& nprocz)
 	{
-		xpesize = parser("-xpesize").asInt(1);
-		ypesize = parser("-ypesize").asInt(1);
-		zpesize = parser("-zpesize").asInt(1);
+		nprocx = parser("-nprocx").asInt(1);
+		nprocy = parser("-nprocy").asInt(1);
+		nprocz = parser("-nprocz").asInt(1);
 	}
 
 public:
@@ -268,7 +268,7 @@ public:
 		}
 
 
-		_setup_mpi_constants(XPESIZE, YPESIZE, ZPESIZE);
+		_setup_mpi_constants(NPROCX, NPROCY, NPROCZ);
 
 		VERBOSITY = 0;
 		if (isroot)
@@ -281,7 +281,7 @@ public:
 			printf("////////////////////////////////////////////////////////////\n");
 		}
 
-		grid = new G(XPESIZE, YPESIZE, ZPESIZE, BPDX, BPDY, BPDZ);
+		grid = new G(NPROCX, NPROCY, NPROCZ, BPDX, BPDY, BPDZ);
 
 		assert(grid != NULL);
 

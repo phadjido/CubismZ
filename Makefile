@@ -12,8 +12,8 @@ config ?= release
 #hdf-libdir ?= /opt/hdf5_mpich/lib
 # hdf-incdir ?= /Users/phadjido/usr/hdf5/include
 # hdf-libdir ?= /Users/phadjido/usr/hdf5/lib
-#hdf-incdir ?= /Users/fabs/local/hdf5/build-parallel/include
-#hdf-libdir ?= /Users/fabs/local/hdf5/build-parallel/lib
+hdf-incdir ?= /Users/fabs/local/hdf5/build-parallel/include
+hdf-libdir ?= /Users/fabs/local/hdf5/build-parallel/lib
 hdf-libs ?= -lhdf5
 
 # general software configuration options
