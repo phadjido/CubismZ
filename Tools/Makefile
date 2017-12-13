@@ -1,6 +1,87 @@
 SHELL := /bin/bash
 
+#################
+# Default options
 dir ?= default
+
+# options for the first compression stage (floating point)
+wavz ?= 0
+fpzip ?= 0
+zfp ?= 0
+sz ?= 0
+
+# options for the second compression stage (encoding)
+zlib ?= 0
+lz4 ?= 0
+
+# options (bit zeroing, byte shuffling) for the wavelet coefficients, applied between the first and second stage
+zerobits ?= 0	# for wavz + zerobits
+shuffle3 ?= 0	# for wavz + shuffle3
+
+###############################################################################
+# Flags related to the compression options
+
+ifeq "$(wavz)" "1"
+       CUBISMZFLAGS += -D_USE_WAVZ_
+endif
+
+ifeq "$(fpzip)" "1"
+	CUBISMZFLAGS += -D_USE_FPZIP_  -I../ThirdParty/build/include/fpzip
+	CUBISMZLIBS += -lfpzip
+endif
+
+ifeq "$(zfp)" "1"
+	CUBISMZFLAGS += -D_USE_ZFP_  -I../ThirdParty/build/include/zfp
+	CUBISMZLIBS += -lzfp
+endif
+
+ifeq "$(sz)" "1"
+	CUBISMZFLAGS += -D_USE_SZ_  -I../ThirdParty/build/include
+	CUBISMZLIBS += -lSZ  -lzlib
+	needs_lz = 0
+endif
+
+
+###############################################################################
+# Flags related to the encoding options
+
+ifeq "$(zlib)" "1"
+	CUBISMZFLAGS += -D_USE_ZLIB_
+	CUBISMZLIBS += -lz
+endif
+
+ifeq "$(lz4)" "1"
+       CUBISMZFLAGS += -D_USE_LZ4_  -I../ThirdParty/build/include/lz4
+       CUBISMZLIBS += -llz4
+endif
+
+ifeq "$(needs_lz)" "1"
+	CUBISMZLIBS += -lz
+endif
+
+###############################################################################
+# Flags related to the extensions to the wavelet-based compression (wavz)
+
+ifeq "$(shuffle3)" "1"
+       CUBISMZFLAGS += -D_USE_SHUFFLE3_
+endif
+
+ifeq "$(zerobits)" "4"
+       CUBISMZFLAGS += -D_USE_ZEROBITS_
+       CUBISMZFLAGS += -D_ZEROBITS_=4
+endif
+ifeq "$(zerobits)" "8"
+       CUBISMZFLAGS += -D_USE_ZEROBITS_
+       CUBISMZFLAGS += -D_ZEROBITS_=8
+endif
+ifeq "$(zerobits)" "12"
+       CUBISMZFLAGS += -D_USE_ZEROBITS_
+       CUBISMZFLAGS += -D_ZEROBITS_=12
+endif
+ifeq "$(zerobits)" "16"
+       CUBISMZFLAGS += -D_USE_ZEROBITS_
+       CUBISMZFLAGS += -D_ZEROBITS_=16
+endif
 
 #################
 # Fixed options

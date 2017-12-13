@@ -4,16 +4,12 @@ RUNNING: genref.sh
 ###############################################################################
 
 Channel 0: 524306.14 kB, wavelet-threshold: 0.0e+00, compr. rate: 1.00
-Threads: 1 Elapsed time: 6.81843 seconds
 
 ###############################################################################
 RUNNING: test_wavz.sh
 ###############################################################################
 
 Channel 0: 8324.78 kB, wavelet-threshold: 1.0e-02, compr. rate: 62.98
-Threads: 1 Elapsed time: 14.6823 seconds
-Elapsed time = 79.878 seconds
-compression-rate: 62.38 rel-linf-error: 3.419876e-01 rel-mean-error: 4.182551e-03
 RES:           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
 RES:        62.38 9.692282e-04 4.814984e-05 4.182551e-03 7.738861e-05 5.897150e-07       0.5130      87.5615
 
@@ -22,9 +18,6 @@ RUNNING: test_zfp.sh
 ###############################################################################
 
 Channel 0: 16929.52 kB, wavelet-threshold: 5.0e-01, compr. rate: 30.97
-Threads: 1 Elapsed time: 9.56787 seconds
-Elapsed time = 75.087 seconds
-compression-rate: 30.82 rel-linf-error: 1.254272e-01 rel-mean-error: 5.775685e-03
 RES:           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
 RES:        30.82 3.554738e-04 6.649012e-05 5.775685e-03 8.788109e-05 6.696695e-07       1.0382      86.4572
 
@@ -33,9 +26,6 @@ RUNNING: test_fpzip.sh
 ###############################################################################
 
 Channel 0: 41586.64 kB, wavelet-threshold: 2.2e+01, compr. rate: 12.61
-Threads: 1 Elapsed time: 10.2735 seconds
-Elapsed time = 82.681 seconds
-compression-rate: 12.58 rel-linf-error: 3.121948e-02 rel-mean-error: 4.016025e-03
 RES:           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
 RES:        12.58 8.847923e-05 4.623277e-05 4.016025e-03 5.336729e-05 4.066682e-07       2.5432      90.7896
 
@@ -44,8 +34,5 @@ RUNNING: test_sz.sh
 ###############################################################################
 
 Channel 0: 30636.43 kB, wavelet-threshold: 1.0e-02, compr. rate: 17.11
-Threads: 1 Elapsed time: 15.0329 seconds
-Elapsed time = 77.337 seconds
-compression-rate: 17.07 rel-linf-error: 9.998322e-03 rel-mean-error: 4.998948e-03
 RES:           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
 RES:        17.07 2.833627e-05 5.754826e-05 4.998948e-03 6.538619e-05 4.982544e-07       1.8748      89.0253

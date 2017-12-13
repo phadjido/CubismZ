@@ -30,7 +30,7 @@ command -v awk >/dev/null 2>&1 || { echo >&2 "Can not find 'awk' command for fil
 output_filter()
 {
     if [ "$use_awk" -eq 1 ]; then
-        awk '$0 ~ /(^Channel|^TLP|^Time distribution|^Threads:|^Elapsed time|^compression-rate:|^RE.?:)/ { print $0; }' >> $fout
+        awk '$0 ~ /(^Channel|^RE.?:)/ { print $0; }' >> $fout
     else
         cat >> $fout
     fi

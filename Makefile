@@ -23,44 +23,21 @@ omp ?= 1
 needs_lz ?= 1
 
 # options for the first compression stage (floating point)
-wavz ?= 0
-fpzip ?= 0
-zfp ?= 0
-sz ?= 0
+# wavz                     (to enable wavz=1)
+# fpzip                    (to enable fpzip=1)
+# zfp                      (to enable zfp=1)
+# sz                       (to enable sz=1)
 
 # options for the second compression stage (encoding)
-zlib ?= 0
-lz4 ?= 0
+# zlib                     (to enable zlib=1)
+# lz4                      (to enable lz4=1)
 
 # options (bit zeroing, byte shuffling) for the wavelet coefficients, applied between the first and second stage
-zerobits ?= 0	# for wavz + zerobits
-shuffle3 ?= 0	# for wavz + shuffle3
+# zerobits: for wavz + zerobits (to enable zerobits=4 or zerobits=8 or zerobits=12 or zeroing=16)
+# shuffle3: for wavz + shuffle3 (to enable shuffle3=1)
 ###############################################################################
 
-
 ###############################################################################
-# Main rules
 include Makefile.config
 export
-
-all: tools
-
-tools: thirdparty-libs tools-only
-
-tools-only:
-	$(MAKE) -C Tools/ install dir=default
-	$(MAKE) -C Tools/ install dir=wavz_zlib wavz=1 zlib=1
-	$(MAKE) -C Tools/ install dir=fpzip fpzip=1
-	$(MAKE) -C Tools/ install dir=zfp zfp=1
-	$(MAKE) -C Tools/ install dir=sz sz=1
-
-tools-custom:
-	$(MAKE) -C Tools/ install
-
-thirdparty-libs:
-	$(MAKE) -C ThirdParty/
-
-clean:
-	$(MAKE) -C Tools/ clean
-	$(MAKE) -C ThirdParty/ clean
 ###############################################################################
