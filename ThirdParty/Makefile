@@ -3,19 +3,19 @@
 all: fpzip lzfour sz zfp zlib
 
 fpzip:
-	$(MAKE) -C fpzip/ CC=$(CC)
+	$(MAKE) -C fpzip/ CC=$(MPICC)
 
 lzfour:
-	$(MAKE) -C lz4/ CC=$(cc) cc=$(cc)
+	$(MAKE) -C lz4/ CC=$(mpicc) cc=$(mpicc)
 
 sz:
-	$(MAKE) -C SZ/ CC=$(cc) cc=$(cc)
+	$(MAKE) -C SZ/ CC=$(mpicc) cc=$(mpicc)
 
 zfp:
-	$(MAKE) -C zfp/ CC=$(CC) cc=$(cc)
+	$(MAKE) -C zfp/ CC=$(MPICC) cc=$(mpicc)
 
 zlib:
-	$(MAKE) -C zlib/ 
+	$(MAKE) -C zlib/
 
 clean:
 	rm -rf build
