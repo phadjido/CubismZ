@@ -47,19 +47,19 @@ mymsg 'genref.sh' >> $fout
 
 # wavelets + zlib
 mymsg 'test_wavz.sh' >> $fout
-./test_wavz.sh $nproc | output_filter
+./test_wavz.sh -1 $nproc | output_filter
 
 # zfp
 mymsg 'test_zfp.sh' >> $fout
-./test_zfp.sh $nproc | output_filter
+./test_zfp.sh -1 $nproc | output_filter
 
 # fpzip
 mymsg 'test_fpzip.sh' >> $fout
-./test_fpzip.sh $nproc | output_filter
+./test_fpzip.sh -1 $nproc | output_filter
 
 # sz
 mymsg 'test_sz.sh' >> $fout
-./test_sz.sh $nproc | output_filter
+./test_sz.sh -1 $nproc | output_filter
 
 rm -f tmp.cz
 rm -f ref.cz

@@ -14,7 +14,12 @@ then
     echo "setting err=0.0001"
     err=0.0001
 else
-    err=$1; shift
+    err=$1
+    if [ "$1" -eq "-1" ]; then
+        echo "setting err=0.0001"
+        err=0.0001
+    fi
+    shift
 fi
 
 nproc=1

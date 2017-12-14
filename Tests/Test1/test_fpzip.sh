@@ -14,7 +14,12 @@ then
 	echo "setting bits=21"
 	bits=21
 else
-	bits=$1; shift
+	bits=$1
+	if [ "$1" -eq "-1" ]; then
+		echo "setting bits=21"
+		bits=21
+	fi
+	shift
 fi
 
 nproc=1
