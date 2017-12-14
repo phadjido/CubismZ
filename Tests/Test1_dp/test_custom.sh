@@ -29,7 +29,7 @@ then
     ./genref.sh
 fi
 
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=$nproc
 mpirun -n 1 ${mypath}/hdf2cz -bpdx $nb -bpdy $nb -bpdz $nb -sim io -h5file $h5file -czfile tmp.cz -threshold $thresh
 
 mpirun -n $nproc ${mypath}/cz2diff -czfile1 tmp.cz  -czfile2 ref.cz

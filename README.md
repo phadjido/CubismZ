@@ -343,44 +343,44 @@ The `run_all.sh` script executes the following tasks:
    If no reference file exists, the script will generate it automatically.  The
    test can be run individually with the syntax:
    ```
-   ./test_wavz.sh [<n processors> [<error threshold>]]
+   ./test_wavz.sh [<error threshold> [<n processors>]]
    ```
-   Parameters in square brackets are optional. `<n processors>` sets the number
-   of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the wavelet compressor.  See [description of
+   Parameters in square brackets are optional.  The `<error threshold>`
+   parameter is specific to the wavelet compressor.  `<n processors>` sets the number
+   of MPI processes.  Defaults to 1 if not specified.  See [description of
    program arguments](#description-of-program-arguments) for more information.
 
 3. `test_zfp.sh`: Runs the [ZFP](#zfp) compressor.  If no reference file
    exists, the script will generate it automatically.  The test can be run
    individually with the syntax:
    ```
-   ./test_zfp.sh [<n processors> [<error threshold>]]
+   ./test_zfp.sh [<error threshold> [<n processors>]]
    ```
-   Parameters in square brackets are optional. `<n processors>` sets the number
-   of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the ZFP compressor.  See [description of
+   Parameters in square brackets are optional.  The `<error threshold>`
+   parameter is specific to the ZFP compressor.  `<n processors>` sets the number
+   of MPI processes.  Defaults to 1 if not specified.  See [description of
    program arguments](#description-of-program-arguments) for more information.
 
 4. `test_fpzip.sh`: Runs the [FPZIP](#fpzip) compressor.  If no reference file
    exists, the script will generate it automatically.  The test can be run
    individually with the syntax:
    ```
-   ./test_fpzip.sh [<n processors> [<n bits>]]
+   ./test_fpzip.sh [<n bits> [<n processors>]]
    ```
-   Parameters in square brackets are optional. `<n processors>` sets the number
-   of MPI processes.  Defaults to 1 if not specified.  The `<n bits>`
-   parameter is specific to the FPZIP compressor.  See [description of
+   Parameters in square brackets are optional.  The `<n bits>`
+   parameter is specific to the FPZIP compressor.  `<n processors>` sets the number
+   of MPI processes.  Defaults to 1 if not specified.  See [description of
    program arguments](#description-of-program-arguments) for more information.
 
 5. `test_sz.sh`: Runs the [SZ](#sz) compressor.  If no reference file exists,
    the script will generate it automatically.  The test can be run individually
    with the syntax:
    ```
-   ./test_sz.sh [<n processors> [<error threshold>]]
+   ./test_sz.sh [<error threshold> [<n processors>]]
    ```
-   Parameters in square brackets are optional. `<n processors>` sets the number
-   of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the SZ compressor.  See [description of
+   Parameters in square brackets are optional.  The `<error threshold>`
+   parameter is specific to the SZ compressor.  `<n processors>` sets the number
+   of MPI processes.  Defaults to 1 if not specified.  See [description of
    program arguments](#description-of-program-arguments) for more information. The SZ
    compressor can be further configured using the provided
    `CubismZ/Tests/Test1/sz.config` file.

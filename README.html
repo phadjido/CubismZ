@@ -220,26 +220,25 @@
 RUNNING: test_wavz.sh
 ###############################################################################
 
-Channel 0: 30.24 kB, wavelet-threshold: 5.0e-05, compr. rate: 270.91
 RES:           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
 RES:       256.23 8.722263e-04 8.271610e-05 3.972721e-05 1.046102e-04 3.611734e-08       0.1249      78.2226</code></pre>
-<p>The comparison results obtained from the <code>cz2diff</code> tool start with <code>RES</code>. The reported numbers are compression ratio (<code>CR</code>), maximum errors in infinity, L1 and L2 norms (<code>rel(e_inf)</code>, <code>rel(e_1)</code> and <code>rel(e_2)</code>) as well as mean values for the L1 and L2 norms (<code>mean(e_1)</code> and <code>mean(e_2)</code>). Finally, bits per sample (<code>BPS</code>) and peak-signal-to-noise-ratio (<code>PSNR</code>) are computed.</p>
+<p>The reported numbers are compression ratio (<code>CR</code>), maximum errors in infinity, L1 and L2 norms (<code>rel(e_inf)</code>, <code>rel(e_1)</code> and <code>rel(e_2)</code>) as well as mean values for the L1 and L2 norms (<code>mean(e_1)</code> and <code>mean(e_2)</code>). Finally, bits-per-sample (<code>BPS</code>) and peak-signal-to-noise-ratio (<code>PSNR</code>) are computed.</p>
 <p>The <code>run_all.sh</code> script executes the following tasks:</p>
 <ol type="1">
 <li><p><code>genref.sh</code>: Generates a reference CZ file without compression, based on the HDF5 input data. The script can also be executed individually with the syntax:</p>
 <pre><code>./genref.sh</code></pre></li>
 <li><p><code>test_wavz.sh</code>: Runs the <a href="#wavelets-and-zlib">wavelets and zlib</a> compressor. If no reference file exists, the script will generate it automatically. The test can be run individually with the syntax:</p>
-<pre><code>./test_wavz.sh [&lt;n processors&gt; [&lt;error threshold&gt;]]</code></pre>
-<p>Parameters in square brackets are optional. <code>&lt;n processors&gt;</code> sets the number of MPI processes. Defaults to 1 if not specified. The <code>&lt;error threshold&gt;</code> parameter is specific to the wavelet compressor. See <a href="#description-of-program-arguments">description of program arguments</a> for more information.</p></li>
+<pre><code>./test_wavz.sh [&lt;error threshold&gt; [&lt;n processors&gt;]]</code></pre>
+<p>Parameters in square brackets are optional. The <code>&lt;error threshold&gt;</code> parameter is specific to the wavelet compressor. <code>&lt;n processors&gt;</code> sets the number of MPI processes. Defaults to 1 if not specified. See <a href="#description-of-program-arguments">description of program arguments</a> for more information.</p></li>
 <li><p><code>test_zfp.sh</code>: Runs the <a href="#zfp">ZFP</a> compressor. If no reference file exists, the script will generate it automatically. The test can be run individually with the syntax:</p>
-<pre><code>./test_zfp.sh [&lt;n processors&gt; [&lt;error threshold&gt;]]</code></pre>
-<p>Parameters in square brackets are optional. <code>&lt;n processors&gt;</code> sets the number of MPI processes. Defaults to 1 if not specified. The <code>&lt;error threshold&gt;</code> parameter is specific to the ZFP compressor. See <a href="#description-of-program-arguments">description of program arguments</a> for more information.</p></li>
+<pre><code>./test_zfp.sh [&lt;error threshold&gt; [&lt;n processors&gt;]]</code></pre>
+<p>Parameters in square brackets are optional. The <code>&lt;error threshold&gt;</code> parameter is specific to the ZFP compressor. <code>&lt;n processors&gt;</code> sets the number of MPI processes. Defaults to 1 if not specified. See <a href="#description-of-program-arguments">description of program arguments</a> for more information.</p></li>
 <li><p><code>test_fpzip.sh</code>: Runs the <a href="#fpzip">FPZIP</a> compressor. If no reference file exists, the script will generate it automatically. The test can be run individually with the syntax:</p>
-<pre><code>./test_fpzip.sh [&lt;n processors&gt; [&lt;n bits&gt;]]</code></pre>
-<p>Parameters in square brackets are optional. <code>&lt;n processors&gt;</code> sets the number of MPI processes. Defaults to 1 if not specified. The <code>&lt;n bits&gt;</code> parameter is specific to the FPZIP compressor. See <a href="#description-of-program-arguments">description of program arguments</a> for more information.</p></li>
+<pre><code>./test_fpzip.sh [&lt;n bits&gt; [&lt;n processors&gt;]]</code></pre>
+<p>Parameters in square brackets are optional. The <code>&lt;n bits&gt;</code> parameter is specific to the FPZIP compressor. <code>&lt;n processors&gt;</code> sets the number of MPI processes. Defaults to 1 if not specified. See <a href="#description-of-program-arguments">description of program arguments</a> for more information.</p></li>
 <li><p><code>test_sz.sh</code>: Runs the <a href="#sz">SZ</a> compressor. If no reference file exists, the script will generate it automatically. The test can be run individually with the syntax:</p>
-<pre><code>./test_sz.sh [&lt;n processors&gt; [&lt;error threshold&gt;]]</code></pre>
-<p>Parameters in square brackets are optional. <code>&lt;n processors&gt;</code> sets the number of MPI processes. Defaults to 1 if not specified. The <code>&lt;error threshold&gt;</code> parameter is specific to the SZ compressor. See <a href="#description-of-program-arguments">description of program arguments</a> for more information. The SZ compressor can be further configured using the provided <code>CubismZ/Tests/Test1/sz.config</code> file.</p></li>
+<pre><code>./test_sz.sh [&lt;error threshold&gt; [&lt;n processors&gt;]]</code></pre>
+<p>Parameters in square brackets are optional. The <code>&lt;error threshold&gt;</code> parameter is specific to the SZ compressor. <code>&lt;n processors&gt;</code> sets the number of MPI processes. Defaults to 1 if not specified. See <a href="#description-of-program-arguments">description of program arguments</a> for more information. The SZ compressor can be further configured using the provided <code>CubismZ/Tests/Test1/sz.config</code> file.</p></li>
 </ol>
 <p>The performance metrics (compression ratio, errors, PSNR value) are written to the standard output or into the file <code>run_all.txt</code> if the batch script is used. The PSNR value is computed based on the reference CZ file generated with the <code>genref.sh</code> script.</p>
 <p>The default error threshold in each script has been adjusted so that the resulting PSNR is in the range of 75 to 78 dB.</p>
