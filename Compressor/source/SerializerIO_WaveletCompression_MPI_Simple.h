@@ -112,7 +112,7 @@ protected:
 		int idcompression = -1;
 
 		//1.
-		/* ZLIB/LZ4/LZF/FPC/FPZIP/DUMMY ENCODING (LOSSLESS COMPRESSION) */
+		/* ZLIB/LZ4 (LOSSLESS COMPRESSION) */
 		{
 			/* TODO: replace the following code with: zbytes = zcompress(inputbuffer, bufsize, maxsize); */
 			z_stream myzstream = {0};
@@ -241,9 +241,10 @@ protected:
 					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
 					int nbytes;
 
+					int is_float = (sizeof(Real)==4)? 1 : 0;
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 					int fpzip_prec = (int)this->threshold;
-					fpz_compress3D((void *)mysoabuffer, inbytes, layout, (void *) compressor.compressed_data(), (unsigned int *)&nbytes, (sizeof(Real)==4)?1:0, fpzip_prec);
+					fpz_compress3D((void *)mysoabuffer, inbytes, layout, (void *) compressor.compressed_data(), (unsigned int *)&nbytes, is_float, fpzip_prec);
 
 					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
@@ -254,7 +255,7 @@ protected:
 					int nbytes;
 
 					double zfp_acc = this->threshold;
-					int is_float = 1;
+					int is_float = (sizeof(Real)==4)? 1 : 0;
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 					size_t nbytes_zfp;
 					int status = zfp_compress_buffer(mysoabuffer, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)compressor.compressed_data(), &nbytes_zfp);
@@ -270,6 +271,7 @@ protected:
 #elif defined(_USE_SZ_)
 					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
 					int nbytes;
+					int is_float = (sizeof(Real)==4)? 1 : 0;
 
 					double sz_abs_acc = 0.0;
 					double sz_rel_acc = 0.0;
@@ -278,13 +280,12 @@ protected:
 					int sz_pwr_type = SZ_PWR_MAX_TYPE;
 
 					if(getenv("SZ_ABS_ACC")) sz_abs_acc = atof(getenv("SZ_ABS_ACC"));
-					//SZ_ABS_ACC=$PARAM
 					sz_abs_acc = (double) this->threshold;
 
 					int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 
 					size_t *bytes_sz = (size_t *)malloc(sizeof(size_t));
-					unsigned char *compressed_sz = SZ_compress_args(SZ_FLOAT, (unsigned char *)mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, sz_pwr_acc, sz_pwr_type, 0, 0, layout[2], layout[1], layout[0]);
+					unsigned char *compressed_sz = SZ_compress_args(is_float? SZ_FLOAT:SZ_DOUBLE, (unsigned char *)mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, sz_pwr_acc, sz_pwr_type, 0, 0, layout[2], layout[1], layout[0]);
 
 					nbytes = *bytes_sz;
 					memcpy(compressor.compressed_data(), compressed_sz, nbytes);

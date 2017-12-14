@@ -36,6 +36,9 @@ output_filter()
     fi
 }
 
+# remove any previous instance
+rm -f $fout
+
 # generate reference
 mymsg 'genref.sh' >> $fout
 ./genref.sh | output_filter
