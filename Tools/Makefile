@@ -89,7 +89,6 @@ endif
 nchannels = 1
 CUBISMZFLAGS += -DTOTAL_CHANNELS=$(nchannels)
 CUBISMZFLAGS += -I../../Cubism/source/ -I../Compressor/source -I. -I../Compressor/reader
-CUBISMZLIBS += -L../ThirdParty/build/lib
 CUBISMZLIBS += -ldl
 
 ##################
@@ -100,13 +99,13 @@ VPATH := ../../Cubism/source/ ../Compressor/source/ .
 all: hdf2cz cz2hdf cz2diff
 
 hdf2cz: hdf2cz.o WaveletCompressor.o
-	$(MPICXX) $(extra) $^ -o $@ $(CUBISMZLIBS)
+	$(MPICXX) $(CUBISMZFLAGS) $(extra) $^ -o $@ $(CUBISMZLIBS)
 
 cz2hdf: cz2hdf.o WaveletCompressor.o
-	$(MPICXX) $(extra) $^ -o $@ $(CUBISMZLIBS)
+	$(MPICXX) $(CUBISMZFLAGS) $(extra) $^ -o $@ $(CUBISMZLIBS)
 
 cz2diff: cz2diff.o WaveletCompressor.o
-	$(MPICXX) $(extra) $^ -o $@ $(CUBISMZLIBS)
+	$(MPICXX) $(CUBISMZFLAGS) $(extra) $^ -o $@ $(CUBISMZLIBS)
 
 %.o: %.cpp .FORCE
 	$(MPICXX) $(CUBISMZFLAGS) -c $< -o $@
