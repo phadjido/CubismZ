@@ -39,8 +39,8 @@ Before lossless compression, data (byte) shuffling and bit zeroing can be option
 ## Code layout
 
 - **Compressor:** source code of CubismZ
- - ***Cubism:*** a library for uniform block-structured grids
- - ***source:*** parallel framework and 3D wavelet-based compression
+  - ***Cubism:*** a library for uniform block-structured grids
+  - ***source:*** parallel framework and 3D wavelet-based compression
 
 - **ThirdParty:** External software libraries 
   - ***build:*** where the third-party libraries are installed
@@ -50,16 +50,16 @@ Before lossless compression, data (byte) shuffling and bit zeroing can be option
   - ***zfp:*** ZFP (v 0.5.0) floating point compressor
   - ***zlib:*** ZLIB (v 1.2.11) compression library
   
-- ***Tools:*** source code for the CubismZ tools (`hdf2cz`, `cz2hdf`, `cz2diff`)
+- **Tools:** source code for the CubismZ tools (`hdf2cz`, `cz2hdf`, `cz2diff`)
 	- ***bin/dir:*** where the above tools are installed, according to their compile-time configuration
 	- ***dir:*** *default*, *wavz_zlib*, *fpzip*, *zfp*, *sz* 
 
 - **Tests** source code for the CubismZ tools (`hdf2cz`, `cz2hdf`, `cz2diff`)
-	- **Data:** HDF5 files (demo.h5 (8 MB) and data_005000-p.h5 (512 MB))
-	- **Test1:** location of the first demo test 
-	- **Test2:** location of the second demo test 
-	- **Test1_cav:** as before but for the larger dataset
-	- **Test2_cav:** as before but for the larger dataset 
+	- ***Data:*** HDF5 files (demo.h5 (8 MB) and data_005000-p.h5 (512 MB))
+	- ***Test1:*** location of the first demo test 
+	- ***Test2:*** location of the second demo test 
+	- ***Test1_cav:*** as before but for the larger dataset
+	- ***Test2_cav:*** as before but for the larger dataset 
 
 ## Quick start
 
@@ -128,50 +128,55 @@ The configuration for these binaries is as follows:
 
 Converts the input file to the CZ format without data compression.  No special flags are
 required for this build at compile time.  This target can be built individually
-inside the `CubismZ/Tools` directory with:
+with:
 ```
-make
+make tools-custom
 ```
+using the `CubismZ/Makefile`.
 
 ##### Wavelets and ZLIB
 
 Generates a build using the CubismZ wavelet compression scheme for the first
 compression stage (floating point compression) and applies [ZLIB][linkzlib] in
-the second compression stage.  This target can be built individually inside the
-`CubismZ/Tools` directory with:
+the second compression stage.  This target can be built individually
+with:
 ```
-make wavz=1 zlib=1
+make tools-custom dir=wavz_zlib wavz=1 zlib=1
 ```
+using the `CubismZ/Makefile`.
 
 ##### ZFP
 
 Generates a build using the [ZFP][linkllnl] floating point compressor for the
 first compression stage.  No further compression is applied for the second
-stage.  This target can be built individually inside the `CubismZ/Tools` directory
+stage.  This target can be built individually
 with:
 ```
-make zfp=1
+make tools-custom dir=zfp zfp=1
 ```
+using the `CubismZ/Makefile`.
 
 ##### FPZIP
 
 Generates a build using the [FPZIP][linkllnl] floating point compressor for the
 first compression stage.  No further compression is applied for the second
-stage.  This target can be built individually inside the `CubismZ/Tools` directory
+stage.  This target can be built individually
 with:
 ```
-make fpzip=1
+make tools-custom dir=fpzip fpzip=1
 ```
+using the `CubismZ/Makefile`.
 
 ##### SZ
 
 Generates a build using the [SZ][linkanl] floating point compressor for the
 first compression stage.  No further compression is applied for the second
-stage.  This target can be built individually inside the `CubismZ/Tools` directory
+stage.  This target can be built individually
 with:
 ```
-make sz=1
+make tools-custom dir=sz sz=1
 ```
+using the `CubismZ/Makefile`.
 
 ### Blocksize
 
@@ -208,9 +213,9 @@ make tools-custom dir=mycustom1 wavz=1 shuffle3=1 zlib=1
 make tools-custom dir=mycustom2 wavz=1 lz4=1
 ```
 
-Additional compile time flags may be required for compiler specification and
-HDF5 library paths.  See the [configured compilation](#configured-compilation)
-section for more details.
+Additional compile time flags may be required for compiler specification, data
+precision and HDF5 library paths.  See the [configured
+compilation](#configured-compilation) section for more details.
 
 
 ## Runtime arguments of CubismZ tools for HDF5 datasets
@@ -222,7 +227,8 @@ Compression of HDF5 files to CZ format.
 hdf2cz -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>] [-bpdx <nbx>] [-bpdy <nby>] [-bpdz <nbz>] [-nprocx <npx>] [-nprocy <npy>] [-nprocz <npz>]
 ```
 
-####Description of program arguments
+#### Description of program arguments
+
 - `-h5file <hdf5 file>`: the input HDF5 file to compress 
 - `-czfile <cz file>`: the name of the output compressed file
 - `-threshold <e>`: specifies how lossy the compression will be and depends on the lossy floating compressor used at the first substage of CubismZ. More specifically:
@@ -230,19 +236,19 @@ hdf2cz -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>] [-bpdx
   - **FPZIP**: denotes the number of useful bits of the floating point numbers (e.g. it must be equal to 32 for full accuracy of single precision datasets).
   - **ZFP**: specifies to the *absolute error* tolerance for fixed-accuracy mode.
   - **SZ**: the (de)compression error is limited to be within an *absolute error* defined by the specificed value.
-- `wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). The following options for wavelet types are supported:
+- `-wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). The following options for wavelet types are supported:
   - **1**: 4th order interpolating wavelets
   - **2**: 4th order lifted interpolating wavelets
   - **3**: 3rd order average interpolating wavelets (default)
 
-- `-bpdx`, `-bdpy`, `-bdpz`: number of 3D blocks per dimension (*x*, *y* and *z*) for **each MPI rank**. Their default value is 1.
+- `-bpdx <nbx>`, `-bdpy <nby>`, `-bdpz <nbz>`: number of 3D blocks per dimension (*x*, *y* and *z*) for **each MPI rank**. Their default value is 1.
 - `-nprocx <npx>`, `-nprocy <npy>`, `-nprocz <npz>`: number of MPI processes per dimension (*x*, *y* and *z*) in the 3D MPI cartesian grid topology. Their default value is 1.
 
 ###### Notes
 - The HDF5 file consists of `(npx * nbx) * (npy * nby) * (npz * nbz)` cubic blocks.
 - Each MPI process has a local subgrid of `nbx * nby * nbz)` blocks. 
-- According to the default compilation options default, each cubic block contains 32^2 floats.
-- The total number of processes specified for the cartesian grid (`npx * npy * npz`) must be equal to the number of processes created by the `mpirun` launcher.
+- For the default compilation options each cubic block contains 32^3 floats.
+- The total number of processes specified for the Cartesian grid (`npx * npy * npz`) must be equal to the number of processes created by the `mpirun` launcher.
 
 ### 2. The `ch2hdf` tool
 
@@ -253,9 +259,9 @@ cz2hdf -czfile <cz file> -h5file <basename> [-wtype <wt>]
 
 #### Description of program arguments
 - `-czfile <cz file>`: the input compressed file in CZ format
-- `-h5file <basename>`: the basename of the output HDF5 file and the correspond xmf file.
-   The output file `<basename>.h5` can be visualized with ParaView.
-- `wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). 
+- `-h5file <basename>`: the basename of the output HDF5 file and the corresponding xmf file.
+   The output file `<basename>.h5` can be visualized with Paraview.
+- `-wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). 
 
 ###### Notes
 - The optional argument specified by `wtype` must agree with the type of wavelets used in the compressed file.
@@ -272,9 +278,9 @@ cz2diff -czfile1 <cz file> [-wtype <wt>] -czfile2 <cz reference file>
 ```
 
 #### Description of program arguments
-- `czfile1 <cz file1>`: compressed CZ file 
-- `czfile2 <cz reference file>`: reference CZ file, generated by the default configuration of the `hdf2cz` tool, i.e., without any [compression method enabled](#no-compression-default)
-- `wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). 
+- `-czfile1 <cz file1>`: compressed CZ file 
+- `-czfile2 <cz reference file>`: reference CZ file, generated by the default configuration of the `hdf2cz` tool, i.e., without any [compression method enabled](#no-compression-default)
+- `-wtype <wt>`: wavelet type used by the corresponding compression scheme (if applied). 
 
 ###### Notes
 - Useful for quality assessment of the compression
@@ -286,7 +292,7 @@ cz2diff -czfile1 <cz file> [-wtype <wt>] -czfile2 <cz reference file>
 
 The software release includes a set of basic tests to demonstrate the
 capabilities of the CubismZ compression techniques. The demo dataset (`demo.h5`) 
-consists of the spherical bubble located at the center of the cubic domain
+consists of a spherical bubble located at the center of the cubic domain
 and discretized with `128 * 128 * 128` cells. 
 The HDF5 file (8MB) is available in the `CubismZ/Tests/Data` directory.
 A visualization of the single bubble is depicted below.
@@ -309,7 +315,24 @@ The script can be run with the syntax:
 ```
 where `<n processors>` is the number of MPI processes to be used.  The default
 is 1.  Reference output from [CSELAB][linklab] can be found in
-`cselab_ref_run_all.txt`.  The script executes the following tasks:
+`cselab_ref_run_all.txt`.  The generated output is as follows (example based on
+`test_wavz.sh`):
+```
+###############################################################################
+RUNNING: test_wavz.sh
+###############################################################################
+
+Channel 0: 30.24 kB, wavelet-threshold: 5.0e-05, compr. rate: 270.91
+RES:           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
+RES:       256.23 8.722263e-04 8.271610e-05 3.972721e-05 1.046102e-04 3.611734e-08       0.1249      78.2226
+```
+The comparison results obtained from the `cz2diff` tool start with `RES`.  The
+reported numbers are compression ratio (`CR`), maximum errors in infinity, L1
+and L2 norms (`rel(e_inf)`, `rel(e_1)` and `rel(e_2)`) as well as mean values
+for the L1 and L2 norms (`mean(e_1)` and `mean(e_2)`).  Finally, bits per
+sample (`BPS`) and peak-signal-to-noise-ratio (`PSNR`) are computed.
+
+The `run_all.sh` script executes the following tasks:
 
 1. `genref.sh`: Generates a reference CZ file without compression, based on
    the HDF5 input data.  The script can also be executed individually with the
@@ -326,7 +349,8 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
    ```
    Parameters in square brackets are optional. `<n processors>` sets the number
    of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the wavelet compressor.
+   parameter is specific to the wavelet compressor.  See [description of
+   program arguments](#description-of-program-arguments) for more information.
 
 3. `test_zfp.sh`: Runs the [ZFP](#zfp) compressor.  If no reference file
    exists, the script will generate it automatically.  The test can be run
@@ -336,7 +360,8 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
    ```
    Parameters in square brackets are optional. `<n processors>` sets the number
    of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the ZFP compressor.
+   parameter is specific to the ZFP compressor.  See [description of
+   program arguments](#description-of-program-arguments) for more information.
 
 4. `test_fpzip.sh`: Runs the [FPZIP](#fpzip) compressor.  If no reference file
    exists, the script will generate it automatically.  The test can be run
@@ -346,7 +371,8 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
    ```
    Parameters in square brackets are optional. `<n processors>` sets the number
    of MPI processes.  Defaults to 1 if not specified.  The `<n bits>`
-   parameter is specific to the FPZIP compressor.
+   parameter is specific to the FPZIP compressor.  See [description of
+   program arguments](#description-of-program-arguments) for more information.
 
 5. `test_sz.sh`: Runs the [SZ](#sz) compressor.  If no reference file exists,
    the script will generate it automatically.  The test can be run individually
@@ -356,7 +382,8 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
    ```
    Parameters in square brackets are optional. `<n processors>` sets the number
    of MPI processes.  Defaults to 1 if not specified.  The `<error threshold>`
-   parameter is specific to the SZ compressor. The SZ
+   parameter is specific to the SZ compressor.  See [description of
+   program arguments](#description-of-program-arguments) for more information. The SZ
    compressor can be further configured using the provided
    `CubismZ/Tests/Test1/sz.config` file.
 
@@ -382,7 +409,8 @@ where
   `CubismZ/Tests/Test1`.
 
 * `<error threshold>`: Error threshold that corresponds to the chosen floating
-  point compressor (substage1 compressor).
+  point compressor (substage1 compressor).  See [description of
+   program arguments](#description-of-program-arguments) for more information.
 
 * `<n processors>`: Number of MPI processes to be used.  Optional, defaults to 1.
 
@@ -398,7 +426,7 @@ where `<n processors>` is the number of MPI processes to be used.  The default
 is 1.  The input HDF5 data is compressed to the CZ format using the `hdf2cz`
 tool with wavelets and ZLIB compression substages.  The compressed data is then
 converted back to HDF5 using the `cz2hdf` tool and can be used for
-visualization using a capable tool such as ParaView, for example.
+visualization using a capable tool such as Paraview, for example.
 
 #### Cloud caviation collapse dataset
 
