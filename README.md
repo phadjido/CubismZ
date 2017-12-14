@@ -322,15 +322,13 @@ is 1.  Reference output from [CSELAB][linklab] can be found in
 RUNNING: test_wavz.sh
 ###############################################################################
 
-Channel 0: 30.24 kB, wavelet-threshold: 5.0e-05, compr. rate: 270.91
 RES:           CR   rel(e_inf)     rel(e_1)    mean(e_1)     rel(e_2)    mean(e_2)          BPS         PSNR
 RES:       256.23 8.722263e-04 8.271610e-05 3.972721e-05 1.046102e-04 3.611734e-08       0.1249      78.2226
 ```
-The comparison results obtained from the `cz2diff` tool start with `RES`.  The
-reported numbers are compression ratio (`CR`), maximum errors in infinity, L1
-and L2 norms (`rel(e_inf)`, `rel(e_1)` and `rel(e_2)`) as well as mean values
-for the L1 and L2 norms (`mean(e_1)` and `mean(e_2)`).  Finally, bits per
-sample (`BPS`) and peak-signal-to-noise-ratio (`PSNR`) are computed.
+The reported numbers are compression ratio (`CR`), maximum errors in infinity,
+L1 and L2 norms (`rel(e_inf)`, `rel(e_1)` and `rel(e_2)`) as well as mean
+values for the L1 and L2 norms (`mean(e_1)` and `mean(e_2)`).  Finally,
+bits-per-sample (`BPS`) and peak-signal-to-noise-ratio (`PSNR`) are computed.
 
 The `run_all.sh` script executes the following tasks:
 
