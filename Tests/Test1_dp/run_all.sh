@@ -36,8 +36,10 @@ output_filter()
     fi
 }
 
-# remove any previous instance
+# remove any previous instances
 rm -f $fout
+rm -f tmp.cz
+rm -f ref.cz
 
 # generate reference
 mymsg 'genref.sh' >> $fout

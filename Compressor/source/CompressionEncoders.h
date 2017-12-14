@@ -11,8 +11,6 @@
 #if defined(_USE_LZ4_)
 #ifdef _OPENMP
 #include <omp.h>
-#else
-static int omp_get_num_threads(void) { return 1; }
 #endif
 #endif
 
@@ -198,7 +196,14 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 	#define MAXBUFFERS	1	
 #endif
 
-	if (omp_get_num_threads() > MAXBUFFERS) {
+	int thread_num = 0;
+	int num_threads = 1;
+#ifdef _OPENMP
+	thread_num = omp_get_thread_num();
+	num_threads = omp_get_num_threads();
+#endif
+
+	if (num_threads > MAXBUFFERS) {
 		printf("Small number of buffers (%d)\n", MAXBUFFERS);
 		abort();
 	}
@@ -210,7 +215,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 		abort();
 	}
 
-	char *bufzlib = (char *)&bufzlibA[omp_get_thread_num()][0];
+	char *bufzlib = (char *)&bufzlibA[thread_num][0];
 
 	int ninputbytes = len;
 	int compressedbytes;
