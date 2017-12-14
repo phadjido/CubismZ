@@ -46,18 +46,27 @@ std::exit(EXIT_FAILURE); \
 } \
 } while (false)
 
-/* peh: support of different endianness */
 
-#if 1
+/*#define _OPT_DECOMPRESSION_*/
+
+#if defined(_OPT_DECOMPRESSION_)
+/*
+ * Decompression speed can be improved by keeping recently decompressed chunks
+ * of blocks in a cache and fetching neighbor target blocks directly from there.
+ * It is likely that neighbor blocks will be stored in the same chunk due to the
+ * chunk-based processing of blocks in the first compression substage.
+ */
+#define CACHE_BUFSIZE (4*1024*1024)
+#define CACHE_ENTRIES 16
 struct lru_cache_type
 {
-	unsigned char cachedbuf[16][4*1024*1024];	// cached decompressed chunk
-	unsigned long start[16];			// chunk id
-	double timestamp[16];				// last accessed time
+	unsigned char cachedbuf[CACHE_ENTRIES][CACHE_BUFSIZE];	// cached decompressed chunk
+	unsigned long start[CACHE_ENTRIES];			// chunk id
+	double timestamp[CACHE_ENTRIES];				// last access time
 
 	unsigned char *fetch_buffer(int chunk_start, int *ready)
 	{
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < CACHE_ENTRIES; i++) {
 			if (chunk_start == start[i]) {
 				timestamp[i] = -MPI_Wtime();
 				*ready = 1;
@@ -68,7 +77,7 @@ struct lru_cache_type
 
 		int lru_index = 0;
 		double lru_timestamp = timestamp[0];
-		for (int i = 1; i < 16; i++) {
+		for (int i = 1; i < CACHE_ENTRIES; i++) {
 			if (timestamp[i] < lru_timestamp)
 			{
 				lru_index = i;
@@ -551,6 +560,9 @@ public:
 	int yblocks() { return totalbpd[1]; }
 	int zblocks() { return totalbpd[2]; }
 
+	/*
+	 * Obsolete function
+	 */
 	void load_block(int ix, int iy, int iz, Real MYBLOCK[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_])
 	{
 		FILE * f = fopen(path.c_str(), "rb");
@@ -614,6 +626,9 @@ public:
 		fclose(f);
 	}
 
+	/*
+	 * Returns a decompressed cubism block into MYBLOCK 
+	 */
 	float load_block2(int ix, int iy, int iz, Real MYBLOCK[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_])
 	{
 		float zratio1, zratio2;
@@ -688,6 +703,7 @@ public:
 			int is_float = (sizeof(Real)==4)?1:0;
 			int fpz_decompressedbytes;
 			fpz_decompress3D((char *)compressor.compressed_data(), nbytes, layout, (char *) MYBLOCK, (unsigned int *)&fpz_decompressedbytes, is_float, fpzip_prec);
+
 			if ((fpz_decompressedbytes < 0)||(fpz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
 				printf("FPZ DECOMPRESSION FAILURE:  %d!!\n", fpz_decompressedbytes);
@@ -698,6 +714,7 @@ public:
 			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
 			int is_float = (sizeof(Real)==4)?1:0;
 			size_t zfp_decompressedbytes;
+
 			int status = zfp_decompress_buffer(MYBLOCK, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)compressor.compressed_data(), nbytes, &zfp_decompressedbytes);
 			if ((status < 0)||(zfp_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
@@ -710,7 +727,6 @@ public:
 			int is_float = (sizeof(Real)==4)?1:0;
 			int sz_decompressedbytes;
 
-			//int SZ_decompress_args(int dataType, unsigned char *bytes, int byteLength, void* decompressed_array, int r5, int r4, int r3, int r2, int r1);
 			sz_decompressedbytes = SZ_decompress_args(is_float?SZ_FLOAT:SZ_DOUBLE, (unsigned char *)compressor.compressed_data(), nbytes, MYBLOCK, 0, 0, layout[2], layout[1], layout[0]);
 			sz_decompressedbytes *= sizeof(Real);
 			if ((sz_decompressedbytes < 0)||(sz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
@@ -734,6 +750,10 @@ public:
 		return zratio1*zratio2;
 	}
 
+#if defined(_OPT_DECOMPRESSION_)
+	/*
+	 * Optimized block loading based on caching of previously decompressed chunks of blocks
+	 */
 	float load_block3(int ix, int iy, int iz, Real MYBLOCK[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_])
 	{
 		double t0, t1;
@@ -829,8 +849,10 @@ public:
 #elif defined(_USE_FPZIP_)
 			int fpzip_prec = (int) this->threshold;
 			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int is_float = (sizeof(Real)==4)?1:0;
 			int fpz_decompressedbytes;
-			fpz_decompress3D((char *)compressor.compressed_data(), nbytes, layout, (char *) MYBLOCK, (unsigned int *)&fpz_decompressedbytes, (sizeof(Real)==4)?1:0, fpzip_prec);
+
+			fpz_decompress3D((char *)compressor.compressed_data(), nbytes, layout, (char *) MYBLOCK, (unsigned int *)&fpz_decompressedbytes, is_float, fpzip_prec);
 			if ((fpz_decompressedbytes < 0)||(fpz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
 				printf("FPZ DECOMPRESSION FAILURE:  %d!!\n", fpz_decompressedbytes);
@@ -840,8 +862,9 @@ public:
 #elif defined(_USE_ZFP_)
 			double zfp_acc = (double)this->threshold;
 			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int is_float = (sizeof(Real)==4)?1:0;
 			size_t zfp_decompressedbytes;
-			int is_float = 1;
+
 			int status = zfp_decompress_buffer(MYBLOCK, layout[0], layout[1], layout[2], zfp_acc, is_float, (unsigned char *)compressor.compressed_data(), nbytes, &zfp_decompressedbytes);
 			if ((status < 0)||(zfp_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
@@ -851,10 +874,10 @@ public:
 
 #elif defined(_USE_SZ_)
 			int layout[4] = {_BLOCKSIZE_, _BLOCKSIZE_, _BLOCKSIZE_, 1};
+			int is_float = (sizeof(Real)==4)?1:0;
 			int sz_decompressedbytes;
 
-			//int SZ_decompress_args(int dataType, unsigned char *bytes, int byteLength, void* decompressed_array, int r5, int r4, int r3, int r2, int r1);
-			sz_decompressedbytes = SZ_decompress_args(SZ_FLOAT, (unsigned char *)compressor.compressed_data(), nbytes, MYBLOCK, 0, 0, layout[2], layout[1], layout[0]);
+			sz_decompressedbytes = SZ_decompress_args(is_float?SZ_FLOAT:SZ_DOUBLE, (unsigned char *)compressor.compressed_data(), nbytes, MYBLOCK, 0, 0, layout[2], layout[1], layout[0]);
 			sz_decompressedbytes *= sizeof(Real);
 			if ((sz_decompressedbytes < 0)||(sz_decompressedbytes != ((_BLOCKSIZE_)*(_BLOCKSIZE_)*(_BLOCKSIZE_)*sizeof(Real))))
 			{
@@ -876,6 +899,8 @@ public:
 
 		return zratio1*zratio2;
 	}
+#endif
+
 };
 
 class Reader_WaveletCompressionMPI: public Reader_WaveletCompression
@@ -914,7 +939,7 @@ public:
 			MPI_Bcast(&threshold, sizeof(threshold), MPI_CHAR, 0, comm);
 		}
 
-#if 0
+#if defined(_OPT_DECOMPRESSION_)
 		t_decode = t_wavelet = 0;
 
 		struct stat st;

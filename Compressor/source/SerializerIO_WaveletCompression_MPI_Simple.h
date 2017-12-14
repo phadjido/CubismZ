@@ -68,8 +68,8 @@ protected:
 	  ENTRYSIZE = sizeof(WaveletCompressor) + sizeof(int),
 	  ENTRIES_CANDIDATE = DESIREDMEM / ENTRYSIZE,
 	  ENTRIES = ENTRIES_CANDIDATE ? ENTRIES_CANDIDATE : 1,
-	  BUFFERSIZE = ENTRIES * ENTRYSIZE, //sonnentanz
-	  ALERT = (ENTRIES - 1) * ENTRYSIZE //got rain?
+	  BUFFERSIZE = ENTRIES * ENTRYSIZE,
+	  ALERT = (ENTRIES - 1) * ENTRYSIZE
 	};
 
 	struct CompressionBuffer
@@ -157,7 +157,6 @@ protected:
 
 		//4.
 		assert(allmydata.size() >= written_bytes);
-		//printf("zptr = %p,  zbytes = %ld, allmydata.size()=%ld, written_bytes=%ld, dstoffset=%ld\n", zptr, zbytes, allmydata.size(), written_bytes, dstoffset);
 		memcpy(&allmydata.front() + dstoffset, zptr, zbytes);
 
 #pragma omp atomic
@@ -185,7 +184,7 @@ protected:
 	template<int channel>
 	void _compress(const vector<BlockInfo>& vInfo, const int NBLOCKS, IterativeStreamer streamer)
 	{
-		int compress_threads = omp_get_max_threads();	// peh: recheck this on BGQ
+		int compress_threads = omp_get_max_threads();
 		if (compress_threads < 1) compress_threads = 1;
 
 #pragma omp parallel 
