@@ -246,7 +246,7 @@ hdf2cz -h5file <hdf5 file> -czfile <cz file> -threshold <e> [-wtype <wt>] [-bpdx
 
 ###### Notes
 - The HDF5 file consists of `(npx * nbx) * (npy * nby) * (npz * nbz)` cubic blocks.
-- Each MPI process has a local subgrid of `nbx * nby * nbz)` blocks. 
+- Each MPI process has a local subgrid of `nbx * nby * nbz` blocks. 
 - For the default compilation options each cubic block contains 32^3 floats.
 - The total number of processes specified for the Cartesian grid (`npx * npy * npz`) must be equal to the number of processes created by the `mpirun` launcher.
 
