@@ -8,12 +8,10 @@
 MPICXX ?= mpic++
 MPICC ?= mpicc
 config ?= release
-#hdf-incdir ?= /opt/hdf5_mpich/include
-#hdf-libdir ?= /opt/hdf5_mpich/lib
-hdf-incdir ?= /Users/phadjido/usr/hdf5/include
-hdf-libdir ?= /Users/phadjido/usr/hdf5/lib
-#hdf-incdir ?= /Users/fabs/local/hdf5/build-parallel/include
-#hdf-libdir ?= /Users/fabs/local/hdf5/build-parallel/lib
+# hdf-incdir ?= /opt/hdf5/include
+# hdf-libdir ?= /opt/hdf5/lib
+hdf-incdir ?= .
+hdf-libdir ?= .
 hdf-libs ?= -lhdf5
 
 # general software configuration options
@@ -32,7 +30,7 @@ omp ?= 1
 # lz4                      (to enable lz4=1)
 
 # options (bit zeroing, byte shuffling) for the wavelet coefficients, applied between the first and second stage
-# zerobits: for wavz + zerobits (to enable zerobits=4 or zerobits=8 or zerobits=12 or zeroing=16)
+# zerobits: for wavz + zerobits (to enable zerobits=4 or zerobits=8 or zerobits=12 or zerobits=16)
 # shuffle3: for wavz + shuffle3 (to enable shuffle3=1)
 ###############################################################################
 
