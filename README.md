@@ -452,6 +452,19 @@ The pressure test data (`data_005000-p.h5`) at iteration 5000 can be found in th
 
 - Execute the script `run_all.sh` in the `CubismZ/Tests/Test1_cav` and `CubismZ/Tests/Test2_cav` directories, following the steps for the demo tests.  
 
+## Cavitation Data
+
+The HDF5 data that has been used (and directly included) for the CPC submission
+can be downloaded from polybox:
+
+[data_005000.tar.xz][datadl]
+
+## CPC Submission
+
+The snapshot based on the gitlab.ethz.ch `cpc` branch that has been submitted
+to the CPC Journal can be downloaded from polybox:
+
+[CPC submission snapshot][cpcdl]
 
 [linklab]:http://www.cse-lab.ethz.ch "http://www.cse-lab.ethz.ch"
 [linkllnl]:https://computation.llnl.gov/projects/floating-point-compression "https://computation.llnl.gov/projects/floating-point-compression"
@@ -461,4 +474,6 @@ The pressure test data (`data_005000-p.h5`) at iteration 5000 can be found in th
 [gcclink]:https://gcc.gnu.org/ "https://gcc.gnu.org/"
 [intellink]:https://software.intel.com/en-us/c-compilers "https://software.intel.com/en-us/c-compilers"
 [clanglink]:http://www.llvm.org/ "http://www.llvm.org/"
+[datadl]:https://polybox.ethz.ch/index.php/s/di7qQoWc6eAhCXk/download "https://polybox.ethz.ch/index.php/s/di7qQoWc6eAhCXk/download"
+[cpcdl]:https://polybox.ethz.ch/index.php/s/0aJdJLYNY24XdwR/download "https://polybox.ethz.ch/index.php/s/0aJdJLYNY24XdwR/download"
 <!---->
