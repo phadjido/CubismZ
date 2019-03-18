@@ -2,7 +2,10 @@
  * Reader_WaveletCompression_plain.h
  * CubismZ
  *
- * Copyright 2017 ETH Zurich. All rights reserved.
+ * Copyright 2018 ETH Zurich. All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 #ifndef READER_WAVELETCOMPRESSION_PLAIN_H_
 #define READER_WAVELETCOMPRESSION_PLAIN_H_ 1

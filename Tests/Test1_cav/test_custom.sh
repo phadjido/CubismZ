@@ -1,12 +1,15 @@
-#!/bin/bash
-#
+#!/usr/bin/env bash
 # test_custom.sh
 # CubismZ
 #
-# Copyright 2017 ETH Zurich. All rights reserved.
+# Copyright 2018 ETH Zurich. All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
 #
 set -x #echo on
 
+[[ ! -f ../Data/data_005000-p.h5 ]] && (cd ../Data; ./get_cavitation_data.sh)
 h5file=../Data/data_005000-p.h5
 
 mypath="$1"; shift

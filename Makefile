@@ -1,8 +1,11 @@
-# File       : Makefile
-# Created    : Wed Nov 29 2017 07:34:13 PM (+0100)
-# Description: Build CubismZ tools
-# Copyright 2017 ETH Zurich. All Rights Reserved.
-
+# Makefile
+# CubismZ
+#
+# Copyright 2018 ETH Zurich. All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+#
 ###############################################################################
 # User options
 MPICXX ?= mpic++
@@ -10,8 +13,8 @@ MPICC ?= mpicc
 config ?= release
 # hdf-incdir ?= /opt/hdf5/include
 # hdf-libdir ?= /opt/hdf5/lib
-hdf-incdir ?= .
-hdf-libdir ?= .
+hdf-incdir ?= $(HDF5_ROOT)/include
+hdf-libdir ?= $(HDF5_ROOT)/lib
 hdf-libs ?= -lhdf5
 
 # general software configuration options

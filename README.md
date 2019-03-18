@@ -426,7 +426,7 @@ tool with wavelets and ZLIB compression substages.  The compressed data is then
 converted back to HDF5 using the `cz2hdf` tool and can be used for
 visualization using a capable tool such as Paraview, for example.
 
-#### Cloud caviation collapse dataset
+#### Cloud cavitation collapse dataset
 
 The software release includes an additional dataset that can be optionally used 
 for testing the compression capabilities of CubismZ.  The test data consists of
@@ -446,7 +446,10 @@ figure.  Plus/minus one standard deviation is indicated by the shaded region.
 
 ![](.images/mean_pressure.png)
 
-The pressure test data (`data_005000-p.h5`) at iteration 5000 can be found in the `CubismZ/Tests/Data` directory. The corresponding tests are located in the `CubismZ/Tests/Test1_cav` and `CubismZ/Tests/Test2_cav` directories. 
+The pressure test data (`data_005000-p.h5`) at iteration 5000 can be downloaded
+with the `get_cavitationd_data.sh` script in the `CubismZ/Tests/Data`
+directory. The corresponding tests are located in the `CubismZ/Tests/Test1_cav`
+and `CubismZ/Tests/Test2_cav` directories. 
 
 ##### Running the cavitation data tests
 
@@ -455,7 +458,8 @@ The pressure test data (`data_005000-p.h5`) at iteration 5000 can be found in th
 ## Cavitation Data
 
 The HDF5 data that has been used (and directly included) for the CPC submission
-can be downloaded from polybox:
+can be downloaded with the `get_cavitation_data.sh` script in the
+`CubismZ/Tests/Data` directory or by using the link below:
 
 [data_005000.tar.xz][datadl]
 
@@ -465,6 +469,13 @@ The snapshot based on the gitlab.ethz.ch `cpc` branch that has been submitted
 to the CPC Journal can be downloaded from polybox:
 
 [CPC submission snapshot][cpcdl]
+
+
+## Third party acknowledgments
+
+* This product includes software produced by UChicago Argonne, LLC under Contract
+No. DE-AC02-06CH11357 with the Department of Energy.
+
 
 [linklab]:http://www.cse-lab.ethz.ch "http://www.cse-lab.ethz.ch"
 [linkllnl]:https://computation.llnl.gov/projects/floating-point-compression "https://computation.llnl.gov/projects/floating-point-compression"

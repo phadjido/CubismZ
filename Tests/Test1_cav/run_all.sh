@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# File       : run_all.sh
-# Created    : Thu Dec 07 2017 12:29:17 PM (+0100)
-# Description: Batch run all test cases.  The output is stored in run_all.txt
-# Copyright 2017 ETH Zurich. All Rights Reserved.
+# run_all.sh
+# CubismZ
+#
+# Copyright 2018 ETH Zurich. All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+#
 nproc=1
 if [[ "$#" -eq 1 ]]; then
     nproc=$1
