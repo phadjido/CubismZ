@@ -1,5 +1,11 @@
 # CubismZ: A Parallel Data Compression Framework for Large Scale 3D Scientific Data
 
+Related publication: 
+`P. Hadjidoukas, F. Wermelinger, A Parallel Data Compression Framework for Large Scale 3D Scientific Data, arXiv:1903.07761 [cs.DC]`
+
+https://arxiv.org/abs/1903.07761
+
+
 
 ## Software design
 
