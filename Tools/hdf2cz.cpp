@@ -7,14 +7,15 @@
  * This source code is licensed under the BSD-style license found in the
  * LICENSE file in the root directory of this source tree.
  */
-#include <map>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <mpi.h>
-using namespace std;
-#include "Test_IO_Compressed.h"
-#include "ArgumentParser.h"
 
+#include "ArgumentParser.h"
+#include "Test_IO_Compressed.h"
+
+using namespace std;
 
 Simulation * sim = NULL;
 

@@ -8,12 +8,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <mpi.h>
+#include <algorithm>
 #include <hdf5.h>
-#include <H5FDmpio.h>
+#include <iostream>
+#include <mpi.h>
+#include <sstream>
+#include <string>
 #define _PARALLEL_IO_
 #define _COLLECTIVE_IO_
 #define _TRANSPOSE_DATA_
@@ -26,6 +26,8 @@
 
 #include "ArgumentParser.h"
 #include "Reader_WaveletCompression.h"
+
+using namespace std;
 
 int main(int argc, char **argv)
 {
@@ -343,8 +345,13 @@ int main(int argc, char **argv)
 		fprintf(xmf, "       <DataItem Name=\"Spacing\" Dimensions=\"3\" NumberType=\"Double\" Precision=\"8\" Format=\"XML\">\n");
 #endif
 
-		fprintf(xmf, "        %e %e %e\n", 1./(Real)max(dims[0],max(dims[1],dims[2])),1./(Real)max(dims[0],max(dims[1],dims[2])),1./(Real)max(dims[0],max(dims[1],dims[2])));
-		fprintf(xmf, "       </DataItem>\n");
+                fprintf(
+                    xmf,
+                    "        %e %e %e\n",
+                    1. / (Real)std::max(dims[0], std::max(dims[1], dims[2])),
+                    1. / (Real)std::max(dims[0], std::max(dims[1], dims[2])),
+                    1. / (Real)std::max(dims[0], std::max(dims[1], dims[2])));
+                fprintf(xmf, "       </DataItem>\n");
 		fprintf(xmf, "     </Geometry>\n");
 
 		if (NCHANNELS == 1)

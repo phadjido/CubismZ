@@ -8,14 +8,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 #include <iostream>
-#include <string>
-#include <sstream>
 #include <mpi.h>
+#include <sstream>
+#include <string>
 
 #include <float.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #ifdef _OPENMP
@@ -25,6 +25,8 @@
 #include "ArgumentParser.h"
 #include "Reader_WaveletCompression.h"
 #include "Reader_WaveletCompression_plain.h"
+
+using namespace std;
 
 int main(int argc, char **argv)
 {
