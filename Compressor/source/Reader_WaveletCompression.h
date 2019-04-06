@@ -20,11 +20,6 @@
 #include <sys/stat.h>
 #include <mpi.h>
 
-#ifdef _OPENMP
-#include <omp.h>
-#else
-#endif
-
 using namespace std;
 
 #ifdef _FLOAT_PRECISION_
@@ -630,7 +625,7 @@ public:
 	}
 
 	/*
-	 * Returns a decompressed cubism block into MYBLOCK 
+	 * Returns a decompressed cubism block into MYBLOCK
 	 */
 	float load_block2(int ix, int iy, int iz, Real MYBLOCK[_BLOCKSIZE_][_BLOCKSIZE_][_BLOCKSIZE_])
 	{
