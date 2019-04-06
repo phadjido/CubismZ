@@ -22,7 +22,7 @@ FPZIP_CONV = -DWITH_UNION
 
 # no changes should be necessary below ----------------------------------------
 
-CXX = g++
+CXX ?= g++
 CXXFLAGS += -ansi -Wall -g
 CXXFLAGS += -O3
 DEFS += -DFPZIP_BLOCK_SIZE=$(FPZIP_BLOCK_SIZE) -DFPZIP_FP=$(FPZIP_FP) $(FPZIP_CONV)
@@ -45,7 +45,7 @@ $(TARGET): $(O_FILES)
 	$(CXX) $(CXXFLAGS) $(DEFS) -I../inc -c $<
 
 clean:
-	@rm -f $(O_FILES) 
+	@rm -f $(O_FILES)
 
 cleanall: clean
 	@rm -f $(TARGET)

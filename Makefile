@@ -32,9 +32,11 @@ omp ?= 1
 # zlib                     (to enable zlib=1)
 # lz4                      (to enable lz4=1)
 
-# options (bit zeroing, byte shuffling) for the wavelet coefficients, applied between the first and second stage
-# zerobits: for wavz + zerobits (to enable zerobits=4 or zerobits=8 or zerobits=12 or zerobits=16)
-# shuffle3: for wavz + shuffle3 (to enable shuffle3=1)
+# options (bit zeroing, byte shuffling) for the wavelet coefficients, applied
+# between the first and second stage:
+# - zerobits: for wavz + zerobits (to enable zerobits=4 or zerobits=8 or
+#   zerobits=12 or zerobits=16)
+# - shuffle3: for wavz + shuffle3 (to enable shuffle3=1)
 ###############################################################################
 
 ###############################################################################
