@@ -84,7 +84,9 @@ Before lossless compression, data (byte) shuffling and bit zeroing can be option
 
 - Issue `make` within the `CubismZ` directory. This will
   1. configure and build the third-party libraries and install them into the `CubismZ/ThirdParty/build` directory. 
-  2. build the CubismZ tools (`hdf2cz`, `cz2hdf`, `cz2diff`) for each of the basic configurations and put the executable into the corresponding subdirectories of the `CubimZ/Tools/bin` directory. 
+  2. build the CubismZ tools (`hdf2cz`, `cz2hdf`, `cz2diff`) for each of the
+  basic configurations and put the executable into the corresponding
+  subdirectories of the `CubismZ/Tools/bin` directory. 
 
 #### 4. Execute the demo tests
 
