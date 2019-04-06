@@ -12,13 +12,12 @@
 #define _WAVELETCOMPRESSOR_H_ 1
 
 #include <cassert>
-#include <cstdlib>
-#include <cstring>
 #include <cstdio>
+#include <cstdlib>
 
 #include "FullWaveletTransform.h"
 
-#include <zlib.h>	// always needed
+#include <zlib.h> // always needed
 
 #if defined(_USE_LZ4_)
 #include <lz4.h>

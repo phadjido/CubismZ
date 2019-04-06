@@ -11,6 +11,7 @@
 #ifndef _COMPRESSIONENCODERS_PLAIN_H_
 #define _COMPRESSIONENCODERS_PLAIN_H_ 1
 
+#include <cstring>
 #include <zlib.h>	// always needed
 
 inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len, unsigned *max);
@@ -22,7 +23,7 @@ inline size_t zdecompress_plain(unsigned char * inputbuf, size_t ninputbytes, un
 	int decompressedbytes = 0;
 
 	decompressedbytes = ninputbytes;
-	memcpy(outputbuf, inputbuf, ninputbytes);
+    std::memcpy(outputbuf, inputbuf, ninputbytes);
 
 	return decompressedbytes;
 }

@@ -12,9 +12,15 @@
 #define SERIALIZERIO_WAVELETCOMPRESSION_MPI_SIMPLE_H_
 #endif
 
-#include <typeinfo>
-#include <sstream>
+#include <cassert>
+#include <cstring>
 #include <numeric>
+#include <sstream>
+#include <string>
+#include <typeinfo>
+#include <vector>
+#include <map>
+#include <mpi.h>
 #ifdef _OPENMP
 #include <omp.h>
 #else
@@ -22,14 +28,12 @@ static int omp_get_max_threads(void) { return 1;}
 static int omp_get_thread_num(void) { return 0; }
 #endif
 
-#include <Timer.h>
-#include <map>
+#include "Timer.h"
+#include "BlockInfo.h"
 
-using namespace std;
-
-#include "WaveletSerializationTypes.h"
 #include "FullWaveletTransform.h"
 #include "WaveletCompressor.h"
+#include "WaveletSerializationTypes.h"
 
 #include "CompressionEncoders.h"
 //#define	_WRITE_AT_ALL_	1	// peh:
@@ -83,20 +87,20 @@ protected:
 
 	struct TimingInfo { float total, fwt, encoding; };
 
-	string binaryocean_title, binarylut_title, header;
+	std::string binaryocean_title, binarylut_title, header;
 
-	vector< BlockMetadata > myblockindices; //tells in which compressed chunk is any block, nblocks
+	std::vector< BlockMetadata > myblockindices; //tells in which compressed chunk is any block, nblocks
 	HeaderLUT lutheader;
-	vector< size_t > lut_compression; //tells the number of compressed chunk, and where do they start, nchunks + 2
-	vector< unsigned char > allmydata; //buffer with the compressed data
+	std::vector< size_t > lut_compression; //tells the number of compressed chunk, and where do they start, nchunks + 2
+	std::vector< unsigned char > allmydata; //buffer with the compressed data
 	size_t written_bytes, pending_writes, completed_writes;
 
 	Real threshold;
 	bool halffloat, verbosity;
 	int wtype_read, wtype_write;	// peh
 
-	vector< float > workload_total, workload_fwt, workload_encode; //per-thread cpu time for imbalance insight for fwt and encoding
-	vector<CompressionBuffer> workbuffer; //per-thread compression buffer
+	std::vector< float > workload_total, workload_fwt, workload_encode; //per-thread cpu time for imbalance insight for fwt and encoding
+	std::vector<CompressionBuffer> workbuffer; //per-thread compression buffer
 
 	float _encode_and_flush(unsigned char inputbuffer[], long& bufsize, const long maxsize, BlockMetadata metablocks[], int& nblocks)
 	{
@@ -149,7 +153,7 @@ protected:
 				//safely resize
 				printf("resizing allmydata to %ld bytes\n", written_bytes);
 				allmydata.resize(written_bytes);
-				
+
 			}
 
 			idcompression = lut_compression.size();
@@ -160,7 +164,7 @@ protected:
 
 		//4.
 		assert(allmydata.size() >= written_bytes);
-		memcpy(&allmydata.front() + dstoffset, zptr, zbytes);
+		std::memcpy(&allmydata.front() + dstoffset, zptr, zbytes);
 
 #pragma omp atomic
 		++completed_writes;
@@ -185,12 +189,14 @@ protected:
 
 
 	template<int channel>
-	void _compress(const vector<BlockInfo>& vInfo, const int NBLOCKS, IterativeStreamer streamer)
+	void _compress(const std::vector<BlockInfo>& vInfo, const int NBLOCKS, IterativeStreamer streamer)
 	{
+        typedef typename GridType::BlockType TBlock;
+
 		int compress_threads = omp_get_max_threads();
 		if (compress_threads < 1) compress_threads = 1;
 
-#pragma omp parallel 
+#pragma omp parallel
 		{
 		  const int tid = omp_get_thread_num();
 
@@ -209,38 +215,38 @@ protected:
 
 				//wavelet compression
 				{
-					FluidBlock& b = *(FluidBlock*)vInfo[i].ptrBlock;
+					TBlock& b = *(TBlock*)vInfo[i].ptrBlock;
 
 					WaveletCompressor compressor;
 
 					Real * const mysoabuffer = &compressor.uncompressed_data()[0][0][0];
 					if(streamer.name() == "StreamerGridPointIterative")
 					{
-					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
-						for(int iy=0; iy<FluidBlock::sizeY; iy++)
-							for(int ix=0; ix<FluidBlock::sizeX; ix++)
+					for(int iz=0; iz<TBlock::sizeZ; iz++)
+						for(int iy=0; iy<TBlock::sizeY; iy++)
+							for(int ix=0; ix<TBlock::sizeX; ix++)
 								mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = streamer.template operate<channel>(b(ix, iy, iz));
 					}
 					else
 					{
 					IterativeStreamer mystreamer(b);
-					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
-						for(int iy=0; iy<FluidBlock::sizeY; iy++)
-							for(int ix=0; ix<FluidBlock::sizeX; ix++)
+					for(int iz=0; iz<TBlock::sizeZ; iz++)
+						for(int iy=0; iy<TBlock::sizeY; iy++)
+							for(int ix=0; ix<TBlock::sizeX; ix++)
 								mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)] = mystreamer.operate(ix, iy, iz);
 					}
 
 
 					//wavelet digestion
-#if defined(_USE_WAVZ_) 
+#if defined(_USE_WAVZ_)
 					const int nbytes = (int)compressor.compress(this->threshold, this->halffloat, this->wtype_write);
-					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					std::memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
 
-					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+					std::memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
 
 #elif defined(_USE_FPZIP_)
-					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					const int inbytes = TBlock::sizeX * TBlock::sizeY * TBlock::sizeZ * sizeof(Real);
 					int nbytes;
 
 					int is_float = (sizeof(Real)==4)? 1 : 0;
@@ -248,12 +254,12 @@ protected:
 					int fpzip_prec = (int)this->threshold;
 					fpz_compress3D((void *)mysoabuffer, inbytes, layout, (void *) compressor.compressed_data(), (unsigned int *)&nbytes, is_float, fpzip_prec);
 
-					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					std::memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
-					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+					std::memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
 
 #elif defined(_USE_ZFP_)
-					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					const int inbytes = TBlock::sizeX * TBlock::sizeY * TBlock::sizeZ * sizeof(Real);
 					int nbytes;
 
 					double zfp_acc = this->threshold;
@@ -266,12 +272,12 @@ protected:
 					printf("zfp_compress status = %d, from %d to %d bytes = %d\n", status, inbytes, nbytes);
 #endif
 
-					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					std::memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
-					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+					std::memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
 
 #elif defined(_USE_SZ_)
-					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					const int inbytes = TBlock::sizeX * TBlock::sizeY * TBlock::sizeZ * sizeof(Real);
 					int nbytes;
 					int is_float = (sizeof(Real)==4)? 1 : 0;
 
@@ -290,7 +296,7 @@ protected:
 					unsigned char *compressed_sz = SZ_compress_args(is_float? SZ_FLOAT:SZ_DOUBLE, (unsigned char *)mysoabuffer, bytes_sz, ABS, sz_abs_acc, sz_rel_acc, sz_pwr_acc, sz_pwr_type, 0, 0, layout[2], layout[1], layout[0]);
 
 					nbytes = *bytes_sz;
-					memcpy(compressor.compressed_data(), compressed_sz, nbytes);
+					std::memcpy(compressor.compressed_data(), compressed_sz, nbytes);
 					free(bytes_sz);
 					free(compressed_sz);
 
@@ -298,26 +304,26 @@ protected:
 					printf("SZ_compress_args: from %d to %d bytes\n", inbytes, nbytes);
 #endif
 
-					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					std::memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
-					memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
+					std::memcpy(mybuf.compressedbuffer + mybytes, compressor.compressed_data(), sizeof(unsigned char) * nbytes);
 
 #else /* NO COMPRESSION */
 
-					const int inbytes = FluidBlock::sizeX * FluidBlock::sizeY * FluidBlock::sizeZ * sizeof(Real);
+					const int inbytes = TBlock::sizeX * TBlock::sizeY * TBlock::sizeZ * sizeof(Real);
 					int nbytes = inbytes;
-					memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
+					std::memcpy(mybuf.compressedbuffer + mybytes, &nbytes, sizeof(nbytes));
 					mybytes += sizeof(nbytes);
 
 #if defined(_USE_ZEROBITS_)
 					// set some bits to zero
-					for(int iz=0; iz<FluidBlock::sizeZ; iz++)
-					for(int iy=0; iy<FluidBlock::sizeY; iy++)
-					for(int ix=0; ix<FluidBlock::sizeX; ix++)
+					for(int iz=0; iz<TBlock::sizeZ; iz++)
+					for(int iy=0; iy<TBlock::sizeY; iy++)
+					for(int ix=0; ix<TBlock::sizeX; ix++)
 						float_zero_bits((unsigned int *)&mysoabuffer[ix + _BLOCKSIZE_ * (iy + _BLOCKSIZE_ * iz)], _ZEROBITS_);
 #endif
 
-					memcpy(mybuf.compressedbuffer + mybytes, mysoabuffer, sizeof(unsigned char) * nbytes);
+					std::memcpy(mybuf.compressedbuffer + mybytes, mysoabuffer, sizeof(unsigned char) * nbytes);
 #endif
 					mybytes += nbytes;
 				}
@@ -344,7 +350,7 @@ protected:
 		}
 	}
 
-	virtual void _to_file(const MPI_Comm mycomm, const string fileName)
+	virtual void _to_file(const MPI_Comm mycomm, const std::string fileName)
 	{
 		int mygid;
 		int nranks;
@@ -354,8 +360,8 @@ protected:
 		MPI_Info myfileinfo;
 		MPI_Info_create(&myfileinfo);
 
-		string key("access_style");
-		string val("write_once");
+		std::string key("access_style");
+		std::string val("write_once");
 		MPI_Info_set(myfileinfo, (char*)key.c_str(), (char*)val.c_str());
 
 		MPI_File myfile;
@@ -465,7 +471,7 @@ protected:
 		MPI_File_close(&myfile); //bon voila tu vois ou quoi
 	}
 
-	float _profile_report(const char * const workload_name, vector<float>& workload, const MPI_Comm mycomm, bool isroot)
+	float _profile_report(const char * const workload_name, std::vector<float>& workload, const MPI_Comm mycomm, bool isroot)
 	{
 		float tmin = *std::min_element(workload.begin(), workload.end());
 		float tmax = *std::max_element(workload.begin(), workload.end());
@@ -487,9 +493,9 @@ protected:
 	}
 
 	template<int channel>
-	void _write(GridType & inputGrid, string fileName, IterativeStreamer streamer)
+	void _write(GridType & inputGrid, std::string fileName, IterativeStreamer streamer)
 	{
-		const vector<BlockInfo> infos = inputGrid.getBlocksInfo();
+		const std::vector<BlockInfo> infos = inputGrid.getBlocksInfo();
 		const int NBLOCKS = infos.size();
 
 		//prepare the headers
@@ -590,7 +596,7 @@ protected:
 				written_bytes += extrabytes;
 			}
 			double t1 = MPI_Wtime();
-			printf("SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization %f seconds\n", t1-t0); 
+			printf("SerializerIO_WaveletCompression_MPI_Simple.h: compress+serialization %f seconds\n", t1-t0);
 		}
 
 		double io_t0 = MPI_Wtime();
@@ -605,11 +611,11 @@ protected:
 		Timer timer; timer.start();
 		if (getenv("CUBISMZ_NOIO") == NULL)
 		_to_file(mycomm, fileName);
-		vector<float> workload_file(1, timer.stop());
+		std::vector<float> workload_file(1, timer.stop());
 		///
 		double io_t1 = MPI_Wtime();
 #if VERBOSE
-		printf("SerializerIO_WaveletCompression_MPI_Simple.h: _to_file %f seconds\n", io_t1-io_t0); 
+		printf("SerializerIO_WaveletCompression_MPI_Simple.h: _to_file %f seconds\n", io_t1-io_t0);
 #endif
 
 		//just a report now
@@ -643,7 +649,7 @@ protected:
 		}
 	}
 
-	void _read(string path)
+	void _read(std::string path)
 	{
 		//THE FIRST PART IS SEQUENTIAL
 		//THE SECOND ONE IS RANDOM ACCESS
@@ -652,14 +658,14 @@ protected:
 		int NBLOCKS = -1;
 		int totalbpd[3] = {-1, -1, -1};
 		int bpd[3] = { -1, -1, -1};
-		string binaryocean_title = "\n==============START-BINARY-OCEAN==============\n";
+		std::string binaryocean_title = "\n==============START-BINARY-OCEAN==============\n";
 		const int miniheader_bytes = sizeof(size_t) + binaryocean_title.size();
 
-		vector<BlockMetadata> metablocks;
+		std::vector<BlockMetadata> metablocks;
 
 		//random access data structures: meta2subchunk, lutchunks;
-		map<int, map<int, map<int, CompressedBlock > > > meta2subchunk;
-		vector<size_t> lutchunks;
+		std::map<int, std::map<int, std::map<int, CompressedBlock > > > meta2subchunk;
+		std::vector<size_t> lutchunks;
 
 		{
 			FILE * file = fopen(path.c_str(), "rb");
@@ -677,7 +683,7 @@ protected:
 				char buf[1024];
 				fgets(buf, sizeof(buf), file);
 				fgets(buf, sizeof(buf), file);
-				assert(string("==============START-ASCI-HEADER==============\n") == string(buf));
+				assert(std::string("==============START-ASCI-HEADER==============\n") == std::string(buf));
 
 				fscanf(file, "Endianess:  %s\n", buf);
 				{
@@ -685,9 +691,9 @@ protected:
 					bool isone = *(char *)(&one);
 
 					if (isone)
-						assert(string(buf) == "little");
+						assert(std::string(buf) == "little");
 					else
-						assert(string(buf) == "big");
+						assert(std::string(buf) == "big");
 				}
 
 
@@ -702,21 +708,21 @@ protected:
 				fscanf(file, "SubdomainBlocks: %d x %d x %d\n", bpd, bpd + 1, bpd + 2);
 
 				fscanf(file, "HalfFloat: %s\n", buf);
-				this->halffloat = (string(buf) == "yes");
+				this->halffloat = (std::string(buf) == "yes");
 
 				fscanf(file, "Wavelets: %s\n", buf);
-				assert(buf == string(WaveletsOnInterval::ChosenWavelets_GetName(this->wtype_read)));
+				assert(buf == std::string(WaveletsOnInterval::ChosenWavelets_GetName(this->wtype_read)));
 
 				fscanf(file, "Encoder: %s\n", buf);
 #if defined(_USE_ZLIB_)
-				assert(buf == string("zlib"));
+				assert(buf == std::string("zlib"));
 #else	/* _USE_LZ4_ */
-				assert(buf == string("lz4"));
+				assert(buf == std::string("lz4"));
 #endif
 
 
 				fgets(buf, sizeof(buf), file);
-				assert(string("==============START-BINARY-METABLOCKS==============\n") == string(buf));
+				assert(std::string("==============START-BINARY-METABLOCKS==============\n") == std::string(buf));
 
 				NBLOCKS = totalbpd[0] * totalbpd[1] * totalbpd[2];
 			}
@@ -739,7 +745,7 @@ protected:
 				char buf[1024];
 				fgetc(file);
 				fgets(buf, sizeof(buf), file);
-				assert(string("==============START-BINARY-LUT==============\n") == string(buf));
+				assert(std::string("==============START-BINARY-LUT==============\n") == std::string(buf));
 
 				//bool done = false;
 
@@ -749,7 +755,7 @@ protected:
 				assert(NBLOCKS % BPS == 0);
 				const int SUBDOMAINS = NBLOCKS / BPS;
 
-				vector<HeaderLUT> headerluts(SUBDOMAINS); //oh mamma mia
+				std::vector<HeaderLUT> headerluts(SUBDOMAINS); //oh mamma mia
 				fread(&headerluts.front(), sizeof(HeaderLUT), SUBDOMAINS, file);
 
 				for(int s = 0, currblock = 0; s < SUBDOMAINS; ++s)
@@ -764,7 +770,7 @@ protected:
 
 					//read the lut
 					fseek(file, lutstart, SEEK_SET);
-					vector<size_t> mylut(nchunks);
+					std::vector<size_t> mylut(nchunks);
 					fread(&mylut.front(), sizeof(size_t), nchunks, file);
 
 					for(int i=0; i< nchunks; ++i)
@@ -853,13 +859,13 @@ protected:
 			assert(start < global_header_displacement);
 			assert(start + compressedchunk.extent < global_header_displacement);
 
-			vector<unsigned char> compressedbuf(compressedchunk.extent);
+			std::vector<unsigned char> compressedbuf(compressedchunk.extent);
 			fseek(f, compressedchunk.start, SEEK_SET);
 			fread(&compressedbuf.front(), compressedchunk.extent, 1, f);
 			assert(!feof(f));
 
 
-			vector<unsigned char> waveletbuf(4 << 20);
+			std::vector<unsigned char> waveletbuf(4 << 20);
 			const size_t decompressedbytes = zdecompress(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 			int readbytes = 0;
 			for(int i = 0; i<compressedchunk.subid; ++i)
@@ -881,7 +887,7 @@ protected:
 				assert(readbytes <= decompressedbytes);
 
 				WaveletCompressor compressor;
-				memcpy(compressor.compressed_data(), &waveletbuf[readbytes], nbytes);
+				std::memcpy(compressor.compressed_data(), &waveletbuf[readbytes], nbytes);
 				readbytes += nbytes;
 
 				compressor.decompress(halffloat, nbytes, wtype_read, MYBLOCK);
@@ -918,7 +924,7 @@ public:
 	}
 
 	template< int channel >
-	void Write(GridType & inputGrid, string fileName, IterativeStreamer streamer = IterativeStreamer())
+	void Write(GridType & inputGrid, std::string fileName, IterativeStreamer streamer = IterativeStreamer())
 	{
 		std::stringstream ss;
 		//ss << "." << streamer.name() << ".channel"  << channel;
@@ -928,7 +934,7 @@ public:
 		_write<channel>(inputGrid, fileName + ss.str(), streamer);
 	}
 
-	void Read(string fileName, IterativeStreamer streamer = IterativeStreamer())
+	void Read(std::string fileName, IterativeStreamer streamer = IterativeStreamer())
 	{
 		for(int channel = 0; channel < NCHANNELS; ++channel)
 		{

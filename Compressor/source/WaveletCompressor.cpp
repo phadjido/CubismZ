@@ -17,6 +17,7 @@ typedef double Real;
 #include <cstdio>
 #include <bitset>
 #include <cassert>
+#include <cstring>
 
 using namespace std;
 
@@ -97,26 +98,26 @@ template<int N>
 void serialize_bitset(bitset<N> mybits, unsigned char * const buf, const int nbytes)
 {
 	assert(nbytes == (N + 7) / 8);
-	
+
 	const int nicebits = 8 * (N / 8);
-	
+
 	for(int i = 0, B = 0; i < nicebits; i += 8, ++B)
 	{
 		unsigned char c = 0;
-		
+
 		for(int b = 0; b < 8; ++b)
 			c |= mybits[i + b] << b;
-		
+
 		buf[B] = c;
 	}
-	
+
 	if (nicebits < N)
 	{
 		unsigned char c = 0;
-		
+
 		for(int b = nicebits; b < N; ++b)
 			c |= mybits[b] << (b - nicebits);
-		
+
 		buf[nbytes - 1] = c;
 	}
 }
@@ -125,37 +126,37 @@ template<int N>
 int deserialize_bitset(bitset<N>& mybits, const unsigned char * const buf, const int nbytes)
 {
 	assert(nbytes == (N + 7) / 8);
-	
+
 	int sum = 0;
-	
+
 	const int nicebits = 8 * (N / 8);
-	
+
 	for(int i = 0, B = 0; i < nicebits; i += 8, ++B)
 	{
 		const unsigned char c = buf[B];
-		
+
 		for(int b = 0; b < 8; ++b)
-			sum += (mybits[i + b] = (c >> b) & 1);		
+			sum += (mybits[i + b] = (c >> b) & 1);
 	}
-	
+
 	if (nicebits < N)
 	{
 		const unsigned char c = buf[nbytes - 1];
-		
+
 		for(int b = nicebits; b < N; ++b)
 			sum += (mybits[b] = (c >> (b - nicebits)) & 1);
 	}
-	
+
 	return sum;
 }
 
 template<int DATASIZE1D, typename DataType>
 size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float threshold, const bool float16, int wtype)
-{				
+{
 	full.fwt(wtype);
-	
+
 	assert(BITSETSIZE % sizeof(DataType) == 0);
-	
+
 	bitset<BS3> mask;
 	const int survivors = full.template threshold<DataType, DATASIZE1D>(threshold, mask, (DataType *)(bufcompression + BITSETSIZE));
 
@@ -165,7 +166,7 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 
   #if defined(_USE_ZEROBITS_)
 	// set some bits to zero
-	for(int i = 0; i < survivors; ++i) 
+	for(int i = 0; i < survivors; ++i)
 	{
 		DataType *ps = (i + (DataType *)(bufcompression + BITSETSIZE));
 		float_zero_bits3((unsigned int *)ps, _ZEROBITS_);	// xxx: extend it for doubles
@@ -184,12 +185,12 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 
 template<int DATASIZE1D, typename DataType>
 size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float threshold, const bool float16, bool swap, int wtype)
-{				
+{
 	full.fwt(wtype);
-	
+
 	exit(1);
 	assert(BITSETSIZE % sizeof(DataType) == 0);
-	
+
 	bitset<BS3> mask;
 	const int survivors = full.template threshold<DataType, DATASIZE1D>(threshold, mask, (DataType *)(bufcompression + BITSETSIZE));
 
@@ -199,7 +200,7 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 
   #if defined(_USE_ZEROBITS_)
 	// set some bits to zero
-	for(int i = 0; i < survivors; ++i) 
+	for(int i = 0; i < survivors; ++i)
 	{
 		DataType *ps = (i + (DataType *)(bufcompression + BITSETSIZE));
 		float_zero_bits3((unsigned int *)ps, _ZEROBITS_);	// xxx: extend it for doubles
@@ -224,7 +225,7 @@ size_t WaveletCompressorGeneric<DATASIZE1D, DataType>::compress(const float thre
 #endif
 
 	return BITSETSIZE + sizeof(DataType) * survivors;
-	
+
 }
 
 
@@ -240,20 +241,20 @@ void WaveletCompressorGeneric<DATASIZE1D, DataType>::decompress(const bool float
 
 	assert((bytes - sizeof(bitset<BS3>)) % sizeof(DataType) == 0 || float16);
 	assert((bytes - sizeof(bitset<BS3>)) % sizeof(unsigned short) == 0);
-	
+
 	size_t bytes_read = BITSETSIZE;
-	
+
 	//const
 	int nelements = (bytes - bytes_read) / (float16 ? sizeof(unsigned short) : sizeof(DataType));
 	if (nelements - expected == 1) {
 		nelements--;
 	}
 	assert(expected == nelements);
-	
+
 	vector<DataType> datastream(nelements);
-	
-	memcpy((void *)&datastream.front(), bufcompression + bytes_read, sizeof(DataType) * nelements);	
-	
+
+	memcpy((void *)&datastream.front(), bufcompression + bytes_read, sizeof(DataType) * nelements);
+
 	full.load(datastream, mask);
 	full.iwt(wtype);
 }

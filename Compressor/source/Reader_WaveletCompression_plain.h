@@ -10,17 +10,15 @@
 #ifndef READER_WAVELETCOMPRESSION_PLAIN_H_
 #define READER_WAVELETCOMPRESSION_PLAIN_H_ 1
 
+#include <cassert>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
-#include <cassert>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include <mpi.h>
-
-using namespace std;
 
 #ifdef _FLOAT_PRECISION_
 typedef float Real;
@@ -35,21 +33,21 @@ typedef double Real;
 #include "../../Compressor/source/FullWaveletTransform.h"
 
 //MACRO TAKEN FROM http://stackoverflow.com/questions/3767869/adding-message-to-assert
-#   define MYASSERT(condition, message) \
-do { \
-if (! (condition)) { \
-std::cerr << "Assertion `" #condition "` failed in " << __FILE__ \
-<< " line " << __LINE__ << ": " << message << std::endl; \
-std::exit(EXIT_FAILURE); \
-} \
-} while (false)
+#define MYASSERT(condition, message)                                           \
+    do {                                                                       \
+        if (!(condition)) {                                                    \
+            std::cerr << "Assertion `" #condition "` failed in " << __FILE__   \
+                      << " line " << __LINE__ << ": " << message << std::endl; \
+            std::exit(EXIT_FAILURE);                                           \
+        }                                                                      \
+    } while (false)
 
 /* peh: support of different endianness */
 
 class Reader_WaveletCompression_plain
 {
 protected:
-	string path;
+	std::string path;
 	bool doswapping; // peh: support of different endianness
 	int wtype;	// peh:
 
@@ -59,7 +57,7 @@ protected:
 	int totalbpd[3], bpd[3];
 	bool halffloat;
 
-	vector<CompressedBlock> idx2chunk;
+	std::vector<CompressedBlock> idx2chunk;
 
 	int _id(int ix, int iy, int iz) const
 	{
@@ -175,7 +173,7 @@ protected:
 
 public:
 
-	Reader_WaveletCompression_plain(const string path, bool doswapping, int wtype): path(path), doswapping(doswapping), wtype(wtype), global_header_displacement(-1), NBLOCKS(-1){ }
+	Reader_WaveletCompression_plain(const std::string path, bool doswapping, int wtype): path(path), doswapping(doswapping), wtype(wtype), global_header_displacement(-1), NBLOCKS(-1){ }
 
 	virtual void load_file()
 	{
@@ -185,13 +183,13 @@ public:
 		for(int i = 0; i < 3; ++i)
 			bpd[i] = -1;
 
-		string binaryocean_title = "\n==============START-BINARY-OCEAN==============\n";
+		std::string binaryocean_title = "\n==============START-BINARY-OCEAN==============\n";
 
 		this->miniheader_bytes = sizeof(size_t) + binaryocean_title.size();
 
-		vector<BlockMetadata> metablocks;
-		vector<size_t> lutchunks;
-		vector<int> sizechunks;
+		std::vector<BlockMetadata> metablocks;
+		std::vector<size_t> lutchunks;
+		std::vector<int> sizechunks;
 
 		{
 			FILE * file = fopen(path.c_str(), "rb");
@@ -212,12 +210,12 @@ public:
 				fgets(buf, sizeof(buf), file);
 
 				printf("\n%s", buf);
-				assert(string("==============START-ASCI-HEADER==============\n") == string(buf));
+				assert(std::string("==============START-ASCI-HEADER==============\n") == std::string(buf));
 
 				fscanf(file, "Endianess:  %s\n", buf);
 				printf("Endianess: <%s>\n", buf);
-//				assert(string(buf) == "little");
-//				int fileendianness = (string(buf) == "little");
+//				assert(std::string(buf) == "little");
+//				int fileendianness = (std::string(buf) == "little");
 //				printf("fileendianness = %d\n", fileendianness);
 //				printf("myendianness() = %d\n", myendianness());
 //				doswapping = (myendianness() != fileendianness);
@@ -278,7 +276,7 @@ public:
 
 				fscanf(file, "HalfFloat: %s\n", buf);
 				printf("HalfFloat: <%s>\n", buf);
-				this->halffloat = (string(buf) == "yes");
+				this->halffloat = (std::string(buf) == "yes");
 
 				fscanf(file, "Wavelets: %s\n", buf);
 				printf("Wavelets: <%s>\n", buf);
@@ -303,7 +301,7 @@ public:
 
 
 
-				MYASSERT(buf == string("none"),
+				MYASSERT(buf == std::string("none"),
 						"\nATTENZIONE:\nWavelets in the file is " << buf <<
 						" and i have " << "none"  << "\n");
 
@@ -323,14 +321,14 @@ public:
 
 
 
-				MYASSERT(buf == string("none"),
+				MYASSERT(buf == std::string("none"),
 						 "\nATTENZIONE:\nEncoder in the file is " << buf <<
 						 " and i have none.\n");
 
 
 				fgets(buf, sizeof(buf), file);
 
-				assert(string("==============START-BINARY-METABLOCKS==============\n") == string(buf));
+				assert(std::string("==============START-BINARY-METABLOCKS==============\n") == std::string(buf));
 				printf("==============END ASCI-HEADER==============\n\n");
 				NBLOCKS = totalbpd[0] * totalbpd[1] * totalbpd[2];
 
@@ -360,7 +358,7 @@ public:
 				fgetc(file);
 				fgets(buf, sizeof(buf), file);
 
-				assert(string("==============START-BINARY-LUT==============\n") == string(buf));
+				assert(std::string("==============START-BINARY-LUT==============\n") == std::string(buf));
 
 				//bool done = false;
 
@@ -370,7 +368,7 @@ public:
 				assert(NBLOCKS % BPS == 0);
 				const int SUBDOMAINS = NBLOCKS / BPS;
 
-				vector<HeaderLUT> headerluts(SUBDOMAINS); //oh mamma mia
+				std::vector<HeaderLUT> headerluts(SUBDOMAINS); //oh mamma mia
 				fread(&headerluts.front(), sizeof(HeaderLUT), SUBDOMAINS, file);
 				{
 				HeaderLUT *hl = headerluts.data();
@@ -399,7 +397,7 @@ public:
 					const size_t lutstart = base + myamount - sizeof(size_t) * nchunks;
 
 					fseek(file, lutstart, SEEK_SET);
-					vector<size_t> mylut(nchunks);
+					std::vector<size_t> mylut(nchunks);
 					fread(&mylut.front(), sizeof(size_t), nchunks, file);
 					{
 					size_t *ml = mylut.data();
@@ -505,13 +503,13 @@ public:
 		assert(start < global_header_displacement);
 		assert(start + compressedchunk.extent <= global_header_displacement);
 
-		vector<unsigned char> compressedbuf(compressedchunk.extent);
+		std::vector<unsigned char> compressedbuf(compressedchunk.extent);
 		fseek(f, compressedchunk.start, SEEK_SET);
 		fread(&compressedbuf.front(), compressedchunk.extent, 1, f);
 
 		assert(!feof(f));
 
-		static vector<unsigned char> waveletbuf(2 << 22);	// 21: 4MB, 22: 8MB, 28: 512MB
+		static std::vector<unsigned char> waveletbuf(2 << 22);	// 21: 4MB, 22: 8MB, 28: 512MB
 		const size_t decompressedbytes = zdecompress_plain(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 
 		int readbytes = 0;
@@ -544,7 +542,7 @@ public:
 				swapbytes(buf+i, 4);
 			}
 
-			memcpy(compressor.compressed_data(), &waveletbuf[readbytes], nbytes);
+			std::memcpy(compressor.compressed_data(), &waveletbuf[readbytes], nbytes);
 			readbytes += nbytes;
 
 			compressor.decompress(halffloat, nbytes, wtype, MYBLOCK);
@@ -569,14 +567,14 @@ public:
 		assert(start < global_header_displacement);
 		assert(start + compressedchunk.extent <= global_header_displacement);
 
-		vector<unsigned char> compressedbuf(compressedchunk.extent);
+		std::vector<unsigned char> compressedbuf(compressedchunk.extent);
 		fseek(f, compressedchunk.start, SEEK_SET);
 		fread(&compressedbuf.front(), compressedchunk.extent, 1, f);
 
 		assert(!feof(f));
 
 		size_t zz_bytes = compressedbuf.size();
-		static vector<unsigned char> waveletbuf(2 << 22);	// 21: 4MB, 22: 8MB, 28: 512MB
+		static std::vector<unsigned char> waveletbuf(2 << 22);	// 21: 4MB, 22: 8MB, 28: 512MB
 		const size_t decompressedbytes = zdecompress_plain(&compressedbuf.front(), compressedbuf.size(), &waveletbuf.front(), waveletbuf.size());
 		zratio1 = (1.0*decompressedbytes)/zz_bytes;
 #if defined(VERBOSE)
@@ -614,10 +612,10 @@ public:
 			for (int i = BITSETSIZE; i < nbytes; i+=4)
 				swapbytes(buf+i, 4);
 			}
-			memcpy(compressor.compressed_data(), &waveletbuf[readbytes], nbytes);
+			std::memcpy(compressor.compressed_data(), &waveletbuf[readbytes], nbytes);
 			readbytes += nbytes;
 
-                        memcpy((void *) MYBLOCK, (void *)compressor.compressed_data(), nbytes);
+                        std::memcpy((void *) MYBLOCK, (void *)compressor.compressed_data(), nbytes);
 
 			const int BS3 = (_BLOCKSIZE_*_BLOCKSIZE_*_BLOCKSIZE_)*sizeof(Real);
 			zratio2 = (1.0*BS3)/nbytes;
@@ -638,7 +636,7 @@ class Reader_WaveletCompressionMPI_plain: public Reader_WaveletCompression_plain
 
 public:
 
-	Reader_WaveletCompressionMPI_plain(const MPI_Comm comm, const string path, int swapbytes, int wtype):
+	Reader_WaveletCompressionMPI_plain(const MPI_Comm comm, const std::string path, int swapbytes, int wtype):
 	Reader_WaveletCompression_plain(path,swapbytes,wtype), comm(comm)
 	{
 

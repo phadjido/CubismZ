@@ -11,6 +11,8 @@
 #ifndef _COMPRESSIONENCODERS_H_
 #define _COMPRESSIONENCODERS_H_ 1
 
+#include <cstring>
+
 #if defined(_USE_LZ4_)
 #ifdef _OPENMP
 #include <omp.h>
@@ -81,7 +83,7 @@ inline size_t zdecompress(unsigned char * inputbuf, size_t ninputbytes, unsigned
 	}
 #else
 	decompressedbytes = ninputbytes;
-	memcpy(outputbuf, inputbuf, ninputbytes);
+    std::memcpy(outputbuf, inputbuf, ninputbytes);
 #endif
 
 	return decompressedbytes;
@@ -153,7 +155,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 
 	have = strm->next_out - temp;
 	if (have <= (strm->avail_in ? len - strm->avail_in : *max)) {
-		memcpy(buf, temp, have);
+        std::memcpy(buf, temp, have);
 		strm->next_out = buf + have;
 		have = 0;
 		while (ret == Z_OK) {
@@ -177,10 +179,10 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 	hold = (unsigned char*)strm->zalloc(strm->opaque, strm->avail_in, 1);
 	if (hold == Z_NULL)
 		return Z_MEM_ERROR;
-	memcpy(hold, strm->next_in, strm->avail_in);
+	std::memcpy(hold, strm->next_in, strm->avail_in);
 	strm->next_in = hold;
 	if (have) {
-		memcpy(buf, temp, have);
+		std::memcpy(buf, temp, have);
 		strm->next_out = buf + have;
 	}
 	strm->avail_out = (buf + *max) - strm->next_out;
@@ -196,7 +198,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 #ifdef _OPENMP
 	#define MAXBUFFERS	12	/* MAX NUMBER OF THREADS */
 #else
-	#define MAXBUFFERS	1	
+	#define MAXBUFFERS	1
 #endif
 
 	int thread_num = 0;
@@ -230,7 +232,7 @@ inline int deflate_inplace(z_stream *strm, unsigned char *buf, unsigned len,
 #if defined(_USE_LZ4_)
 		compressedbytes = LZ4_compress((char*) buf, (char *) bufzlib, ninputbytes);
 #endif
-		memcpy(buf, bufzlib, compressedbytes);
+		std::memcpy(buf, bufzlib, compressedbytes);
 	}
 
 	strm->total_out = compressedbytes;
