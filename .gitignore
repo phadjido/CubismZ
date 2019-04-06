@@ -3,7 +3,11 @@
 *.swp
 *.swo
 *.o
+*.lo
 .DS_Store
 *.cz
 *.h5
 *.xmf
+
+# we ignore everything here and force add what is necessary
+/ThirdParty
