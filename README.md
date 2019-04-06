@@ -469,13 +469,6 @@ can be downloaded with the `get_cavitation_data.sh` script in the
 
 [data_005000.tar.xz][datadl]
 
-## CPC Submission
-
-The snapshot based on the gitlab.ethz.ch `cpc` branch that has been submitted
-to the CPC Journal can be downloaded from polybox:
-
-[CPC submission snapshot][cpcdl]
-
 
 ## Third party acknowledgments
 
