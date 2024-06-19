@@ -23,7 +23,7 @@ the first stage.  A more detailed description can be found in the paper.
 
 Available compressors for this stage are:
 
-- 3D wavelets ([CSELAB][linklab])
+- 3D wavelets ([CSELAB])
 - FPZIP ([LLNL][linkllnl])
 - ZFP ([LLNL][linkllnl])
 - SZ ([ANL][linkanl])
@@ -322,7 +322,7 @@ The script can be run with the syntax:
 ./run_all.sh [<n processors>]
 ```
 where `<n processors>` is the number of MPI processes to be used.  The default
-is 1.  Reference output from [CSELAB][linklab] can be found in
+is 1.  Reference output from can be found in
 `cselab_ref_run_all.txt`.  The generated output is as follows (example based on
 `test_wavz.sh`):
 ```
@@ -469,7 +469,7 @@ The HDF5 data that has been used (and directly included) for the CPC submission
 can be downloaded with the `get_cavitation_data.sh` script in the
 `CubismZ/Tests/Data` directory or by using the link below:
 
-[data_005000.tar.xz][datadl]
+[cavitation_data.tar.gz][datadl]
 
 
 ## Third party acknowledgments
@@ -478,7 +478,6 @@ can be downloaded with the `get_cavitation_data.sh` script in the
 No. DE-AC02-06CH11357 with the Department of Energy.
 
 
-[linklab]:http://www.cse-lab.ethz.ch "http://www.cse-lab.ethz.ch"
 [linkllnl]:https://computation.llnl.gov/projects/floating-point-compression "https://computation.llnl.gov/projects/floating-point-compression"
 [linkanl]:https://collab.cels.anl.gov/display/ESR/SZ "https://collab.cels.anl.gov/display/ESR/SZ"
 [linkzlib]:https://zlib.net/ "https://zlib.net/"
@@ -486,6 +485,5 @@ No. DE-AC02-06CH11357 with the Department of Energy.
 [gcclink]:https://gcc.gnu.org/ "https://gcc.gnu.org/"
 [intellink]:https://software.intel.com/en-us/c-compilers "https://software.intel.com/en-us/c-compilers"
 [clanglink]:http://www.llvm.org/ "http://www.llvm.org/"
-[datadl]:https://polybox.ethz.ch/index.php/s/di7qQoWc6eAhCXk/download "https://polybox.ethz.ch/index.php/s/di7qQoWc6eAhCXk/download"
-[cpcdl]:https://polybox.ethz.ch/index.php/s/0aJdJLYNY24XdwR/download "https://polybox.ethz.ch/index.php/s/0aJdJLYNY24XdwR/download"
+[datadl]:https://www.hpclab.ceid.upatras.gr/cubismz/cavitation_data.tar.gz "https://www.hpclab.ceid.upatras.gr/cubismz/cavitation_data.tar.gz"
 <!---->
