@@ -14,13 +14,13 @@ h5file=../Data/demo_dp.h5
 
 if [ -z ${1+x} ]
 then
-	echo "setting bits=21"
-	bits=21
+	echo "setting bits=22"
+	bits=22
 else
 	bits=$1
 	if [ "$1" -eq "-1" ]; then
-		echo "setting bits=21"
-		bits=21
+		echo "setting bits=22"
+		bits=22
 	fi
 	shift
 fi
